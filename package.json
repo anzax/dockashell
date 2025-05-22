@@ -1,0 +1,36 @@
+{
+  "name": "dockashell",
+  "version": "0.1.0",
+  "description": "AI agent secure Docker environments for project work",
+  "type": "module",
+  "main": "src/mcp-server.js",
+  "bin": {
+    "dockashell": "./src/mcp-server.js"
+  },
+  "scripts": {
+    "start": "node src/mcp-server.js",
+    "debug": "npx @modelcontextprotocol/inspector node src/mcp-server.js",
+    "test-tools": "node test-mcp-tools.js",
+    "validate": "node test.js",
+    "setup-examples": "node create-examples.js",
+    "configure-claude": "node configure-claude.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "dockerode": "^4.0.0",
+    "fs-extra": "^11.0.0",
+    "zod": "^3.23.8"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "docker",
+    "ai",
+    "agent",
+    "container"
+  ],
+  "author": "DockaShell",
+  "license": "MIT"
+}

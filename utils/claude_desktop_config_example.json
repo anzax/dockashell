@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "dockashell": {
+      "command": "node",
+      "args": ["/Users/anzax/Projects/dockashell/src/mcp-server.js"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}

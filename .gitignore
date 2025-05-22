@@ -134,3 +134,15 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# MacOS files
+.DS_Store
+
+# Development cache
+.agent/
+
+# Temporary patches
+*.patch
+
+# Runtime config directories
+.dockashell/
