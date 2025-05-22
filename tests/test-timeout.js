@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { ContainerManager } from './src/container-manager.js';
-import { Logger } from './src/logger.js';
+import { ContainerManager } from '../src/container-manager.js';
+import { Logger } from '../src/logger.js';
 
 async function testTimeout() {
   console.log('Testing timeout functionality...');
@@ -33,7 +33,7 @@ async function testTimeout() {
     console.log('❌ Fast operation failed:', error.message);
   }
   
-  console.log('\\nTesting stop container with nonexistent container...');
+  console.log('\nTesting stop container with nonexistent container...');
   try {
     const result = await containerManager.stopContainer('test-nonexistent');
     console.log('✅ Stop nonexistent container handled:', result.status);
@@ -41,7 +41,7 @@ async function testTimeout() {
     console.log('✅ Stop nonexistent container error handled:', error.message);
   }
   
-  console.log('\\nTests completed!');
+  console.log('\nTests completed!');
 }
 
 testTimeout().catch(console.error);

@@ -331,6 +331,17 @@ export class ContainerManager {
     return ports;
   }
 
+  async withTimeout(promise, timeoutMs, operation = 'Operation') {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error(`${operation} timed out after ${timeoutMs}ms`));
+        }, timeoutMs);
+      })
+    ]);
+  }
+
   async cleanup() {
     // DO NOT STOP CONTAINERS - let them persist across MCP restarts
     // Only clear the in-memory references

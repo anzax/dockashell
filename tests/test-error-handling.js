@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { DockashellServer } from './src/mcp-server.js';
+import { DockashellServer } from '../src/mcp-server.js';
 
 // Test error handling for each tool
 async function testErrorHandling() {
@@ -33,7 +33,7 @@ async function testErrorHandling() {
   }
   
   // Test invalid commands
-  console.log('\\n2. Testing command validation:');
+  console.log('\n2. Testing command validation:');
   try {
     server.securityManager.validateCommand('', {});
     console.log('  ❌ Empty command should fail');
@@ -49,7 +49,7 @@ async function testErrorHandling() {
   }
   
   // Test security with restricted mode
-  console.log('\\n3. Testing security restrictions:');
+  console.log('\n3. Testing security restrictions:');
   const restrictedConfig = {
     security: {
       restricted_mode: true,
@@ -72,7 +72,7 @@ async function testErrorHandling() {
   }
   
   // Test container operations timeout handling
-  console.log('\\n4. Testing container operations:');
+  console.log('\n4. Testing container operations:');
   try {
     await server.containerManager.stopContainer('nonexistent-project');
     console.log('  ✅ Stop nonexistent container handled gracefully');
@@ -88,7 +88,7 @@ async function testErrorHandling() {
   }
   
   // Test timeout helper
-  console.log('\\n5. Testing timeout functionality:');
+  console.log('\n5. Testing timeout functionality:');
   try {
     await server.containerManager.withTimeout(
       new Promise(resolve => setTimeout(resolve, 2000)),
@@ -100,7 +100,7 @@ async function testErrorHandling() {
     console.log(`  ✅ Timeout triggered: ${error.message}`);
   }
   
-  console.log('\\n🎉 Error handling tests completed!');
+  console.log('\n🎉 Error handling tests completed!');
 }
 
 testErrorHandling().catch(console.error);

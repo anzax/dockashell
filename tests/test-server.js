@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { DockashellServer } from './src/mcp-server.js';
+import { DockashellServer } from '../src/mcp-server.js';
 
 // Simple test to verify the server can initialize
 async function testServer() {

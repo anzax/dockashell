@@ -75,8 +75,15 @@ class DockashellServer {
             throw new Error('Project name must be a non-empty string');
           }
 
+          // Debug: check project loading
+          let projectConfig;
+          try {
+            projectConfig = await this.projectManager.loadProject(project_name);
+          } catch (loadError) {
+            throw new Error(`Failed to load project configuration: ${loadError.message}`);
+          }
+
           const result = await this.containerManager.startContainer(project_name);
-          const projectConfig = await this.projectManager.loadProject(project_name);
 
           let response = `# Project Started: ${project_name}\n\n`;
           response += `**Container ID:** ${result.containerId}\n`;
