@@ -155,4 +155,20 @@ describe('Logger', () => {
     await expect(invalidLogger.logCommand('test', 'command', { type: 'exec' }))
       .resolves.not.toThrow();
   });
+
+  test('should log notes and read json logs', async () => {
+    const projectName = 'test-project';
+    await logger.logNote(projectName, 'user', 'remember this');
+    await logger.logCommand(projectName, 'echo hi', { type: 'exec', exitCode: 0 });
+
+    const jsonEntries = await logger.readJsonLogs(projectName);
+    expect(jsonEntries.length).toBe(2);
+    const kinds = jsonEntries.map(e => e.kind);
+    expect(kinds).toContain('note');
+    expect(kinds).toContain('command');
+
+    const filtered = await logger.readJsonLogs(projectName, { type: 'note' });
+    expect(filtered.length).toBe(1);
+    expect(filtered[0].noteType).toBe('user');
+  });
 });

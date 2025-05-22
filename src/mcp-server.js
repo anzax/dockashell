@@ -124,9 +124,10 @@ class DockashellServer {
       'run_command',
       {
         project_name: z.string().describe('Name of the project'),
-        command: z.string().describe('Shell command to execute')
+        command: z.string().describe('Shell command to execute'),
+        log: z.string().optional().describe('Optional reasoning to log')
       },
-      async ({ project_name, command }) => {
+      async ({ project_name, command, log }) => {
         try {
           if (!project_name || typeof project_name !== 'string') {
             throw new Error('Project name must be a non-empty string');
@@ -134,6 +135,10 @@ class DockashellServer {
 
           if (!command || typeof command !== 'string') {
             throw new Error('Command must be a non-empty string');
+          }
+
+          if (log) {
+            await this.logger.logNote(project_name, 'agent', log);
           }
 
           const projectConfig = await this.projectManager.loadProject(project_name);
@@ -171,6 +176,49 @@ class DockashellServer {
           };
         } catch (error) {
           throw new Error(`Failed to execute command in project '${project_name}': ${error.message}`);
+        }
+      }
+    );
+
+    // Write log note tool
+    this.server.tool(
+      'write_log',
+      {
+        project_name: z.string().describe('Project name'),
+        type: z.enum(['user', 'summary', 'agent']).describe('Note type'),
+        text: z.string().describe('Text to record')
+      },
+      async ({ project_name, type, text }) => {
+        try {
+          await this.logger.logNote(project_name, type, text);
+          return { content: [{ type: 'text', text: 'Note recorded' }] };
+        } catch (error) {
+          throw new Error(`Failed to write log: ${error.message}`);
+        }
+      }
+    );
+
+    // Read log tool
+    this.server.tool(
+      'read_log',
+      {
+        project_name: z.string().describe('Project name'),
+        type: z.string().optional().describe('Filter by kind or note type'),
+        search: z.string().optional().describe('Search substring'),
+        skip: z.number().int().optional().describe('Skip N entries'),
+        limit: z.number().int().optional().describe('Limit number of entries'),
+        concat: z.boolean().optional().describe('Concatenate text output')
+      },
+      async ({ project_name, type, search, skip = 0, limit = 20, concat = true }) => {
+        try {
+          const entries = await this.logger.readJsonLogs(project_name, { type, search, skip, limit });
+          if (concat) {
+            const text = entries.map(e => e.command || e.text).join('\n');
+            return { content: [{ type: 'text', text }] };
+          }
+          return { content: [{ type: 'json', json: entries }] };
+        } catch (error) {
+          throw new Error(`Failed to read log: ${error.message}`);
         }
       }
     );
