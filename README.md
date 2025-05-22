@@ -236,7 +236,7 @@ Note: The `image` field is optional - if omitted, projects will use the default 
 
 ## 🔧 MCP Tools
 
-DockaShell exposes 5 MCP tools:
+DockaShell exposes several MCP tools:
 
 ### `list_projects`
 Lists all configured projects with their status.
@@ -246,8 +246,8 @@ Lists all configured projects with their status.
 Starts a Docker container for the specified project.
 
 ### `run_command`
-**Arguments:** `{"project_name": "string", "command": "string"}`
-Executes a shell command in the project container.
+**Arguments:** `{"project_name": "string", "command": "string", "log?": "string"}`
+Executes a shell command in the project container. When `log` is provided, the text is stored as an agent note before execution.
 
 ### `project_status`
 **Arguments:** `{"project_name": "string"}`
@@ -256,6 +256,14 @@ Returns detailed status information about the project container.
 ### `stop_project`
 **Arguments:** `{"project_name": "string"}`
 Stops the project container.
+
+### `write_log`
+**Arguments:** `{"project_name": "string", "type": "user|summary|agent", "text": "string"}`
+Writes an arbitrary note to the project log.
+
+### `read_log`
+**Arguments:** `{"project_name": "string", "type?": "string", "search?": "string", "skip?": "number", "limit?": "number", "concat?": "boolean"}`
+Returns log entries with simple filtering and pagination.
 
 ## 🛡️ Security Features
 
@@ -276,13 +284,15 @@ When `restricted_mode` is enabled:
 
 ## 📊 Logging
 
-Commands are logged to `~/.dockashell/logs/{project-name}.log`:
+Commands are logged to `~/.dockashell/logs/{project-name}.log` and a machine readable `*.jsonl` file:
 
 ```
 2024-05-22T10:30:15.123Z [START] project=web-app container=abc123 ports=3000:3000
 2024-05-22T10:30:16.456Z [EXEC] project=web-app command="npm install" exit_code=0 duration=2.3s
 2024-05-22T10:30:20.789Z [EXEC] project=web-app command="npm start" exit_code=0 duration=0.1s
 ```
+
+Use `write_log` to store notes and `read_log` to query previous entries.
 
 ## 🔌 MCP Client Integration
 
