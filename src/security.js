@@ -38,7 +38,7 @@ export class SecurityManager {
       return false;
     }
 
-    const normalizedCommand = command.trim().toLowerCase();
+    const normalizedCommand = command.trim();
     
     return blockedCommands.some(blocked => {
       if (!blocked || typeof blocked !== 'string') {
@@ -81,5 +81,25 @@ export class SecurityManager {
     }
     
     return 300; // 5 minutes default
+  }
+
+  /**
+   * Get default security settings
+   * @returns {Object} Default security configuration
+   */
+  getDefaultSecuritySettings() {
+    return {
+      restricted_mode: false,
+      blocked_commands: [
+        "rm -rf /",
+        "sudo rm -rf",
+        "mkfs",
+        "dd if=/dev/zero",
+        "sudo passwd",
+        ":(){ :|:& };:",
+        "dangerous-cmd"
+      ],
+      max_execution_time: 300
+    };
   }
 }

@@ -45,7 +45,7 @@ describe('Logger', () => {
 
     const logContent = await fs.readFile(logFile, 'utf8');
     expect(logContent).toContain(command);
-    expect(logContent).toContain('exec');
+    expect(logContent).toContain('[EXEC]');
     expect(logContent).toContain('exit_code=0');
   });
 
@@ -99,7 +99,7 @@ describe('Logger', () => {
   test('should create log directory if it does not exist', async () => {
     const newLogger = new Logger();
     const newLogDir = path.join(os.homedir(), '.dockashell-test-new', 'logs');
-    newLogger.logDir = newLogDir;
+    newLogger.logsDir = newLogDir;
 
     await newLogger.logCommand('test-project', 'test command', {
       type: 'exec',

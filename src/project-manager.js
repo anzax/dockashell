@@ -174,4 +174,24 @@ export class ProjectManager {
       // console.warn('Failed to parse devcontainer:', error.message);
     }
   }
+
+  /**
+   * Validate project name format
+   * @param {string} name - Project name to validate
+   * @throws {Error} If name is invalid
+   */
+  validateProjectName(name) {
+    if (!name || typeof name !== "string") {
+      throw new Error("Project name must be a non-empty string");
+    }
+    if (name.length === 0) {
+      throw new Error("Project name cannot be empty");
+    }
+    if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+      throw new Error("Project name can only contain letters, numbers, hyphens, and underscores");
+    }
+    if (name.length > 64) {
+      throw new Error("Project name must be 64 characters or less");
+    }
+  }
 }
