@@ -195,6 +195,8 @@ export class ContainerManager {
       let output = '';
       let error = '';
       
+      let timedOut = false;
+
       const result = await Promise.race([
         new Promise((resolve, reject) => {
           stream.on('data', (chunk) => {
@@ -208,7 +210,7 @@ export class ContainerManager {
               output += data;
             }
           });
-          
+
           stream.on('end', async () => {
             try {
               const inspect = await exec.inspect();
@@ -216,17 +218,35 @@ export class ContainerManager {
                 stdout: output.trim(),
                 stderr: error.trim(),
                 exitCode: inspect.ExitCode,
-                timedOut: false
+                timedOut
               });
             } catch (inspectError) {
               reject(inspectError);
             }
           });
-          
+
           stream.on('error', reject);
         }),
         new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Command timed out')), timeoutMs);
+          setTimeout(() => {
+            timedOut = true;
+            (async () => {
+              try {
+                const info = await exec.inspect();
+                if (info.Pid) {
+                  const killer = await container.exec({
+                    Cmd: ['kill', '-TERM', info.Pid.toString()],
+                    AttachStdout: false,
+                    AttachStderr: false,
+                    Tty: false
+                  });
+                  await killer.start({ Detach: true, Tty: false });
+                }
+              } catch (_) {}
+              stream.destroy();
+              reject(new Error('Command timed out'));
+            })();
+          }, timeoutMs);
         })
       ]);
 
@@ -303,11 +323,11 @@ export class ContainerManager {
 
   extractMounts(containerData) {
     if (!containerData.Mounts) return [];
-    
+
     return containerData.Mounts.map(mount => ({
-      host: mount.Source,
-      container: mount.Destination,
-      readonly: !mount.RW
+      source: mount.Source,
+      destination: mount.Destination,
+      mode: mount.RW ? 'rw' : 'ro'
     }));
   }
 

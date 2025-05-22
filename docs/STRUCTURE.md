@@ -19,7 +19,7 @@ dockashell/
 │   ├── claude_desktop_config_example.json  # MCP config example
 │   └── create-test-project.js   # Test project setup utility
 ├── package.json                  # Node.js dependencies
-├── test.js                      # Basic functionality test
+├── tests/                       # Test suite
 ├── create-examples.js           # Project examples generator
 └── README.md                    # Project documentation
 ```

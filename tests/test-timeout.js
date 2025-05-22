@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 import { ContainerManager } from '../src/container-manager.js';
-import { Logger } from '../src/logger.js';
+import { ProjectManager } from '../src/project-manager.js';
 
 async function testTimeout() {
   console.log('Testing timeout functionality...');
   
-  const logger = new Logger();
-  const containerManager = new ContainerManager(logger);
+  const projectManager = new ProjectManager();
+  const containerManager = new ContainerManager(projectManager);
   
   try {
     // Test the timeout helper method

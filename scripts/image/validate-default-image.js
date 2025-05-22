@@ -3,7 +3,7 @@
 // Validate the default image implementation
 import Docker from 'dockerode';
 import { ImageBuilder } from './build-default-image.js';
-import { ProjectManager } from './src/project-manager.js';
+import { ProjectManager } from '../../src/project-manager.js';
 
 async function validateDefaultImage() {
   console.log('🔍 Validating DockaShell default image implementation...\n');
