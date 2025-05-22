@@ -1,4 +1,5 @@
 import Docker from 'dockerode';
+import os from 'os';
 import { Logger } from './logger.js';
 
 export class ContainerManager {
@@ -67,12 +68,7 @@ export class ContainerManager {
     }
 
     // Load project configuration
-    const projectConfig = await this.projectManager.loadProject(projectName);
-    if (!projectConfig.success) {
-      throw new Error(`Failed to load project configuration: ${projectConfig.error}`);
-    }
-
-    const config = projectConfig.config;
+    const config = await this.projectManager.loadProject(projectName);
 
     // Create port bindings
     const portBindings = {};
@@ -90,7 +86,7 @@ export class ContainerManager {
     const binds = [];
     if (config.mounts) {
       config.mounts.forEach(mount => {
-        const hostPath = mount.host.replace('~', process.env.HOME);
+        const hostPath = mount.host.replace('~', os.homedir());
         const readonlyFlag = mount.readonly ? ':ro' : '';
         binds.push(`${hostPath}:${mount.container}${readonlyFlag}`);
       });

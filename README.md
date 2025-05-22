@@ -13,6 +13,7 @@ DockaShell provides isolated, persistent Docker containers for AI agents to safe
 - **🛡️ Security Controls**: Configurable command blocking and timeouts
 - **📊 Command Logging**: Full audit trail of all executed commands
 - **🔧 MCP Integration**: Standard Model Context Protocol interface
+- **🐳 Default Development Image**: Pre-built Ubuntu 24.04 LTS with Node.js 22 LTS, Python 3, and essential CLI tools
 
 ## 🚀 Quick Start
 
@@ -24,22 +25,38 @@ cd dockashell
 npm install
 ```
 
-### 2. Create Example Projects
+### 2. Complete Setup (Recommended)
 
 ```bash
-npm run setup-examples
+npm run setup-complete
 ```
 
-This creates three example projects:
-- `web-app` - Node.js development (ports 3000, 8080)
-- `data-science` - Python environment (port 8888)
-- `react-app` - React/TypeScript setup (port 3000)
+This will:
+- Build the default development image (`dockashell/default-dev:latest`)
+- Create example projects with simplified configurations
+- Set up the complete DockaShell environment
+
+Or run individual setup steps:
+
+```bash
+# Build just the default image
+npm run setup-image
+
+# Create just the example projects
+npm run setup-examples
+```
 
 ### 3. Test with MCP Inspector
 
 ```bash
-npm run test
+npm run debug
 ```
+
+This creates four example projects:
+- `web-app` - Node.js development (ports 3000, 8080) [DEFAULT IMAGE]
+- `data-science` - Python environment (port 8888) [DEFAULT IMAGE]
+- `react-app` - React/TypeScript setup (port 3000) [DEFAULT IMAGE]
+- `fullstack-legacy` - Custom Node.js 16 environment [CUSTOM IMAGE]
 
 In the MCP inspector interface, try these commands:
 
@@ -60,6 +77,17 @@ Tool: run_command
 Arguments: {"project_name": "web-app", "command": "node --version"}
 ```
 
+**Test available tools:**
+```json
+Tool: run_command
+Arguments: {"project_name": "web-app", "command": "python3 --version"}
+```
+
+```json
+Tool: run_command
+Arguments: {"project_name": "web-app", "command": "which rg jq tree curl"}
+```
+
 **Check project status:**
 ```json
 Tool: project_status
@@ -70,6 +98,50 @@ Arguments: {"project_name": "web-app"}
 ```json
 Tool: stop_project
 Arguments: {"project_name": "web-app"}
+```
+
+## 🐳 Default Development Image
+
+DockaShell includes a comprehensive default development image (`dockashell/default-dev:latest`) based on:
+
+- **Ubuntu 24.04 LTS (Noble Numbat)** - Long-term support until 2029
+- **Node.js 22 LTS** - Active LTS support until April 2027
+- **Python 3** with pip and venv
+- **Essential CLI Tools**: patch, diff, grep, sed, gawk, rg, cat, head, tail, find, tree, zip, unzip, curl, wget, nano, vim, git, jq
+- **Development Tools**: gcc, g++, make, cmake, build-essential, pkg-config
+- **Package Managers**: npm, pnpm, pip3
+- **Non-root developer user** with sudo access
+
+### Benefits of the Default Image
+
+- **Consistency**: Every project gets the same comprehensive environment
+- **Simplicity**: Project configs focus on project-specific needs (ports, mounts, environment)
+- **Performance**: Base image is cached and reused across all projects
+- **Zero Configuration**: Works out-of-the-box for most development workflows
+
+### Using Custom Images
+
+You can still specify custom Docker images in your project configuration when needed:
+
+```json
+{
+  "name": "legacy-project",
+  "image": "node:16-bullseye",
+  "description": "Project requiring specific Node.js version"
+}
+```
+
+### Building the Default Image
+
+```bash
+# Build the default image
+npm run setup-image
+
+# Force rebuild
+npm run rebuild-image
+
+# Build manually
+npm run build-image
 ```
 
 ## 📝 Example Workflow
@@ -118,7 +190,6 @@ Projects are configured in `~/.dockashell/projects/{project-name}/config.json`:
 {
   "name": "my-project",
   "description": "Project description",
-  "image": "node:18-bullseye",
   "mounts": [
     {
       "host": "~/projects/my-project",
@@ -145,13 +216,15 @@ Projects are configured in `~/.dockashell/projects/{project-name}/config.json`:
 }
 ```
 
+Note: The `image` field is optional - if omitted, projects will use the default `dockashell/default-dev:latest` image.
+
 ### Configuration Options
 
 | Field | Description | Default |
 |-------|-------------|---------|
 | `name` | Project identifier | (required) |
 | `description` | Human-readable description | "" |
-| `image` | Docker image to use | "ubuntu:latest" |
+| `image` | Docker image to use | "dockashell/default-dev:latest" |
 | `mounts` | File system mounts | [] |
 | `ports` | Port mappings | [] |
 | `environment` | Environment variables | {} |
@@ -256,30 +329,36 @@ DockaShell
 │   └── Docker operations via dockerode
 ├── Security Manager (src/security.js)
 │   └── Command validation and blocking
-└── Logger (src/logger.js)
-    └── Persistent command logging
+├── Logger (src/logger.js)
+│   └── Persistent command logging
+└── Image Builder (build-default-image.js)
+    └── Builds comprehensive default development image
 ```
 
 ## 🧪 Development
 
-### Validate Components
+### Complete Setup
 ```bash
+npm run setup-complete
+```
+
+### Individual Commands
+```bash
+# Validate components
 npm run validate
-```
 
-### Create Test Projects
-```bash
+# Create test projects
 npm run setup-examples
-```
 
-### Test with MCP Inspector
-```bash
-npm run test
-```
+# Test with MCP Inspector
+npm run debug
 
-### Run Server Directly
-```bash
+# Run server directly
 npm start
+
+# Build/rebuild default image
+npm run build-image
+npm run rebuild-image
 ```
 
 ## 📁 File Structure
@@ -292,6 +371,10 @@ dockashell/
 │   ├── container-manager.js # Docker operations
 │   ├── security.js          # Command validation
 │   └── logger.js            # Command logging
+├── Dockerfile               # Default development image
+├── build-default-image.js   # Image builder
+├── setup-default-image.js   # Image setup script
+├── setup-complete.js        # Complete setup script
 ├── package.json
 ├── README.md
 ├── test.js                  # Component validation

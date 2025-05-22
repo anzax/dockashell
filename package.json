@@ -12,9 +12,15 @@
     "debug": "npx @modelcontextprotocol/inspector node src/mcp-server.js",
     "test-tools": "node tests/test-mcp-tools.js",
     "validate": "node test.js",
-    "setup-examples": "node create-examples.js",
+    "setup-examples": "node scripts/setup/create-examples.js",
     "configure-claude": "node configure-claude.js",
-    "test": "node --experimental-vm-modules node_modules/.bin/jest"
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "build-image": "node scripts/image/build-default-image.js",
+    "setup-image": "node scripts/setup/setup-default-image.js",
+    "rebuild-image": "node scripts/image/build-default-image.js --rebuild",
+    "setup-complete": "node scripts/setup/setup-complete.js",
+    "validate-image": "node scripts/image/validate-default-image.js",
+    "setup-config": "node setup-dockashell.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",

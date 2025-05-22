@@ -8,6 +8,14 @@ export class ProjectManager {
     this.projectsDir = path.join(this.configDir, 'projects');
   }
 
+  /**
+   * Get the default Docker image for new projects
+   * @returns {string} Default Docker image name
+   */
+  getDefaultImage() {
+    return 'dockashell/default-dev:latest';
+  }
+
   async initialize() {
     await this.ensureConfigStructure();
   }
@@ -47,7 +55,7 @@ export class ProjectManager {
             projects.push({
               name: config.name || dir,
               description: config.description || '',
-              image: config.image || 'ubuntu:latest',
+              image: config.image || this.getDefaultImage(),
               status: 'configured'
             });
           } catch (error) {
@@ -103,7 +111,7 @@ export class ProjectManager {
       const projectConfig = {
         name: projectName,
         description: config.description || '',
-        image: config.image || 'ubuntu:latest',
+        image: config.image || this.getDefaultImage(),
         mounts: Array.isArray(config.mounts) ? config.mounts : [],
         ports: Array.isArray(config.ports) ? config.ports : [],
         environment: (config.environment && typeof config.environment === 'object') ? config.environment : {},
@@ -129,7 +137,7 @@ export class ProjectManager {
       } else if (error.name === 'SyntaxError') {
         throw new Error(`Invalid JSON in project configuration: ${error.message}`);
       }
-      throw new Error(`Failed to load project '${projectName}': ${error.message}`);
+      throw new Error(`Failed to load project '${projectName}': ${error.message || error.toString() || 'Unknown error'}`);
     }
   }
 

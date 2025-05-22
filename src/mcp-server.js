@@ -3,6 +3,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
+import path from 'path';
 import { ProjectManager } from './project-manager.js';
 import { ContainerManager } from './container-manager.js';
 import { SecurityManager } from './security.js';
@@ -75,12 +76,12 @@ class DockashellServer {
             throw new Error('Project name must be a non-empty string');
           }
 
-          // Debug: check project loading
+          // Load project configuration
           let projectConfig;
           try {
             projectConfig = await this.projectManager.loadProject(project_name);
           } catch (loadError) {
-            throw new Error(`Failed to load project configuration: ${loadError.message}`);
+            throw new Error(`Failed to load project configuration: ${loadError?.message || loadError?.toString() || 'Unknown error'}`);
           }
 
           const result = await this.containerManager.startContainer(project_name);
