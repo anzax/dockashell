@@ -11,7 +11,6 @@
     "start": "node src/mcp-server.js",
     "debug": "npx @modelcontextprotocol/inspector node src/mcp-server.js",
     "test-tools": "node tests/test-mcp-tools.js",
-    "validate": "node test.js",
     "setup-examples": "node scripts/setup/create-examples.js",
     "configure-claude": "node configure-claude.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",

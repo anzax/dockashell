@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Complete setup script for DockaShell with default image
-import { ImageBuilder } from './build-default-image.js';
+import { ImageBuilder } from '../image/build-default-image.js';
 import fs from 'fs-extra';
 import path from 'path';
 import { execSync } from 'child_process';

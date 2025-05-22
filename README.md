@@ -344,9 +344,6 @@ npm run setup-complete
 
 ### Individual Commands
 ```bash
-# Validate components
-npm run validate
-
 # Create test projects
 npm run setup-examples
 
@@ -377,7 +374,7 @@ dockashell/
 ├── setup-complete.js        # Complete setup script
 ├── package.json
 ├── README.md
-├── test.js                  # Component validation
+├── tests/                  # Test suite
 └── create-examples.js       # Example project setup
 ```
 
@@ -386,7 +383,7 @@ dockashell/
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Run `npm run validate` to test
+4. Run `npm test` to test
 5. Submit a pull request
 
 ## 📄 License
