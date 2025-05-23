@@ -25,22 +25,18 @@ const App = () => {
   if (!config) return null;
 
   if (!project) {
-    return (
-      <ProjectSelector
-        onSelect={setProject}
-        onExit={() => process.exit(0)}
-      />
-    );
+    return React.createElement(ProjectSelector, {
+      onSelect: setProject,
+      onExit: () => process.exit(0)
+    });
   }
 
-  return (
-    <LogViewer
-      project={project}
-      config={config.tui || { display: { max_lines_per_entry: 5, max_entries: 100 } }}
-      onBack={() => setProject(null)}
-      onExit={() => process.exit(0)}
-    />
-  );
+  return React.createElement(LogViewer, {
+    project: project,
+    config: config.tui || { display: { max_lines_per_entry: 5, max_entries: 100 } },
+    onBack: () => setProject(null),
+    onExit: () => process.exit(0)
+  });
 };
 
-render(<App />);
+render(React.createElement(App));

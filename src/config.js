@@ -7,6 +7,7 @@ const defaultConfig = {
     display: {
       max_lines_per_entry: 5,
       max_entries: 100,
+      max_visible_entries: 10,
       show_icons: true,
       theme: 'dark'
     },
@@ -28,6 +29,11 @@ export async function loadConfig() {
   try {
     const cfg = await fs.readJSON(configPath);
     if (!cfg.tui) cfg.tui = { ...defaultConfig.tui };
+    if (!cfg.tui.display) cfg.tui.display = { ...defaultConfig.tui.display };
+    // Ensure max_visible_entries exists
+    if (!cfg.tui.display.max_visible_entries) {
+      cfg.tui.display.max_visible_entries = defaultConfig.tui.display.max_visible_entries;
+    }
     return cfg;
   } catch {
     return { ...defaultConfig };

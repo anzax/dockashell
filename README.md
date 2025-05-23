@@ -427,3 +427,59 @@ Apache License 2.0 - see LICENSE file for details.
 **Built for the AI-first development era** 🚀
 
 DockaShell enables AI agents to work safely and effectively in isolated environments while maintaining the flexibility and power of full development stacks.
+
+## 🖥️ Terminal User Interface (TUI)
+
+DockaShell includes a Terminal User Interface for viewing agent activity and project logs.
+
+### Usage
+
+**Interactive project selector:**
+```bash
+dockashell-tui
+```
+
+**Direct project access:**
+```bash
+dockashell-tui myproject
+```
+
+### Features
+
+- **Project Discovery**: Automatically finds all DockaShell projects
+- **Activity Sorting**: Projects sorted by most recent activity  
+- **Log Viewing**: Navigate through agent logs with keyboard
+- **Entry Types**: Displays user inputs, agent reasoning, and command results
+- **Configurable**: Customizable display settings via `~/.dockashell/config.json`
+
+### Navigation
+
+**Project Selector:**
+- `↑↓` Navigate projects
+- `Enter` Select project  
+- `q` Quit
+
+**Log Viewer:**
+- `↑↓` Navigate entries
+- `b` Back to project selector
+- `q` Quit
+
+### Configuration
+
+TUI settings in `~/.dockashell/config.json`:
+
+```json
+{
+  "tui": {
+    "display": {
+      "max_lines_per_entry": 5,
+      "max_entries": 100,
+      "show_icons": true,
+      "theme": "dark"
+    }
+  }
+}
+```
+
+The TUI provides immediate visibility into what agents are working on without interrupting their progress.
+

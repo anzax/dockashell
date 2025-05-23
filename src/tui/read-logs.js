@@ -9,7 +9,9 @@ export async function readLogEntries(projectName, maxEntries = 100) {
     throw new Error(`Log file not found for project '${projectName}'`);
   }
   const lines = (await fs.readFile(file, 'utf8')).split('\n').filter(Boolean);
-  const slice = lines.slice(-maxEntries).reverse();
+  
+  // Take last maxEntries but keep chronological order (oldest first, newest last)
+  const slice = lines.slice(-maxEntries);
   const entries = [];
   for (const line of slice) {
     try {

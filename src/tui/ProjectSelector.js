@@ -44,23 +44,20 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
   });
 
   if (projects.length === 0) {
-    return (
-      <Box flexDirection="column">
-        <Text>🚫 No projects found in ~/.dockashell/logs</Text>
-        <Text>Use DockaShell to create a project first.</Text>
-      </Box>
+    return React.createElement(Box, { flexDirection: 'column' },
+      React.createElement(Text, null, '🚫 No projects found in ~/.dockashell/logs'),
+      React.createElement(Text, null, 'Use DockaShell to create a project first.')
     );
   }
 
-  return (
-    <Box flexDirection="column">
-      <Text bold>DockaShell TUI - Select Project</Text>
-      {projects.map((p, i) => (
-        <Text key={p.name} color={i === index ? 'cyan' : undefined}>
-          {i === index ? '► ' : '  '}{p.name} ({p.count} entries{p.last ? `, last: ${p.last}` : ''})
-        </Text>
-      ))}
-      <Text dimColor>{'[↑↓] Navigate  [Enter] Select  [q] Quit'}</Text>
-    </Box>
+  return React.createElement(Box, { flexDirection: 'column' },
+    React.createElement(Text, { bold: true }, 'DockaShell TUI - Select Project'),
+    ...projects.map((p, i) =>
+      React.createElement(Text, { 
+        key: p.name, 
+        color: i === index ? 'cyan' : undefined 
+      }, `${i === index ? '► ' : '  '}${p.name} (${p.count} entries${p.last ? `, last: ${p.last}` : ''})`)
+    ),
+    React.createElement(Text, { dimColor: true }, '[↑↓] Navigate  [Enter] Select  [q] Quit')
   );
 };
