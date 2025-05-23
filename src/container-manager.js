@@ -252,12 +252,13 @@ export class ContainerManager {
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
-      // Log the command execution
+      // Log the command execution including full output for later preview
       await this.logger.logCommand(projectName, command, {
         type: 'exec',
         exitCode: result.exitCode,
         duration: `${duration}s`,
-        timedOut: result.timedOut
+        timedOut: result.timedOut,
+        output: result.stdout || ''
       });
 
       return {
@@ -277,7 +278,8 @@ export class ContainerManager {
           type: 'exec',
           exitCode: -1,
           duration: `${duration}s`,
-          timedOut: true
+          timedOut: true,
+          output: ''
         });
         
         return {

@@ -262,8 +262,30 @@ Stops the project container.
 Writes an arbitrary note to the project log.
 
 ### `read_log`
-**Arguments:** `{"project_name": "string", "type?": "string", "search?": "string", "skip?": "number", "limit?": "number", "concat?": "boolean"}`
-Returns log entries with simple filtering and pagination.
+**Arguments:** `{"project_name": "string", "type?": "string", "search?": "string", "skip?": "number", "limit?": "number", "fields?": "string[]"}`
+Returns formatted log entries with optional filtering and field selection.
+
+**Field Options:**
+- `timestamp`, `type`, `content` - Always included for context
+- `exit_code`, `duration` - Command execution metadata (commands only)
+- `output` - Command output preview, truncated to 200 chars for display (commands only)
+
+**Type Filtering:**
+- `"command"` - Shell command executions only
+- `"note"` - All note types (user, agent, summary)
+- `"user"`, `"agent"`, `"summary"` - Specific note types
+
+**Usage Examples:**
+```javascript
+// Recent activity overview
+read_log("project", {limit: 10})
+
+// Debug failed commands with output
+read_log("project", {type: "command", fields: ["timestamp", "type", "content", "exit_code", "output"]})
+
+// Search across commands and output
+read_log("project", {search: "error"})
+```
 
 ## 🛡️ Security Features
 

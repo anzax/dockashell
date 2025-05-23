@@ -59,7 +59,8 @@ export class Logger {
         timestamp,
         kind: 'command',
         command,
-        result
+        result,
+        output: result.output || ''
       };
 
       await fs.appendFile(jsonLogFile, JSON.stringify(jsonEntry) + '\n');
@@ -131,12 +132,21 @@ export class Logger {
       }).filter(Boolean);
 
       if (type) {
-        entries = entries.filter(e => e.kind === type || e.noteType === type);
+        if (type === 'note') {
+          entries = entries.filter(e => e.kind === 'note');
+        } else if (['user', 'agent', 'summary'].includes(type)) {
+          entries = entries.filter(e => e.kind === 'note' && e.noteType === type);
+        } else if (type === 'command') {
+          entries = entries.filter(e => e.kind === 'command');
+        } else {
+          entries = entries.filter(e => e.kind === type || e.noteType === type);
+        }
       }
       if (search) {
+        const lower = search.toLowerCase();
         entries = entries.filter(e => {
-          const target = e.command || e.text || '';
-          return target.includes(search);
+          const target = (e.command || '') + (e.text || '') + (e.output || '');
+          return target.toLowerCase().includes(lower);
         });
       }
 
