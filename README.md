@@ -262,8 +262,8 @@ Stops the project container.
 Writes an arbitrary note to the project log.
 
 ### `read_log`
-**Arguments:** `{"project_name": "string", "type?": "string", "search?": "string", "skip?": "number", "limit?": "number", "concat?": "boolean"}`
-Returns log entries with simple filtering and pagination.
+**Arguments:** `{"project_name": "string", "type?": "string", "search?": "string", "skip?": "number", "limit?": "number", "fields?": "string[]"}`
+Returns formatted log entries with optional filtering. By default shows timestamp, type and content. Available fields: `timestamp`, `type`, `content`, `exit_code`, `duration`, `output`.
 
 ## 🛡️ Security Features
 

@@ -203,20 +203,65 @@ class DockashellServer {
       'read_log',
       {
         project_name: z.string().describe('Project name'),
-        type: z.string().optional().describe('Filter by kind or note type'),
+        type: z.string().optional().describe("Filter by 'command', 'note', 'user', 'agent', 'summary'"),
         search: z.string().optional().describe('Search substring'),
         skip: z.number().int().optional().describe('Skip N entries'),
         limit: z.number().int().optional().describe('Limit number of entries'),
-        concat: z.boolean().optional().describe('Concatenate text output')
+        fields: z.array(z.string()).optional().describe('Fields to include in output')
       },
-      async ({ project_name, type, search, skip = 0, limit = 20, concat = true }) => {
+      async ({ project_name, type, search, skip = 0, limit = 20, fields }) => {
         try {
           const entries = await this.logger.readJsonLogs(project_name, { type, search, skip, limit });
-          if (concat) {
-            const text = entries.map(e => e.command || e.text).join('\n');
-            return { content: [{ type: 'text', text }] };
-          }
-          return { content: [{ type: 'json', json: entries }] };
+
+          const validFields = ['timestamp', 'type', 'content', 'exit_code', 'duration', 'output'];
+          let selected = Array.isArray(fields) ? fields.filter(f => validFields.includes(f)) : ['timestamp', 'type', 'content'];
+          if (!selected.includes('timestamp')) selected.unshift('timestamp');
+          if (!selected.includes('type')) selected.splice(1, 0, 'type');
+
+          const text = entries.map(entry => {
+            const meta = [];
+            const typeLabel = entry.kind === 'command'
+              ? 'COMMAND'
+              : (entry.noteType || entry.kind || 'UNKNOWN').toUpperCase();
+
+            if (selected.includes('exit_code') && entry.kind === 'command' && entry.result?.exitCode !== undefined) {
+              meta.push(`exit_code=${entry.result.exitCode}`);
+            }
+            if (selected.includes('duration') && entry.kind === 'command' && entry.result?.duration) {
+              meta.push(`duration=${entry.result.duration}`);
+            }
+
+            let header = `## ${entry.timestamp} [${typeLabel}]`;
+            if (meta.length) header += ' ' + meta.join(' ');
+
+            const lines = [header];
+
+            if (selected.includes('content')) {
+              if (entry.kind === 'command') {
+                if (selected.includes('output')) {
+                  lines.push('```bash');
+                  lines.push(entry.command);
+                  lines.push('```');
+                } else {
+                  lines.push(entry.command);
+                }
+              } else {
+                lines.push(entry.text);
+              }
+            }
+
+            if (selected.includes('output') && entry.kind === 'command' && entry.output) {
+              lines.push('');
+              lines.push('**Output:**');
+              lines.push('```');
+              lines.push(entry.output);
+              lines.push('```');
+            }
+
+            return lines.join('\n');
+          }).join('\n\n');
+
+          return { content: [{ type: 'text', text: text || 'No log entries found' }] };
         } catch (error) {
           throw new Error(`Failed to read log: ${error.message}`);
         }

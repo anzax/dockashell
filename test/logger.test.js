@@ -159,7 +159,7 @@ describe('Logger', () => {
   test('should log notes and read json logs', async () => {
     const projectName = 'test-project';
     await logger.logNote(projectName, 'user', 'remember this');
-    await logger.logCommand(projectName, 'echo hi', { type: 'exec', exitCode: 0 });
+    await logger.logCommand(projectName, 'echo hi', { type: 'exec', exitCode: 0, output: 'hello world' });
 
     const jsonEntries = await logger.readJsonLogs(projectName);
     expect(jsonEntries.length).toBe(2);
@@ -170,5 +170,16 @@ describe('Logger', () => {
     const filtered = await logger.readJsonLogs(projectName, { type: 'note' });
     expect(filtered.length).toBe(1);
     expect(filtered[0].noteType).toBe('user');
+  });
+
+  test('should include command output preview and search it', async () => {
+    const projectName = 'output-project';
+    await logger.logCommand(projectName, 'echo preview', { type: 'exec', exitCode: 0, output: 'preview text' });
+
+    const entries = await logger.readJsonLogs(projectName);
+    expect(entries[0].output).toBe('preview text');
+
+    const searched = await logger.readJsonLogs(projectName, { search: 'preview' });
+    expect(searched.length).toBe(1);
   });
 });
