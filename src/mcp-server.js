@@ -149,6 +149,9 @@ class DockashellServer {
           const maxTime = this.securityManager.getMaxExecutionTime(projectConfig);
           const result = await this.containerManager.executeCommand(project_name, command, { timeout: maxTime * 1000 });
 
+          // Log the command execution to JSONL file for TUI display
+          await this.logger.logCommand(project_name, command, result);
+
           let response = `# Command Execution: ${project_name}\n\n`;
           response += `**Command:** \`${command}\`\n`;
           response += `**Exit Code:** ${result.exitCode}\n`;

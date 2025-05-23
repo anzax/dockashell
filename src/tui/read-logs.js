@@ -10,7 +10,7 @@ export async function readLogEntries(projectName, maxEntries = 100) {
   }
   const lines = (await fs.readFile(file, 'utf8')).split('\n').filter(Boolean);
   
-  // Take last maxEntries but keep chronological order (oldest first, newest last)
+  // Take last maxEntries and reverse to show newest first
   const slice = lines.slice(-maxEntries);
   const entries = [];
   for (const line of slice) {
@@ -21,5 +21,7 @@ export async function readLogEntries(projectName, maxEntries = 100) {
       // ignore malformed lines
     }
   }
-  return entries;
+  
+  // Reverse to show newest entries first (as expected by TUI and tests)
+  return entries.reverse();
 }

@@ -1,12 +1,73 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Text, useInput } from 'ink';
+import { Box, Text, useInput, useStdout } from 'ink';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 
+const ProjectItem = ({ project, selected }) => {
+  const timeStr = project.last ? `, last: ${new Date(project.last).toLocaleDateString()}` : '';
+  const displayText = `${project.name} (${project.count} entries${timeStr})`;
+  
+  return React.createElement(Box, { 
+    flexDirection: 'row',
+    paddingLeft: 1,
+    paddingRight: 1,
+    borderStyle: selected ? 'single' : undefined,
+    borderColor: selected ? 'cyan' : undefined
+  },
+    React.createElement(Text, { 
+      color: selected ? 'cyan' : undefined,
+      bold: selected
+    }, displayText)
+  );
+};
+
 export const ProjectSelector = ({ onSelect, onExit }) => {
   const [projects, setProjects] = useState([]);
-  const [index, setIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollOffset, setScrollOffset] = useState(0);
+  const [terminalHeight, setTerminalHeight] = useState(20);
+  const { stdout } = useStdout();
+
+  // Calculate max visible projects based on terminal height
+  // Reserve space for header (2 lines) + help text (1 line) + padding (2 lines)
+  const maxVisibleProjects = Math.max(3, terminalHeight - 5);
+
+  // Handle terminal resize
+  useEffect(() => {
+    const updateTerminalSize = () => {
+      if (stdout && stdout.rows) {
+        setTerminalHeight(stdout.rows);
+      } else if (process.stdout && process.stdout.rows) {
+        setTerminalHeight(process.stdout.rows);
+      }
+    };
+
+    updateTerminalSize();
+    
+    const onResize = () => {
+      updateTerminalSize();
+    };
+
+    if (process.stdout) {
+      process.stdout.on('resize', onResize);
+      return () => {
+        process.stdout.removeListener('resize', onResize);
+      };
+    }
+  }, [stdout]);
+
+  // Adjust scroll when maxVisibleProjects changes (terminal resize)
+  useEffect(() => {
+    if (projects.length > 0) {
+      // Ensure selected item stays visible after resize
+      if (selectedIndex < scrollOffset) {
+        setScrollOffset(selectedIndex);
+      } else if (selectedIndex >= scrollOffset + maxVisibleProjects) {
+        setScrollOffset(Math.max(0, selectedIndex - maxVisibleProjects + 1));
+      }
+    }
+  }, [maxVisibleProjects, selectedIndex, scrollOffset, projects.length]);
 
   useEffect(() => {
     (async () => {
@@ -18,46 +79,94 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
         if (!f.endsWith('.jsonl')) continue;
         const name = f.replace(/\.jsonl$/, '');
         const file = path.join(logsDir, f);
-        const lines = (await fs.readFile(file, 'utf8')).split('\n').filter(Boolean);
-        const count = lines.length;
-        let last = '';
-        if (count > 0) {
-          try {
-            const obj = JSON.parse(lines[count - 1]);
-            last = obj.timestamp;
-          } catch {}
+        try {
+          const lines = (await fs.readFile(file, 'utf8')).split('\n').filter(Boolean);
+          const count = lines.length;
+          let last = '';
+          if (count > 0) {
+            try {
+              const obj = JSON.parse(lines[count - 1]);
+              last = obj.timestamp;
+            } catch {
+              // Skip malformed entries
+            }
+          }
+          list.push({ name, count, last });
+        } catch {
+          // Skip unreadable files
         }
-        list.push({ name, count, last });
       }
       list.sort((a, b) => new Date(b.last).getTime() - new Date(a.last).getTime());
       setProjects(list);
+      setSelectedIndex(0); // Reset selection when projects load
+      setScrollOffset(0); // Reset scroll when projects load
     })();
   }, []);
 
   useInput((input, key) => {
-    if (key.downArrow) setIndex(i => Math.min(i + 1, projects.length - 1));
-    else if (key.upArrow) setIndex(i => Math.max(i - 1, 0));
-    else if (key.return) {
-      const sel = projects[index];
-      if (sel) onSelect(sel.name);
-    } else if (input === 'q') onExit();
+    if (key.downArrow && selectedIndex < projects.length - 1) {
+      const newIndex = selectedIndex + 1;
+      setSelectedIndex(newIndex);
+      
+      // Auto-scroll down if selection goes below visible area
+      if (newIndex >= scrollOffset + maxVisibleProjects) {
+        setScrollOffset(newIndex - maxVisibleProjects + 1);
+      }
+    } else if (key.upArrow && selectedIndex > 0) {
+      const newIndex = selectedIndex - 1;
+      setSelectedIndex(newIndex);
+      
+      // Auto-scroll up if selection goes above visible area
+      if (newIndex < scrollOffset) {
+        setScrollOffset(newIndex);
+      }
+    } else if (key.return) {
+      const selected = projects[selectedIndex];
+      if (selected) onSelect(selected.name);
+    } else if (input === 'q') {
+      onExit();
+    }
   });
 
   if (projects.length === 0) {
-    return React.createElement(Box, { flexDirection: 'column' },
+    return React.createElement(Box, { 
+      flexDirection: 'column',
+      height: terminalHeight,
+      paddingX: 1
+    },
+      React.createElement(Text, { bold: true }, 'DockaShell TUI - No Projects Found'),
       React.createElement(Text, null, '🚫 No projects found in ~/.dockashell/logs'),
-      React.createElement(Text, null, 'Use DockaShell to create a project first.')
+      React.createElement(Text, null, 'Use DockaShell to create a project first.'),
+      React.createElement(Text, { dimColor: true }, '[q] Quit')
     );
   }
 
-  return React.createElement(Box, { flexDirection: 'column' },
-    React.createElement(Text, { bold: true }, 'DockaShell TUI - Select Project'),
-    ...projects.map((p, i) =>
-      React.createElement(Text, { 
-        key: p.name, 
-        color: i === index ? 'cyan' : undefined 
-      }, `${i === index ? '► ' : '  '}${p.name} (${p.count} entries${p.last ? `, last: ${p.last}` : ''})`)
+  // Calculate visible projects based on scroll offset
+  const visibleProjects = projects.slice(scrollOffset, scrollOffset + maxVisibleProjects);
+  
+  // Calculate scroll indicator
+  const hasMore = projects.length > maxVisibleProjects;
+  const scrollIndicator = hasMore 
+    ? ` (${scrollOffset + 1}-${Math.min(scrollOffset + maxVisibleProjects, projects.length)} of ${projects.length})` 
+    : '';
+
+  return React.createElement(Box, { 
+    flexDirection: 'column',
+    height: terminalHeight
+  },
+    React.createElement(Text, { bold: true, marginBottom: 1 }, `DockaShell TUI - Select Project${scrollIndicator}`),
+    React.createElement(Box, { flexDirection: 'column', flexGrow: 1 },
+      ...visibleProjects.map((project, i) => {
+        const actualIndex = scrollOffset + i;
+        return React.createElement(ProjectItem, { 
+          key: project.name, 
+          project: project,
+          selected: actualIndex === selectedIndex
+        });
+      })
     ),
-    React.createElement(Text, { dimColor: true }, '[↑↓] Navigate  [Enter] Select  [q] Quit')
+    React.createElement(Text, { dimColor: true, marginTop: 1 }, 
+      '[↑↓] Navigate  [Enter] Select  [q] Quit'
+    )
   );
 };
