@@ -40,13 +40,14 @@ describe('TUI Integration Tests', () => {
     const entries = await readLogEntries('test-project', 100);
 
     expect(entries).toHaveLength(3);
-    // Should be in reverse order (newest first)
-    expect(entries[0].kind).toBe('command');
-    expect(entries[0].command).toBe('npm test');
+    // Should be in chronological order (oldest first)
+    expect(entries[0].kind).toBe('note');
+    expect(entries[0].noteType).toBe('user');
+    expect(entries[0].text).toBe('Create app');
     expect(entries[1].noteType).toBe('agent');
     expect(entries[1].text).toBe('Planning implementation');
-    expect(entries[2].noteType).toBe('user');
-    expect(entries[2].text).toBe('Create app');
+    expect(entries[2].kind).toBe('command');
+    expect(entries[2].command).toBe('npm test');
   });
 
   test('readLogEntries respects maxEntries limit', async () => {
@@ -63,10 +64,10 @@ describe('TUI Integration Tests', () => {
     const entries = await readLogEntries('large-project', 3);
 
     expect(entries).toHaveLength(3);
-    // Should get last 3 entries in reverse order
-    expect(entries[0].text).toBe('Entry 9');
+    // Should get last 3 entries in chronological order
+    expect(entries[0].text).toBe('Entry 7');
     expect(entries[1].text).toBe('Entry 8');
-    expect(entries[2].text).toBe('Entry 7');
+    expect(entries[2].text).toBe('Entry 9');
   });
 
   test('readLogEntries throws error for nonexistent project', async () => {
@@ -94,11 +95,11 @@ describe('TUI Integration Tests', () => {
 
     const entries = await readLogEntries('mixed-project', 100);
 
-    // Should only return valid JSON entries
+    // Should only return valid JSON entries in chronological order
     expect(entries).toHaveLength(3);
-    expect(entries[0].text).toBe('Valid entry 3');
+    expect(entries[0].text).toBe('Valid entry 1');
     expect(entries[1].text).toBe('Valid entry 2');
-    expect(entries[2].text).toBe('Valid entry 1');
+    expect(entries[2].text).toBe('Valid entry 3');
   });
 
   test('readLogEntries handles empty files', async () => {

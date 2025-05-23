@@ -55,13 +55,12 @@ export class Logger {
 
       await fs.appendFile(logFile, logEntry);
 
-      // Fix: Don't duplicate output - the result object already contains it
       const jsonEntry = {
         timestamp,
         kind: 'command',
         command,
-        result
-        // Removed: output: result.output || '' - this was causing duplication
+        result,
+        output: result.output || ''
       };
 
       await fs.appendFile(jsonLogFile, JSON.stringify(jsonEntry) + '\n');
@@ -146,7 +145,7 @@ export class Logger {
       if (search) {
         const lower = search.toLowerCase();
         entries = entries.filter(e => {
-          const target = (e.command || '') + (e.text || '') + (e.result?.output || '');
+          const target = (e.command || '') + (e.text || '') + (e.output || '');
           return target.toLowerCase().includes(lower);
         });
       }

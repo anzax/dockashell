@@ -9,8 +9,8 @@ export async function readLogEntries(projectName, maxEntries = 100) {
     throw new Error(`Log file not found for project '${projectName}'`);
   }
   const lines = (await fs.readFile(file, 'utf8')).split('\n').filter(Boolean);
-  
-  // Take last maxEntries and reverse to show newest first
+
+  // Take last maxEntries
   const slice = lines.slice(-maxEntries);
   const entries = [];
   for (const line of slice) {
@@ -21,7 +21,6 @@ export async function readLogEntries(projectName, maxEntries = 100) {
       // ignore malformed lines
     }
   }
-  
-  // Reverse to show newest entries first (as expected by TUI and tests)
-  return entries.reverse();
+
+  return entries;
 }

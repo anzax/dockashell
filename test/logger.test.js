@@ -177,7 +177,7 @@ describe('Logger', () => {
     await logger.logCommand(projectName, 'echo preview', { type: 'exec', exitCode: 0, output: 'preview text' });
 
     const entries = await logger.readJsonLogs(projectName);
-    expect(entries[0].output).toBe('preview text');
+    expect(entries[0].result.output).toBe('preview text');
 
     const searched = await logger.readJsonLogs(projectName, { search: 'preview' });
     expect(searched.length).toBe(1);

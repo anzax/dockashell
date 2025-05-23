@@ -12,14 +12,6 @@ const formatTimestamp = (timestamp) => {
   });
 };
 
-const formatDuration = (ms) => {
-  if (ms < 1000) return `${ms}ms`;
-  if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
-  const mins = Math.floor(ms / 60000);
-  const secs = ((ms % 60000) / 1000).toFixed(0);
-  return `${mins}m ${secs}s`;
-};
-
 const formatLines = (text, maxLines) => {
   if (!text) return [];
 
@@ -105,7 +97,7 @@ const Entry = ({ entry, selected, maxLines }) => {
     // Status line with exit code and duration
     const result = entry.result || {};
     const exitCode = result.exitCode !== undefined ? result.exitCode : 'N/A';
-    const duration = result.duration ? formatDuration(result.duration) : 'N/A';
+    const duration = result.duration;
     const success = exitCode === 0;
 
     lines.push({
@@ -116,7 +108,7 @@ const Entry = ({ entry, selected, maxLines }) => {
     });
 
     // Output
-    const output = entry.output || result.output || '';
+    const output = result.output || '';
     if (output && output.trim()) {
       const outputLines = formatLines(output.trim(), maxLines);
       outputLines.forEach(line => {
@@ -207,7 +199,7 @@ const getEntryHeight = (entry, maxLines) => {
     if (lines > maxLines) height += 1; // Truncation message
   } else if (entry.kind === 'command') {
     height += 2; // Command line + status line
-    const output = entry.output || entry.result?.output || '';
+    const output = entry.result?.output || '';
     if (output.trim()) {
       const lines = output.trim().split('\n').length;
       height += Math.min(lines, maxLines);
