@@ -20,7 +20,7 @@ dockashell/
 │   └── create-test-project.js   # Test project setup utility
 ├── package.json                  # Node.js dependencies
 ├── tests/                       # Test suite
-├── create-examples.js           # Project examples generator
+├── scripts/setup/create-examples.js           # Project examples generator
 └── README.md                    # Project documentation
 ```
 
@@ -48,6 +48,6 @@ dockashell/
 1. **Core changes**: Edit files in `src/`
 2. **Testing**: Run tests from `tests/` directory
 3. **Setup**: Use utilities from `utils/` for configuration
-4. **Examples**: Generate with `create-examples.js`
+4. **Examples**: Generate with `scripts/setup/create-examples.js`
 
 This structure maintains separation of concerns while keeping the project accessible and maintainable.

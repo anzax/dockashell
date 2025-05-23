@@ -12,7 +12,6 @@
     "debug": "npx @modelcontextprotocol/inspector node src/mcp-server.js",
     "test-tools": "node tests/test-mcp-tools.js",
     "setup-examples": "node scripts/setup/create-examples.js",
-    "configure-claude": "node configure-claude.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "build-image": "node scripts/image/build-default-image.js",
     "setup-image": "node scripts/setup/setup-default-image.js",
@@ -38,7 +37,7 @@
     "container"
   ],
   "author": "DockaShell",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "devDependencies": {
     "jest": "^29.7.0"
   }

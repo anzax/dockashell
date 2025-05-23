@@ -40,7 +40,7 @@ async function setupDockaShell() {
   try {
     // Import and run the examples script
     const { execSync } = await import('child_process');
-    execSync('node create-examples.js', { stdio: 'inherit' });
+    execSync('node scripts/setup/create-examples.js', { stdio: 'inherit' });
   } catch (error) {
     console.error('❌ Failed to create example projects:', error.message);
     process.exit(1);

@@ -15,7 +15,7 @@ This implementation adds a comprehensive default Docker image approach to DockaS
 
 ### Modified Files
 - `src/project-manager.js` - Updated to use default image (`dockashell/default-dev:latest`)
-- `create-examples.js` - Simplified example projects using default image
+- `scripts/setup/create-examples.js` - Simplified example projects using default image
 - `package.json` - Added new npm scripts
 - `README.md` - Updated documentation with default image information
 

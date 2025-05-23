@@ -375,7 +375,7 @@ dockashell/
 ├── package.json
 ├── README.md
 ├── tests/                  # Test suite
-└── create-examples.js       # Example project setup
+└── scripts/setup/create-examples.js       # Example project setup
 ```
 
 ## 🤝 Contributing
@@ -388,7 +388,7 @@ dockashell/
 
 ## 📄 License
 
-MIT License - see LICENSE file for details.
+Apache License 2.0 - see LICENSE file for details.
 
 ---
 
