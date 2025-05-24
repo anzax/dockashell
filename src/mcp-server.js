@@ -366,6 +366,7 @@ class DockashellServer {
     const cleanup = async () => {
       // console.log("Cleaning up containers...");
       await this.containerManager.cleanup();
+      await this.logger.cleanup();
       process.exit(0);
     };
 
