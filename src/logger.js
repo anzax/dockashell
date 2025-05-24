@@ -1,10 +1,13 @@
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
+import { systemLogger } from './system-logger.js';
+import { TraceRecorder } from './trace-recorder.js';
 
 export class Logger {
   constructor() {
     this.logsDir = path.join(os.homedir(), '.dockashell', 'logs');
+    this.traceRecorders = new Map();
   }
 
   get logDir() {
@@ -13,6 +16,13 @@ export class Logger {
 
   set logDir(dir) {
     this.logsDir = dir;
+  }
+
+  getTraceRecorder(projectName) {
+    if (!this.traceRecorders.has(projectName)) {
+      this.traceRecorders.set(projectName, new TraceRecorder(projectName));
+    }
+    return this.traceRecorders.get(projectName);
   }
 
   async ensureLogsDirectory() {
@@ -33,6 +43,14 @@ export class Logger {
       }
 
       await this.ensureLogsDirectory();
+
+      // New tracing behaviour
+      systemLogger.debug('Command executed', {
+        projectName,
+        command: (command || '').substring(0, 50)
+      });
+      const recorder = this.getTraceRecorder(projectName);
+      await recorder.execution('run_command', { command }, result);
 
       // Sanitize project name for filename
       const safeProjectName = projectName.replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -96,6 +114,13 @@ export class Logger {
       }
 
       await this.ensureLogsDirectory();
+
+      systemLogger.info('Note recorded', {
+        projectName,
+        noteType
+      });
+      const recorder = this.getTraceRecorder(projectName);
+      await recorder.observation(noteType, text);
 
       const safeProjectName = projectName.replace(/[^a-zA-Z0-9_-]/g, '_');
       const logFile = path.join(this.logsDir, `${safeProjectName}.log`);
