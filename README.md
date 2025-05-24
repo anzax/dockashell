@@ -430,7 +430,7 @@ DockaShell enables AI agents to work safely and effectively in isolated environm
 
 ## 🖥️ Terminal User Interface (TUI)
 
-DockaShell includes a Terminal User Interface for viewing agent activity and project logs.
+DockaShell includes a Terminal User Interface for viewing agent activity and project traces.
 
 ### Usage
 

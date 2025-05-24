@@ -11,4 +11,8 @@ the new logging system.
   implemented along with the updated `Logger` facade.
 - **Status 2025-05-02:** Added recorder cleanup on shutdown and moved trace sessions to `sessions/` directory on close.
 
+- **Status 2025-05-03:** Legacy project log files removed. MCP tools renamed to
+  `write_trace` and `read_traces`. Documentation updated for the new trace-only
+  system.
+
 Add further notes below as the migration continues.

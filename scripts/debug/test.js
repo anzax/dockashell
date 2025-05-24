@@ -89,9 +89,9 @@ async function runTests() {
     duration: '0.1s'
   });
   console.log('   ✓ Command logged successfully');
-  
-  const logs = await logger.getProjectLogs('test-project');
-  console.log(`   Log entry created: ${logs.split('\n').length - 1} lines`);
+
+  const traces = await logger.readTraces('test-project');
+  console.log(`   Trace entries: ${traces.length}`);
   console.log('   ✓ Logger working\n');
 
   console.log('✅ All core components working correctly!');

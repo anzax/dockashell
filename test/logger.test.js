@@ -7,23 +7,25 @@ import os from 'os';
 
 describe('Logger', () => {
   let logger;
-  let testLogDir;
+  let tmpHome;
+  let oldHome;
   
   beforeEach(async () => {
-    testLogDir = await fs.mkdtemp(path.join(os.tmpdir(), 'dockashell-test-'));
+    tmpHome = await fs.mkdtemp(path.join(os.tmpdir(), 'ds-home-'));
+    oldHome = process.env.HOME;
+    process.env.HOME = tmpHome;
     logger = new Logger();
-    logger.logDir = testLogDir;
   });
 
   afterEach(async () => {
-    if (testLogDir) {
-      await fs.remove(testLogDir);
+    process.env.HOME = oldHome;
+    if (tmpHome) {
+      await fs.remove(tmpHome);
     }
   });
 
   test('should initialize successfully', () => {
     assert.ok(logger instanceof Logger);
-    assert.ok(typeof logger.logDir === 'string');
   });
 
   test('should log commands', async () => {
@@ -34,33 +36,43 @@ describe('Logger', () => {
     };
 
     await logger.logCommand('test-project', 'ls -la', result);
-    
-    const logFile = path.join(testLogDir, 'test-project.log');
-    assert.ok(await fs.pathExists(logFile));
-    
-    const content = await fs.readFile(logFile, 'utf8');
-    assert.ok(content.includes('test-project'));
+
+    const traceFile = path.join(
+      tmpHome,
+      '.dockashell',
+      'projects',
+      'test-project',
+      'traces',
+      'current.jsonl'
+    );
+    const content = await fs.readFile(traceFile, 'utf8');
     assert.ok(content.includes('ls -la'));
-    assert.ok(content.includes('exit_code=0'));
+    assert.ok(content.includes('exitCode'));
   });
 
   test('should log notes', async () => {
     await logger.logNote('test-project', 'user', 'Test note message');
-    
-    const logFile = path.join(testLogDir, 'test-project.log');
-    assert.ok(await fs.pathExists(logFile));
-    
-    const content = await fs.readFile(logFile, 'utf8');
+
+    const traceFile = path.join(
+      tmpHome,
+      '.dockashell',
+      'projects',
+      'test-project',
+      'traces',
+      'current.jsonl'
+    );
+    const content = await fs.readFile(traceFile, 'utf8');
     assert.ok(content.includes('Test note message'));
-    assert.ok(content.includes('type=user'));
+    assert.ok(content.includes('"type":"user"'));
   });
 
-  test('should read project logs', async () => {
+  test('should read traces', async () => {
     await logger.logNote('test-project', 'agent', 'First entry');
     await logger.logNote('test-project', 'user', 'Second entry');
-    
-    const logs = await logger.getProjectLogs('test-project');
-    assert.ok(logs.includes('First entry'));
-    assert.ok(logs.includes('Second entry'));
+
+    const entries = await logger.readTraces('test-project', { limit: 10 });
+    const texts = entries.map(e => e.text).filter(Boolean);
+    assert.ok(texts.includes('First entry'));
+    assert.ok(texts.includes('Second entry'));
   });
 });

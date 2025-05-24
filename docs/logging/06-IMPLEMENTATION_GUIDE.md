@@ -11,8 +11,8 @@ structure.
    for a single project. Each recorder manages its own session identifier and
    exposes helper methods like `execution()` and `observation()`.
 3. **Update `Logger`** – retain its public methods but internally call the new
-   components. During Phase&nbsp;1 the original per project log files are kept and
-   the new trace files receive the same information.
+   components. Legacy per‑project log files were removed in Phase&nbsp;3 so only
+   structured trace files are written.
 4. **Use the facade** – other modules continue to instantiate `Logger` as
    before. No external API changes are required.
 
