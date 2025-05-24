@@ -209,7 +209,7 @@ class DockashellServer {
       },
       async ({ project_name, type, search, skip = 0, limit = 20, fields }) => {
         try {
-          const entries = await this.logger.readJsonLogs(project_name, { type, search, skip, limit });
+          const entries = await this.logger.readTraces(project_name, { type, search, skip, limit });
 
           const validFields = ['timestamp', 'type', 'content', 'exit_code', 'duration', 'output'];
           let selected = Array.isArray(fields) ? fields.filter(f => validFields.includes(f)) : ['timestamp', 'type', 'content'];
