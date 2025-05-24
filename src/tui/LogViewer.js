@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Box, Text, useInput, useStdout } from 'ink';
-import { readLogEntries } from './read-logs.js';
+import { readTraceEntries } from './read-traces.js';
 import { prepareEntry } from './entry-utils.js';
 
 const renderLines = (lines, selected, isModal = false) =>
@@ -162,7 +162,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   useEffect(() => {
     (async () => {
       try {
-        const raw = await readLogEntries(project, config?.display?.max_entries || 100);
+        const raw = await readTraceEntries(project, config?.display?.max_entries || 100);
         const prepared = raw.map((e) => prepareEntry(e, maxLinesPerEntry));
         setEntries(prepared);
 
@@ -235,7 +235,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     } else if (input === 'r') {
       (async () => {
         try {
-          const raw = await readLogEntries(project, config?.display?.max_entries || 100);
+          const raw = await readTraceEntries(project, config?.display?.max_entries || 100);
           const prepared = raw.map((e) => prepareEntry(e, maxLinesPerEntry));
           setEntries(prepared);
           if (selectedIndex >= prepared.length) {

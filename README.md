@@ -246,8 +246,8 @@ Lists all configured projects with their status.
 Starts a Docker container for the specified project.
 
 ### `run_command`
-**Arguments:** `{"project_name": "string", "command": "string", "log?": "string"}`
-Executes a shell command in the project container. When `log` is provided, the text is stored as an agent note before execution.
+**Arguments:** `{"project_name": "string", "command": "string"}`
+Executes a shell command in the project container.
 
 ### `project_status`
 **Arguments:** `{"project_name": "string"}`
@@ -257,13 +257,13 @@ Returns detailed status information about the project container.
 **Arguments:** `{"project_name": "string"}`
 Stops the project container.
 
-### `write_log`
+### `write_trace`
 **Arguments:** `{"project_name": "string", "type": "user|summary|agent", "text": "string"}`
-Writes an arbitrary note to the project log.
+Writes an arbitrary note to the project trace log.
 
-### `read_log`
+### `read_traces`
 **Arguments:** `{"project_name": "string", "type?": "string", "search?": "string", "skip?": "number", "limit?": "number", "fields?": "string[]"}`
-Returns formatted log entries with optional filtering and field selection.
+Returns formatted trace entries with optional filtering and field selection.
 
 **Field Options:**
 - `timestamp`, `type`, `content` - Always included for context
@@ -278,13 +278,13 @@ Returns formatted log entries with optional filtering and field selection.
 **Usage Examples:**
 ```javascript
 // Recent activity overview
-read_log("project", {limit: 10})
+read_traces("project", {limit: 10})
 
 // Debug failed commands with output
-read_log("project", {type: "command", fields: ["timestamp", "type", "content", "exit_code", "output"]})
+read_traces("project", {type: "command", fields: ["timestamp", "type", "content", "exit_code", "output"]})
 
 // Search across commands and output
-read_log("project", {search: "error"})
+read_traces("project", {search: "error"})
 ```
 
 ## 🛡️ Security Features
@@ -306,15 +306,15 @@ When `restricted_mode` is enabled:
 
 ## 📊 Logging
 
-Commands are logged to `~/.dockashell/logs/{project-name}.log` and a machine readable `*.jsonl` file:
+Agent traces are stored in `~/.dockashell/projects/{project-name}/traces/current.jsonl`:
 
 ```
-2024-05-22T10:30:15.123Z [START] project=web-app container=abc123 ports=3000:3000
-2024-05-22T10:30:16.456Z [EXEC] project=web-app command="npm install" exit_code=0 duration=2.3s
-2024-05-22T10:30:20.789Z [EXEC] project=web-app command="npm start" exit_code=0 duration=0.1s
+{"id":"tr_abc123","tool":"start_project","trace_type":"execution","project_name":"web-app","result":{"success":true}}
+{"id":"tr_def456","tool":"write_trace","trace_type":"observation","type":"agent","text":"Planning React app"}
+{"id":"tr_ghi789","tool":"run_command","trace_type":"execution","command":"npm start","result":{"exitCode":0,"duration":"0.1s"}}
 ```
 
-Use `write_log` to store notes and `read_log` to query previous entries.
+Use `write_trace` to store notes and `read_traces` to query previous entries.
 
 ## 🔌 MCP Client Integration
 

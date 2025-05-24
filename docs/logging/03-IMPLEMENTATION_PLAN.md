@@ -86,7 +86,7 @@ export class TraceRecorder {
   }
 
   async observation(type, text, metadata = {}) {
-    return this.trace('write_log', 'observation', { type, text, metadata });
+    return this.trace('write_trace', 'observation', { type, text, metadata });
   }
 
   async decision(operation, decision) {
@@ -141,9 +141,9 @@ export class Logger {
 
 #### 2.2 Update MCP Server Tools
 ```javascript
-// In mcp-server.js, update the write_log handler
-{
-  name: "write_log",
+// In mcp-server.js, update the write_trace handler
+{ 
+  name: "write_trace",
   handler: async (args) => {
     const { project_name, type, text } = args;
     const recorder = logger.getTraceRecorder(project_name);
@@ -152,7 +152,7 @@ export class Logger {
   }
 }
 
-// Add new read_traces tool alongside read_log
+// Replace read_log with new read_traces tool
 {
   name: "read_traces",
   description: "Read agent activity traces",
@@ -221,7 +221,7 @@ export const TraceViewer = ({ traces }) => {
 function getToolEmoji(tool) {
   const emojis = {
     'run_command': '⚡',
-    'write_log': '📝',
+    'write_trace': '📝',
     'start_project': '🚀',
     'container_manager': '🤔'
   };
@@ -231,7 +231,7 @@ function getToolEmoji(tool) {
 function getToolColor(tool) {
   const colors = {
     'run_command': 'yellow',
-    'write_log': 'blue',
+    'write_trace': 'blue',
     'start_project': 'green',
     'container_manager': 'magenta'
   };
@@ -242,7 +242,7 @@ function formatTrace(trace) {
   if (trace.tool === 'run_command') {
     const status = trace.result?.success ? '✅' : '❌';
     return `${trace.command.substring(0, 50)} ${status}`;
-  } else if (trace.tool === 'write_log') {
+  } else if (trace.tool === 'write_trace') {
     return `${trace.type.toUpperCase()}: ${trace.text.substring(0, 60)}`;
   }
   return JSON.stringify(trace);

@@ -90,11 +90,11 @@ DockaShell maintains two distinct data streams with different purposes, formats,
 }
 ```
 
-#### write_log Traces
+#### write_trace Traces
 ```javascript
 {
   ...base_fields,
-  "tool": "write_log",
+  "tool": "write_trace",
   "trace_type": "observation",
   "type": "agent",  // agent|user|summary
   "text": "Analysis shows performance bottleneck in database queries",
@@ -215,7 +215,7 @@ function generateTraceId() {
 
 ### Query Interface
 ```javascript
-// Enhanced read_log becomes read_traces
+// Enhanced write/read APIs
 {
   tool: "read_traces",
   parameters: {

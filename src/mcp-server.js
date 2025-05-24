@@ -124,10 +124,9 @@ class DockashellServer {
       'run_command',
       {
         project_name: z.string().describe('Name of the project'),
-        command: z.string().describe('Shell command to execute'),
-        log: z.string().optional().describe('Optional reasoning to log')
+        command: z.string().describe('Shell command to execute')
       },
-      async ({ project_name, command, log }) => {
+      async ({ project_name, command }) => {
         try {
           if (!project_name || typeof project_name !== 'string') {
             throw new Error('Project name must be a non-empty string');
@@ -137,9 +136,6 @@ class DockashellServer {
             throw new Error('Command must be a non-empty string');
           }
 
-          if (log) {
-            await this.logger.logNote(project_name, 'agent', log);
-          }
 
           const projectConfig = await this.projectManager.loadProject(project_name);
 
@@ -180,9 +176,9 @@ class DockashellServer {
       }
     );
 
-    // Write log note tool
+    // Write trace note tool
     this.server.tool(
-      'write_log',
+      'write_trace',
       {
         project_name: z.string().describe('Project name'),
         type: z.enum(['user', 'summary', 'agent']).describe('Note type'),
@@ -191,16 +187,16 @@ class DockashellServer {
       async ({ project_name, type, text }) => {
         try {
           await this.logger.logNote(project_name, type, text);
-          return { content: [{ type: 'text', text: 'Note recorded' }] };
+          return { content: [{ type: 'text', text: 'Trace recorded' }] };
         } catch (error) {
-          throw new Error(`Failed to write log: ${error.message}`);
+          throw new Error(`Failed to write trace: ${error.message}`);
         }
       }
     );
 
-    // Read log tool
+    // Read traces tool
     this.server.tool(
-      'read_log',
+      'read_traces',
       {
         project_name: z.string().describe('Project name'),
         type: z.string().optional().describe("Filter by 'command', 'note', 'user', 'agent', 'summary'"),
@@ -266,9 +262,9 @@ class DockashellServer {
             return lines.join('\n');
           }).join('\n\n');
 
-          return { content: [{ type: 'text', text: text || 'No log entries found' }] };
+          return { content: [{ type: 'text', text: text || 'No trace entries found' }] };
         } catch (error) {
-          throw new Error(`Failed to read log: ${error.message}`);
+          throw new Error(`Failed to read traces: ${error.message}`);
         }
       }
     );

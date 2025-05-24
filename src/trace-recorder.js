@@ -46,7 +46,7 @@ export class TraceRecorder {
   }
 
   async observation(type, text, metadata = {}) {
-    return this.trace('write_log', 'observation', { type, text, metadata });
+    return this.trace('write_trace', 'observation', { type, text, metadata });
   }
 
   async decision(operation, decision) {
