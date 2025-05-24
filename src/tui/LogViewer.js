@@ -63,20 +63,39 @@ const Entry = ({ item, selected }) => {
 };
 
 const EntryModal = ({ item, onClose, height }) => {
+  const [offset, setOffset] = useState(0);
+
+  const availableHeight = Math.max(1, height - 6); // header, help, borders
+  const maxOffset = Math.max(0, item.fullLines.length - availableHeight);
+  const visible = item.fullLines.slice(offset, offset + availableHeight);
+
   useInput((input, key) => {
-    if (key.escape || key.return || input === 'q') onClose();
+    if (key.escape || key.return || input === 'q') {
+      onClose();
+      return;
+    }
+    if (key.downArrow) setOffset((o) => Math.min(maxOffset, o + 1));
+    else if (key.upArrow) setOffset((o) => Math.max(0, o - 1));
+    else if (key.pageDown) setOffset((o) => Math.min(maxOffset, o + availableHeight));
+    else if (key.pageUp) setOffset((o) => Math.max(0, o - availableHeight));
+    else if (input === 'g') setOffset(0);
+    else if (input === 'G') setOffset(maxOffset);
   });
+
+  const indicator = item.fullLines.length > availableHeight
+    ? ` (${offset + 1}-${Math.min(item.fullLines.length, offset + availableHeight)} of ${item.fullLines.length})`
+    : '';
 
   return React.createElement(
     Box,
     { flexDirection: 'column', height },
-    React.createElement(Text, { bold: true }, 'Log Entry Detail'),
+    React.createElement(Text, { bold: true }, `Log Entry Detail${indicator}`),
     React.createElement(
       Box,
       { flexDirection: 'column', flexGrow: 1, borderStyle: 'double', paddingLeft: 1, paddingRight: 1, marginY: 1 },
-      ...renderLines(item.fullLines, false, true)
+      ...renderLines(visible, false, true)
     ),
-    React.createElement(Text, { dimColor: true }, '[Enter/Esc/q] Close')
+    React.createElement(Text, { dimColor: true }, '[↑↓ PgUp/PgDn g/G] Scroll  [Enter/Esc/q] Close')
   );
 };
 

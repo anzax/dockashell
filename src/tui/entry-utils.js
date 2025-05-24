@@ -57,7 +57,8 @@ export const getNoteTypeIcon = (noteType) => {
   }
 };
 
-export const buildEntryLines = (entry, maxLines = Infinity) => {
+export const buildEntryLines = (entry, maxLines = Infinity, options = {}) => {
+  const { showOutput = true, compact = false } = options;
   const lines = [];
 
   if (entry.type === 'note' || entry.kind === 'note') {
@@ -71,7 +72,7 @@ export const buildEntryLines = (entry, maxLines = Infinity) => {
     });
     const contentLines = formatLines(entry.text || '', maxLines);
     contentLines.forEach((t) => lines.push({ type: 'content', text: t }));
-  } else if (entry.kind === 'command') {
+  } else if (entry.kind === 'command' || entry.type === 'command') {
     lines.push({
       type: 'header',
       icon: '💻',
@@ -79,25 +80,35 @@ export const buildEntryLines = (entry, maxLines = Infinity) => {
       typeText: 'COMMAND',
       typeColor: 'cyan'
     });
-    
+
     // Format command with truncation
     const displayCommand = formatCommand(entry.command);
-    lines.push({ type: 'command', text: `$ ${displayCommand}` });
-    
+    let commandText = `$ ${displayCommand}`;
+
     const result = entry.result || {};
     const exitCode = result.exitCode !== undefined ? result.exitCode : 'N/A';
     const duration = result.duration;
-    const success = exitCode === 0;
-    lines.push({
-      type: 'status',
-      text: `Exit: ${exitCode}`,
-      color: success ? 'green' : 'red',
-      extra: ` | Duration: ${duration}`
-    });
-    const output = result.output || '';
-    if (output.trim()) {
-      const outputLines = formatLines(output.trim(), maxLines);
-      outputLines.forEach((t) => lines.push({ type: 'output', text: t }));
+
+    if (compact) {
+      commandText += ` (exit ${exitCode}, ${duration})`;
+      lines.push({ type: 'command', text: commandText });
+    } else {
+      lines.push({ type: 'command', text: commandText });
+
+      const success = exitCode === 0;
+      lines.push({
+        type: 'status',
+        text: `Exit: ${exitCode}`,
+        color: success ? 'green' : 'red',
+        extra: ` | Duration: ${duration}`
+      });
+    }
+    if (showOutput) {
+      const output = result.output || '';
+      if (output.trim()) {
+        const outputLines = formatLines(output.trim(), maxLines);
+        outputLines.forEach((t) => lines.push({ type: 'output', text: t }));
+      }
     }
   } else {
     const type = entry.type || entry.kind || 'UNKNOWN';
@@ -116,8 +127,8 @@ export const buildEntryLines = (entry, maxLines = Infinity) => {
 };
 
 export const prepareEntry = (entry, maxLines) => {
-  const lines = buildEntryLines(entry, maxLines);
-  const fullLines = buildEntryLines(entry, Infinity);
+  const lines = buildEntryLines(entry, maxLines, { showOutput: false, compact: true });
+  const fullLines = buildEntryLines(entry, Infinity, { showOutput: true });
   const height = lines.length + 1; // margin bottom
   return { entry, lines, fullLines, height };
 };
