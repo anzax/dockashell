@@ -9,11 +9,11 @@ const renderLines = (lines, selected, isModal = false) =>
       return React.createElement(
         Box,
         { key: idx },
-        React.createElement(Text, null, line.icon + ' '),
-        React.createElement(Text, { dimColor: !isModal }, line.timestamp + ' '),
+        React.createElement(Text, { wrap: 'truncate-end' }, line.icon + ' '),
+        React.createElement(Text, { dimColor: !isModal, wrap: 'truncate-end' }, line.timestamp + ' '),
         React.createElement(
           Text,
-          { bold: selected && !isModal, color: line.typeColor },
+          { bold: selected && !isModal, color: line.typeColor, wrap: 'truncate-end' },
           `[${line.typeText}]`
         )
       );
@@ -21,7 +21,7 @@ const renderLines = (lines, selected, isModal = false) =>
     if (line.type === 'command') {
       return React.createElement(
         Text,
-        { key: idx, bold: selected && !isModal, color: isModal ? 'white' : 'cyan' },
+        { key: idx, bold: selected && !isModal, color: isModal ? 'white' : 'cyan', wrap: 'truncate-end' },
         line.text
       );
     }
@@ -29,20 +29,20 @@ const renderLines = (lines, selected, isModal = false) =>
       return React.createElement(
         Box,
         { key: idx },
-        React.createElement(Text, { color: line.color }, line.text),
-        React.createElement(Text, { dimColor: !isModal }, line.extra)
+        React.createElement(Text, { color: line.color, wrap: 'truncate-end' }, line.text),
+        React.createElement(Text, { dimColor: !isModal, wrap: 'truncate-end' }, line.extra)
       );
     }
     if (line.type === 'output') {
       return React.createElement(
         Text,
-        { key: idx, color: isModal ? 'white' : 'gray' },
+        { key: idx, color: isModal ? 'white' : 'gray', wrap: 'truncate-end' },
         '  ' + line.text
       );
     }
     return React.createElement(
       Text,
-      { key: idx, color: isModal ? 'white' : 'gray' },
+      { key: idx, color: isModal ? 'white' : 'gray', wrap: 'truncate-end' },
       line.text
     );
   });
@@ -92,13 +92,13 @@ const EntryModal = ({ item, onClose, height }) => {
   return React.createElement(
     Box,
     { flexDirection: 'column', height },
-    React.createElement(Text, { bold: true }, `Log Entry Detail${indicator}`),
+    React.createElement(Text, { bold: true, wrap: 'truncate-end' }, `Log Entry Detail${indicator}`),
     React.createElement(
       Box,
       { flexDirection: 'column', flexGrow: 1, borderStyle: 'double', paddingLeft: 1, paddingRight: 1, marginY: 1 },
       ...renderLines(visible, false, true)
     ),
-    React.createElement(Text, { dimColor: true }, '[↑↓ PgUp/PgDn g/G] Scroll  [Enter/Esc/q] Close')
+    React.createElement(Text, { dimColor: true, wrap: 'truncate-end' }, '[↑↓ PgUp/PgDn g/G] Scroll  [Enter/Esc/q] Close')
   );
 };
 
@@ -287,7 +287,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   return React.createElement(
     Box,
     { flexDirection: 'column', height: terminalHeight },
-    React.createElement(Text, { bold: true }, `DockaShell TUI - ${project}${scrollIndicator}`),
+    React.createElement(Text, { bold: true, wrap: 'truncate-end' }, `DockaShell TUI - ${project}${scrollIndicator}`),
     React.createElement(
       Box,
       { flexDirection: 'column', flexGrow: 1 },
@@ -302,7 +302,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     ),
     React.createElement(
       Text,
-      { dimColor: true },
+      { dimColor: true, wrap: 'truncate-end' },
       hasMore
         ? '[↑↓] Navigate  [Enter] Detail  [PgUp/PgDn] Page  [g] Top  [G] Bottom  [r] Refresh  [b] Back  [q] Quit'
         : '[↑↓] Navigate  [Enter] Detail  [r] Refresh  [b] Back  [q] Quit'
