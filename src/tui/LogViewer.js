@@ -188,7 +188,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
               type: 'note',
               noteType: 'error',
               timestamp: new Date().toISOString(),
-              text: `Error loading logs: ${err.message}`
+              text: `Error loading traces: ${err.message}`
             },
             maxLinesPerEntry
           )
@@ -248,7 +248,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
                 type: 'note',
                 noteType: 'error',
                 timestamp: new Date().toISOString(),
-                text: `Error loading logs: ${err.message}`
+                text: `Error loading traces: ${err.message}`
               },
               maxLinesPerEntry
             )

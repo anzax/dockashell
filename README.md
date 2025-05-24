@@ -448,7 +448,7 @@ dockashell-tui myproject
 
 - **Project Discovery**: Automatically finds all DockaShell projects
 - **Activity Sorting**: Projects sorted by most recent activity  
-- **Log Viewing**: Navigate through agent logs with keyboard
+- **Trace Viewing**: Navigate through agent logs with keyboard
 - **Entry Types**: Displays user inputs, agent reasoning, and command results
 - **Configurable**: Customizable display settings via `~/.dockashell/config.json`
 
@@ -459,7 +459,7 @@ dockashell-tui myproject
 - `Enter` Select project  
 - `q` Quit
 
-**Log Viewer:**
+**Trace Viewer:**
 - `↑↓` Navigate entries
 - `b` Back to project selector
 - `q` Quit

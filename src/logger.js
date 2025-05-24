@@ -127,7 +127,7 @@ export class Logger {
         });
       }
 
-      return entries.slice(skip, skip + limit);
+      return entries.reverse().slice(skip, skip + limit);
     } catch (error) {
       console.error('Failed to read traces:', error.message);
       return [];
