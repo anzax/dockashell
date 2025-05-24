@@ -11,7 +11,8 @@
   "scripts": {
     "start": "node src/mcp-server.js",
     "debug": "npx @modelcontextprotocol/inspector node src/mcp-server.js",
-    "test-tools": "node tests/test-mcp-tools.js",
+    "test-tools": "node test/integration/test-mcp-tools.js",
+    "test:integration": "node test/integration/test-*.js",
     "setup-examples": "node scripts/setup/create-examples.js",
     "test": "node --test test/*.test.js",
     "build-image": "node scripts/image/build-default-image.js",

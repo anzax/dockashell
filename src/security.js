@@ -87,19 +87,4 @@ export class SecurityManager {
    * Get default security settings
    * @returns {Object} Default security configuration
    */
-  getDefaultSecuritySettings() {
-    return {
-      restricted_mode: false,
-      blocked_commands: [
-        "rm -rf /",
-        "sudo rm -rf",
-        "mkfs",
-        "dd if=/dev/zero",
-        "sudo passwd",
-        ":(){ :|:& };:",
-        "dangerous-cmd"
-      ],
-      max_execution_time: 300
-    };
-  }
 }
