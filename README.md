@@ -306,12 +306,12 @@ When `restricted_mode` is enabled:
 
 ## 📊 Logging
 
-Commands are logged to `~/.dockashell/logs/{project-name}.log` and a machine readable `*.jsonl` file:
+Agent traces are stored in `~/.dockashell/projects/{project-name}/traces/current.jsonl`:
 
 ```
-2024-05-22T10:30:15.123Z [START] project=web-app container=abc123 ports=3000:3000
-2024-05-22T10:30:16.456Z [EXEC] project=web-app command="npm install" exit_code=0 duration=2.3s
-2024-05-22T10:30:20.789Z [EXEC] project=web-app command="npm start" exit_code=0 duration=0.1s
+{"id":"tr_abc123","tool":"start_project","trace_type":"execution","project_name":"web-app","result":{"success":true}}
+{"id":"tr_def456","tool":"write_log","trace_type":"observation","type":"agent","text":"Planning React app"}
+{"id":"tr_ghi789","tool":"run_command","trace_type":"execution","command":"npm start","result":{"exitCode":0,"duration":"0.1s"}}
 ```
 
 Use `write_log` to store notes and `read_log` to query previous entries.

@@ -184,13 +184,9 @@ export class Logger {
   }
 
   async cleanup() {
-    for (const recorder of this.traceRecorders.values()) {
-      try {
-        await recorder.close();
-      } catch (error) {
-        systemLogger.warn('Failed to close trace recorder', { error: error.message });
-      }
-    }
+    // Sessions should persist across server restarts. Only clear
+    // in-memory references so new recorders will resume existing
+    // sessions if available.
     this.traceRecorders.clear();
   }
 }

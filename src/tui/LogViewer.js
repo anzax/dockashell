@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Box, Text, useInput, useStdout } from 'ink';
-import { readLogEntries } from './read-logs.js';
+import { readLogEntries } from './read-traces.js';
 import { prepareEntry } from './entry-utils.js';
 
 const renderLines = (lines, selected, isModal = false) =>

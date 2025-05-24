@@ -39,4 +39,22 @@ describe('TraceRecorder', () => {
     const sessionFile = path.join(recorder.sessionsDir, `${recorder.sessionId}.jsonl`);
     assert.ok(await fs.pathExists(sessionFile));
   });
+
+  test('resumes active session on restart', async () => {
+    await recorder.observation('user', 'note');
+    const firstId = recorder.sessionId;
+
+    const resumed = new TraceRecorder('proj');
+    assert.strictEqual(resumed.sessionId, firstId);
+  });
+
+  test('rotates session after timeout', async () => {
+    await recorder.observation('user', 'start');
+    const firstId = recorder.sessionId;
+    // Simulate 5 hours passing
+    recorder.sessionStart = Date.now() - 5 * 60 * 60 * 1000;
+    await recorder.observation('user', 'after timeout');
+    const secondId = recorder.sessionId;
+    assert.notStrictEqual(secondId, firstId);
+  });
 });

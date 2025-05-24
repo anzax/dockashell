@@ -71,14 +71,13 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
 
   useEffect(() => {
     (async () => {
-      const logsDir = path.join(os.homedir(), '.dockashell', 'logs');
-      await fs.ensureDir(logsDir);
-      const files = await fs.readdir(logsDir);
+      const projectsDir = path.join(os.homedir(), '.dockashell', 'projects');
+      await fs.ensureDir(projectsDir);
+      const projects = await fs.readdir(projectsDir);
       const list = [];
-      for (const f of files) {
-        if (!f.endsWith('.jsonl')) continue;
-        const name = f.replace(/\.jsonl$/, '');
-        const file = path.join(logsDir, f);
+      for (const name of projects) {
+        const file = path.join(projectsDir, name, 'traces', 'current.jsonl');
+        if (!await fs.pathExists(file)) continue;
         try {
           const lines = (await fs.readFile(file, 'utf8')).split('\n').filter(Boolean);
           const count = lines.length;
@@ -135,7 +134,7 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
       paddingX: 1
     },
       React.createElement(Text, { bold: true }, 'DockaShell TUI - No Projects Found'),
-      React.createElement(Text, null, '🚫 No projects found in ~/.dockashell/logs'),
+      React.createElement(Text, null, '🚫 No traces found in ~/.dockashell/projects'),
       React.createElement(Text, null, 'Use DockaShell to create a project first.'),
       React.createElement(Text, { dimColor: true }, '[q] Quit')
     );
