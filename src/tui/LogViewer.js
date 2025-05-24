@@ -3,17 +3,17 @@ import { Box, Text, useInput, useStdout } from 'ink';
 import { readLogEntries } from './read-logs.js';
 import { prepareEntry } from './entry-utils.js';
 
-const renderLines = (lines, selected) =>
+const renderLines = (lines, selected, isModal = false) =>
   lines.map((line, idx) => {
     if (line.type === 'header') {
       return React.createElement(
         Box,
         { key: idx },
         React.createElement(Text, null, line.icon + ' '),
-        React.createElement(Text, { dimColor: true }, line.timestamp + ' '),
+        React.createElement(Text, { dimColor: !isModal }, line.timestamp + ' '),
         React.createElement(
           Text,
-          { bold: selected, color: line.typeColor },
+          { bold: selected && !isModal, color: line.typeColor },
           `[${line.typeText}]`
         )
       );
@@ -21,7 +21,7 @@ const renderLines = (lines, selected) =>
     if (line.type === 'command') {
       return React.createElement(
         Text,
-        { key: idx, bold: selected, color: selected ? 'white' : 'gray' },
+        { key: idx, bold: selected && !isModal, color: isModal ? 'white' : 'cyan' },
         line.text
       );
     }
@@ -30,19 +30,19 @@ const renderLines = (lines, selected) =>
         Box,
         { key: idx },
         React.createElement(Text, { color: line.color }, line.text),
-        React.createElement(Text, { dimColor: true }, line.extra)
+        React.createElement(Text, { dimColor: !isModal }, line.extra)
       );
     }
     if (line.type === 'output') {
       return React.createElement(
         Text,
-        { key: idx, dimColor: !selected, color: selected ? 'white' : 'gray' },
+        { key: idx, color: isModal ? 'white' : 'gray' },
         '  ' + line.text
       );
     }
     return React.createElement(
       Text,
-      { key: idx, dimColor: !selected, color: selected ? 'white' : 'gray' },
+      { key: idx, color: isModal ? 'white' : 'gray' },
       line.text
     );
   });
@@ -58,7 +58,7 @@ const Entry = ({ item, selected }) => {
       paddingRight: 1,
       marginBottom: 1
     },
-    ...renderLines(item.lines, selected)
+    ...renderLines(item.lines, selected, false)
   );
 };
 
@@ -74,9 +74,9 @@ const EntryModal = ({ item, onClose, height }) => {
     React.createElement(
       Box,
       { flexDirection: 'column', flexGrow: 1, borderStyle: 'double', paddingLeft: 1, paddingRight: 1, marginY: 1 },
-      ...renderLines(item.fullLines, false)
+      ...renderLines(item.fullLines, false, true)
     ),
-    React.createElement(Text, { dimColor: true }, '[Enter/Esc] Close')
+    React.createElement(Text, { dimColor: true }, '[Enter/Esc/q] Close')
   );
 };
 
@@ -112,9 +112,9 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   // Handle terminal resize
   useEffect(() => {
     const updateTerminalSize = () => {
-      if (stdout && stdout.rows) {
+      if (stdout?.rows) {
         setTerminalHeight(stdout.rows);
-      } else if (process.stdout && process.stdout.rows) {
+      } else if (process.stdout?.rows) {
         setTerminalHeight(process.stdout.rows);
       }
     };
@@ -243,21 +243,10 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     }
   });
 
-  if (entries.length === 0) {
-    return React.createElement(Box, { flexDirection: 'column', height: terminalHeight },
-      React.createElement(Text, { bold: true }, `DockaShell TUI - ${project}`),
-      React.createElement(Text, null, 'No log entries found'),
-      React.createElement(Text, { dimColor: true }, '[r] Refresh  [b] Back  [q] Quit')
-    );
-  }
-
-  // Calculate visible entries
   const { start: visibleStart, end: visibleEnd } = calculateVisibleEntries();
   const visibleEntries = entries.slice(visibleStart, visibleEnd);
-
-  // Show scroll indicator
   const hasMore = entries.length > visibleEnd - visibleStart;
-  const scrollIndicator = hasMore
+  const scrollIndicator = hasMore 
     ? ` (${visibleStart + 1}-${visibleEnd} of ${entries.length})`
     : '';
 
@@ -285,8 +274,8 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       Text,
       { dimColor: true },
       hasMore
-        ? '[↑↓] Navigate  [PgUp/PgDn] Page  [g] Top  [G] Bottom  [r] Refresh  [b] Back  [q] Quit'
-        : '[↑↓] Navigate  [r] Refresh  [b] Back  [q] Quit'
+        ? '[↑↓] Navigate  [Enter] Detail  [PgUp/PgDn] Page  [g] Top  [G] Bottom  [r] Refresh  [b] Back  [q] Quit'
+        : '[↑↓] Navigate  [Enter] Detail  [r] Refresh  [b] Back  [q] Quit'
     )
   );
 };

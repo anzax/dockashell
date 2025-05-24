@@ -7,6 +7,12 @@ export const formatLines = (text, maxLines = Infinity) => {
   if (!text) return [];
   const lines = text.split('\n');
   if (!isFinite(maxLines) || lines.length <= maxLines) return lines;
+  
+  // For very long content, be more aggressive with truncation
+  if (lines.length > 50 && maxLines > 5) {
+    maxLines = Math.min(maxLines, 5); // Cap at 5 lines for very long content
+  }
+  
   const half = Math.floor((maxLines - 1) / 2);
   const start = lines.slice(0, half);
   const end = lines.slice(-(maxLines - 1 - half));
@@ -15,6 +21,14 @@ export const formatLines = (text, maxLines = Infinity) => {
     `... (${lines.length - maxLines + 1} lines truncated) ...`,
     ...end
   ];
+};
+
+export const formatCommand = (command) => {
+  // Truncate very long commands
+  if (command.length > 100) {
+    return command.substring(0, 97) + '...';
+  }
+  return command;
 };
 
 export const getNoteTypeColor = (noteType) => {
@@ -65,7 +79,11 @@ export const buildEntryLines = (entry, maxLines = Infinity) => {
       typeText: 'COMMAND',
       typeColor: 'cyan'
     });
-    lines.push({ type: 'command', text: `$ ${entry.command}` });
+    
+    // Format command with truncation
+    const displayCommand = formatCommand(entry.command);
+    lines.push({ type: 'command', text: `$ ${displayCommand}` });
+    
     const result = entry.result || {};
     const exitCode = result.exitCode !== undefined ? result.exitCode : 'N/A';
     const duration = result.duration;
