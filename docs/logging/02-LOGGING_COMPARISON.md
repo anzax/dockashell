@@ -24,7 +24,7 @@
 ### Agent Traces (traces.jsonl)
 ```json
 {"id":"tr_abc123","tool":"start_project","trace_type":"execution","project_name":"myapp","result":{"success":true}}
-{"id":"tr_def456","tool":"write_log","trace_type":"observation","type":"agent","text":"Planning React app structure"}
+{"id":"tr_def456","tool":"write_trace","trace_type":"observation","type":"agent","text":"Planning React app structure"}
 {"id":"tr_ghi789","tool":"run_command","trace_type":"execution","command":"npm init -y","result":{"success":true}}
 ```
 

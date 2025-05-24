@@ -70,7 +70,7 @@ async function setupDockaShell() {
   console.log('📖 Documentation:');
   console.log('   • README.md - Full project documentation');
   console.log('   • Project configs in ~/.dockashell/projects/');
-  console.log('   • Logs in ~/.dockashell/logs/\n');
+  console.log('   • Traces in ~/.dockashell/projects/{name}/traces/\n');
 }
 
 setupDockaShell().catch(console.error);
