@@ -62,6 +62,9 @@ const Entry = ({ item, selected }) => {
   );
 };
 
+export const getEntryHeight = (entry, isSelected) =>
+  entry.height + (isSelected ? 2 : 0);
+
 const EntryModal = ({ item, onClose, height }) => {
   const [offset, setOffset] = useState(0);
 
@@ -118,13 +121,14 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       const availableHeight = terminalHeight - 3;
       let height = 0;
       for (let i = index; i >= offset; i--) {
-        height += entries[i].height;
+        height += getEntryHeight(entries[i], i === index);
         if (height > availableHeight) {
           offset = i + 1;
           break;
         }
       }
     }
+    offset = Math.min(Math.max(offset, 0), entries.length - 1);
     setScrollOffset(offset);
   }, [entries, scrollOffset, terminalHeight]);
 
@@ -150,13 +154,16 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     let height = 0;
     let end = scrollOffset;
 
-    while (end < entries.length && height + entries[end].height <= availableHeight) {
-      height += entries[end].height;
+    while (
+      end < entries.length &&
+      height + getEntryHeight(entries[end], end === selectedIndex) <= availableHeight
+    ) {
+      height += getEntryHeight(entries[end], end === selectedIndex);
       end++;
     }
 
     return { start: scrollOffset, end };
-  }, [entries, scrollOffset, terminalHeight]);
+  }, [entries, scrollOffset, terminalHeight, selectedIndex]);
 
   // Load entries
   useEffect(() => {
@@ -174,12 +181,16 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
           let offset = lastIndex;
           const availableHeight = terminalHeight - 3;
 
-          while (offset >= 0 && height + prepared[offset].height <= availableHeight) {
-            height += prepared[offset].height;
+          while (
+            offset >= 0 &&
+            height + getEntryHeight(prepared[offset], offset === lastIndex) <= availableHeight
+          ) {
+            height += getEntryHeight(prepared[offset], offset === lastIndex);
             offset--;
           }
 
-          setScrollOffset(Math.max(0, offset + 1));
+          offset = Math.max(0, Math.min(prepared.length - 1, offset + 1));
+          setScrollOffset(offset);
         }
       } catch (err) {
         setEntries([
