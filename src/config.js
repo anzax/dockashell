@@ -16,6 +16,11 @@ const defaultConfig = {
       recent: [],
     },
   },
+  logging: {
+    traces: {
+      session_timeout: '4h',
+    },
+  },
 };
 
 export async function loadConfig() {
@@ -34,6 +39,13 @@ export async function loadConfig() {
     if (!cfg.tui.display.max_visible_entries) {
       cfg.tui.display.max_visible_entries =
         defaultConfig.tui.display.max_visible_entries;
+    }
+    if (!cfg.logging) cfg.logging = { ...defaultConfig.logging };
+    if (!cfg.logging.traces)
+      cfg.logging.traces = { ...defaultConfig.logging.traces };
+    if (!cfg.logging.traces.session_timeout) {
+      cfg.logging.traces.session_timeout =
+        defaultConfig.logging.traces.session_timeout;
     }
     return cfg;
   } catch {

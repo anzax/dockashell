@@ -40,10 +40,18 @@ describe('TraceRecorder', () => {
     const fileExists = await fs.pathExists(recorder.currentFile);
     assert.ok(fileExists);
     await recorder.close();
-    const sessionFile = path.join(
-      recorder.sessionsDir,
-      `${recorder.sessionId}.jsonl`
-    );
-    assert.ok(await fs.pathExists(sessionFile));
+    const files = await fs.readdir(recorder.sessionsDir);
+    assert.strictEqual(files.length, 1);
+  });
+
+  test('rotates session after timeout', async () => {
+    await recorder.observation('user', 'first');
+    // simulate 5h later
+    recorder.lastTraceTime -= 5 * 60 * 60 * 1000;
+    await recorder.observation('user', 'second');
+    const files = await fs.readdir(recorder.sessionsDir);
+    assert.strictEqual(files.length, 1);
+    const currentExists = await fs.pathExists(recorder.currentFile);
+    assert.ok(currentExists);
   });
 });

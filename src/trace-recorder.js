@@ -3,7 +3,7 @@ import path from 'path';
 import os from 'os';
 
 export class TraceRecorder {
-  constructor(projectName) {
+  constructor(projectName, sessionTimeoutMs = 4 * 60 * 60 * 1000) {
     this.projectName = projectName;
     this.baseDir = path.join(
       os.homedir(),
@@ -16,6 +16,8 @@ export class TraceRecorder {
     this.sessionsDir = path.join(this.baseDir, 'sessions');
     this.sessionId = this.generateSessionId();
     this.sessionStart = Date.now();
+    this.sessionTimeoutMs = sessionTimeoutMs;
+    this.lastTraceTime = this.sessionStart;
   }
 
   generateSessionId() {
@@ -32,6 +34,13 @@ export class TraceRecorder {
 
   async trace(tool, traceType, data) {
     await fs.ensureDir(this.baseDir);
+    const now = Date.now();
+    if (now - this.lastTraceTime > this.sessionTimeoutMs) {
+      await this.close();
+      this.sessionId = this.generateSessionId();
+      this.sessionStart = now;
+    }
+    this.lastTraceTime = now;
     const entry = {
       id: this.generateTraceId(),
       session_id: this.sessionId,
@@ -61,7 +70,12 @@ export class TraceRecorder {
 
   async close() {
     await fs.ensureDir(this.sessionsDir);
-    const sessionFile = path.join(this.sessionsDir, `${this.sessionId}.jsonl`);
+    const timestamp = new Date(this.sessionStart)
+      .toISOString()
+      .slice(0, 16)
+      .replace(':', '-') +
+      'Z';
+    const sessionFile = path.join(this.sessionsDir, `${timestamp}.jsonl`);
     if (await fs.pathExists(this.currentFile)) {
       await fs.move(this.currentFile, sessionFile, { overwrite: true });
     }

@@ -20,4 +20,8 @@ the new logging system.
 - **Status 2025-05-05:** Session navigation added. Viewer can jump between
   archived sessions stored under `traces/sessions/`.
 
+- **Status 2025-05-06:** Session timeout configurable via
+  `logging.traces.session_timeout`. Recorder rotates files after periods of
+  inactivity.
+
 Add further notes below as the migration continues.
