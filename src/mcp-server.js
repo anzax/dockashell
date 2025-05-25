@@ -176,6 +176,47 @@ class DockashellServer {
       }
     );
 
+    // Git apply patch tool
+    this.server.tool(
+      'git_apply',
+      {
+        project_name: z.string().describe('Name of the project'),
+        diff: z.string().describe('Unified git diff to apply')
+      },
+      async ({ project_name, diff }) => {
+        try {
+          if (!project_name || typeof project_name !== 'string') {
+            throw new Error('Project name must be a non-empty string');
+          }
+
+          if (!diff || typeof diff !== 'string') {
+            throw new Error('Diff must be a non-empty string');
+          }
+
+          // Ensure project exists
+          await this.projectManager.loadProject(project_name);
+
+          const result = await this.containerManager.applyPatch(project_name, diff);
+
+          let response = `# Git Apply: ${project_name}\n\n`;
+          response += `**Exit Code:** ${result.exitCode}\n`;
+          response += `**Success:** ${result.success ? '✅' : '❌'}\n\n`;
+
+          if (result.stdout) {
+            response += `**Output:**\n\`\`\`\n${result.stdout}\n\`\`\`\n\n`;
+          }
+
+          if (result.stderr) {
+            response += `**Error Output:**\n\`\`\`\n${result.stderr}\n\`\`\`\n\n`;
+          }
+
+          return { content: [{ type: 'text', text: response }] };
+        } catch (error) {
+          throw new Error(`Failed to apply patch in project '${project_name}': ${error.message}`);
+        }
+      }
+    );
+
     // Write trace note tool
     this.server.tool(
       'write_trace',

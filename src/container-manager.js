@@ -296,6 +296,105 @@ export class ContainerManager {
     }
   }
 
+  async applyPatch(projectName, diff, options = {}) {
+    const containerName = `dockashell-${projectName}`;
+    const timeoutMs = options.timeout || 30000;
+    const startTime = Date.now();
+
+    try {
+      const container = this.docker.getContainer(containerName);
+
+      const data = await container.inspect();
+      if (!data.State.Running) {
+        throw new Error('Container is not running. Please start the project first.');
+      }
+
+      const exec = await container.exec({
+        Cmd: ['bash', '-c', 'git apply --check --whitespace=nowarn - && git apply --whitespace=fix -'],
+        AttachStdout: true,
+        AttachStderr: true,
+        AttachStdin: true,
+        Tty: false
+      });
+
+      const stream = await exec.start({ Detach: false, Tty: false, hijack: true, stdin: true });
+
+      stream.end(diff);
+
+      let output = '';
+      let error = '';
+      let timedOut = false;
+
+      const result = await Promise.race([
+        new Promise((resolve, reject) => {
+          stream.on('data', (chunk) => {
+            const data = chunk.toString();
+            if (chunk[0] === 1) {
+              output += data.slice(8);
+            } else if (chunk[0] === 2) {
+              error += data.slice(8);
+            } else {
+              output += data;
+            }
+          });
+
+          stream.on('end', async () => {
+            try {
+              const inspect = await exec.inspect();
+              resolve({
+                stdout: output.trim(),
+                stderr: error.trim(),
+                exitCode: inspect.ExitCode,
+                timedOut
+              });
+            } catch (inspectError) {
+              reject(inspectError);
+            }
+          });
+
+          stream.on('error', reject);
+        }),
+        new Promise((_, reject) => {
+          setTimeout(() => {
+            timedOut = true;
+            stream.destroy();
+            reject(new Error('Patch apply timed out'));
+          }, timeoutMs);
+        })
+      ]);
+
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+
+      await this.logger.logCommand(projectName, 'git_apply', {
+        type: 'git_apply',
+        exitCode: result.exitCode,
+        duration: `${duration}s`,
+        timedOut: result.timedOut,
+        output: result.stdout || ''
+      });
+
+      return {
+        success: result.exitCode === 0,
+        exitCode: result.exitCode,
+        stdout: result.stdout,
+        stderr: result.stderr,
+        timedOut: result.timedOut || false,
+        duration: `${duration}s`
+      };
+
+    } catch (error) {
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      await this.logger.logCommand(projectName, 'git_apply', {
+        type: 'git_apply',
+        exitCode: -1,
+        duration: `${duration}s`,
+        timedOut: false,
+        output: ''
+      });
+      throw error;
+    }
+  }
+
   async getStatus(projectName) {
     const containerName = `dockashell-${projectName}`;
     
