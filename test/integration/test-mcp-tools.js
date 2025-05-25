@@ -135,25 +135,25 @@ async function testMCPTools() {
     );
   }
 
-  // Test 5: git_apply with nonexistent project
+  // Test 5: apply_diff with nonexistent project
   try {
-    console.log('5. Testing git_apply with nonexistent project...');
+    console.log('5. Testing apply_diff with nonexistent project...');
     const diff =
       'diff --git a/foo.txt b/foo.txt\nindex 0000000..e69de29 100644\n--- a/foo.txt\n+++ b/foo.txt\n@@\n+test\n';
-    const response = await runMCPCommand('git_apply', {
+    const response = await runMCPCommand('apply_diff', {
       project_name: 'missing',
       diff,
     });
     if (response.error || response.result?.isError) {
       console.log(
-        '✅ git_apply handled error:',
+        '✅ apply_diff handled error:',
         response.result?.content?.[0]?.text || response.error?.message
       );
     } else {
-      console.log('❌ git_apply should have failed for nonexistent project');
+      console.log('❌ apply_diff should have failed for nonexistent project');
     }
   } catch (error) {
-    console.log('✅ git_apply handled error gracefully:', error.message);
+    console.log('✅ apply_diff handled error gracefully:', error.message);
   }
 
   // Test 6: Stop project (should handle gracefully)
