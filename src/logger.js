@@ -44,6 +44,20 @@ export class Logger {
     }
   }
 
+  async logToolExecution(projectName, toolName, params, result) {
+    try {
+      if (!projectName || typeof projectName !== 'string') {
+        console.error('Invalid project name for logging:', projectName);
+        return;
+      }
+
+      const recorder = this.getTraceRecorder(projectName);
+      await recorder.execution(toolName, params, result || {});
+    } catch (error) {
+      console.error('Failed to log tool execution:', error.message);
+    }
+  }
+
 
   async logNote(projectName, noteType, text) {
     try {
@@ -94,6 +108,13 @@ export class Logger {
               command: trace.command,
               result: trace.result
             };
+          } else if (trace.tool === 'git_apply') {
+            return {
+              timestamp: trace.timestamp,
+              kind: 'git_apply',
+              diff: trace.diff,
+              result: trace.result
+            };
           } else if (trace.tool === 'write_trace') {
             return {
               timestamp: trace.timestamp,
@@ -115,6 +136,8 @@ export class Logger {
           entries = entries.filter(e => e.kind === 'note' && e.noteType === type);
         } else if (type === 'command') {
           entries = entries.filter(e => e.kind === 'command');
+        } else if (type === 'git_apply') {
+          entries = entries.filter(e => e.kind === 'git_apply');
         } else {
           entries = entries.filter(e => e.kind === type || e.noteType === type);
         }

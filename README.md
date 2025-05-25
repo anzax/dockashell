@@ -316,6 +316,7 @@ Agent traces are stored in `~/.dockashell/projects/{project-name}/traces/current
 {"id":"tr_abc123","tool":"start_project","trace_type":"execution","project_name":"web-app","result":{"success":true}}
 {"id":"tr_def456","tool":"write_trace","trace_type":"observation","type":"agent","text":"Planning React app"}
 {"id":"tr_ghi789","tool":"run_command","trace_type":"execution","command":"npm start","result":{"exitCode":0,"duration":"0.1s"}}
+{"id":"tr_xyz000","tool":"git_apply","trace_type":"execution","diff":"diff --git a/foo b/foo","result":{"exitCode":0,"duration":"0.2s"}}
 ```
 
 Use `write_trace` to store notes and `read_traces` to query previous entries.

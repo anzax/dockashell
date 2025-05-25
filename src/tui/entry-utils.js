@@ -168,6 +168,40 @@ export const buildEntryLines = (entry, maxLines = Infinity, terminalWidth = 80, 
         outputLines.forEach((line) => lines.push({ type: 'output', text: line }));
       }
     }
+  } else if (entry.kind === 'git_apply') {
+    const result = entry.result || {};
+    const exitCode = result.exitCode !== undefined ? result.exitCode : 'N/A';
+    const duration = result.duration || 'N/A';
+
+    lines.push({
+      type: 'header',
+      icon: '🩹',
+      timestamp: formatTimestamp(entry.timestamp),
+      typeText: `GIT_APPLY | Exit: ${exitCode} | ${duration}`,
+      typeColor: 'green'
+    });
+
+    const diff = entry.diff || '';
+
+    if (compact) {
+      const first = diff.split('\n')[0];
+      lines.push({ type: 'command', text: truncateText(first, contentAvailableWidth) });
+    } else {
+      const diffLines = formatMultilineText(diff, contentAvailableWidth - 2, Infinity, true);
+      diffLines.forEach((line, index) => {
+        lines.push({ type: 'command', text: index === 0 ? line : `  ${line}` });
+      });
+
+      if (showOutput && result.output && result.output.trim()) {
+        lines.push({
+          type: 'separator',
+          text: '─'.repeat(Math.min(contentAvailableWidth, 60))
+        });
+
+        const outputLines = formatCommandOutput(result.output.trim(), contentAvailableWidth, maxLines - lines.length);
+        outputLines.forEach((line) => lines.push({ type: 'output', text: line }));
+      }
+    }
   } else {
     // Unknown entry type
     const type = entry.type || entry.kind || 'UNKNOWN';
