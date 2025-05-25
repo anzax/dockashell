@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Box, Text, useInput, useStdout } from 'ink';
-import { readTraceEntries } from './read-traces.js';
+import chokidar from 'chokidar';
+import { readTraceEntries, listSessions, getTraceFile } from './read-traces.js';
 import { prepareEntry } from './entry-utils.js';
 
 const renderLines = (lines, selected, isModal = false) =>
@@ -108,9 +109,32 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const [scrollOffset, setScrollOffset] = useState(0);
   const [terminalHeight, setTerminalHeight] = useState(20);
   const [modalEntry, setModalEntry] = useState(null);
+  const [sessions, setSessions] = useState([]);
+  const [sessionIndex, setSessionIndex] = useState(0);
+  const [watcher, setWatcher] = useState(null);
   const { stdout } = useStdout();
 
   const maxLinesPerEntry = config?.display?.max_lines_per_entry || 10;
+
+  useEffect(() => {
+    return () => {
+      if (watcher) watcher.close().catch(() => {});
+    };
+  }, [watcher]);
+
+  // Load sessions on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const ses = await listSessions(project);
+        setSessions(ses);
+        setSessionIndex(Math.max(0, ses.length - 1));
+      } catch {
+        setSessions(['current']);
+        setSessionIndex(0);
+      }
+    })();
+  }, [project]);
 
   const ensureVisible = useCallback((index) => {
     if (entries.length === 0) return;
@@ -165,12 +189,19 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     return { start: scrollOffset, end };
   }, [entries, scrollOffset, terminalHeight, selectedIndex]);
 
-  // Load entries
+  // Load entries for the active session and watch for updates
   useEffect(() => {
-    (async () => {
+    if (sessions.length === 0) return;
+    const sessionId = sessions[sessionIndex];
+
+    let active = true;
+    let w;
+
+    const load = async () => {
       try {
-        const raw = await readTraceEntries(project, config?.display?.max_entries || 100);
+        const raw = await readTraceEntries(project, config?.display?.max_entries || 100, sessionId);
         const prepared = raw.map((e) => prepareEntry(e, maxLinesPerEntry));
+        if (!active) return;
         setEntries(prepared);
 
         if (prepared.length > 0) {
@@ -193,6 +224,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
           setScrollOffset(offset);
         }
       } catch (err) {
+        if (!active) return;
         setEntries([
           prepareEntry(
             {
@@ -205,8 +237,28 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
           )
         ]);
       }
-    })();
-  }, [project, config, terminalHeight, maxLinesPerEntry]);
+    };
+
+    load();
+
+    if (watcher) {
+      watcher.close().catch(() => {});
+      setWatcher(null);
+    }
+
+    if (sessionId === 'current') {
+      const file = getTraceFile(project, 'current');
+      w = chokidar.watch(file, { ignoreInitial: true });
+      w.on('add', load);
+      w.on('change', load);
+      setWatcher(w);
+    }
+
+    return () => {
+      active = false;
+      if (w) w.close();
+    };
+  }, [project, sessions, sessionIndex, config, terminalHeight, maxLinesPerEntry]);
 
   // Input handling
   useInput((input, key) => {
@@ -246,7 +298,8 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     } else if (input === 'r') {
       (async () => {
         try {
-          const raw = await readTraceEntries(project, config?.display?.max_entries || 100);
+          const sessionId = sessions[sessionIndex];
+          const raw = await readTraceEntries(project, config?.display?.max_entries || 100, sessionId);
           const prepared = raw.map((e) => prepareEntry(e, maxLinesPerEntry));
           setEntries(prepared);
           if (selectedIndex >= prepared.length) {
@@ -266,6 +319,14 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
           ]);
         }
       })();
+    } else if (input === ']' && sessionIndex < sessions.length - 1) {
+      setSessionIndex((i) => Math.min(sessions.length - 1, i + 1));
+      setSelectedIndex(0);
+      setScrollOffset(0);
+    } else if (input === '[' && sessionIndex > 0) {
+      setSessionIndex((i) => Math.max(0, i - 1));
+      setSelectedIndex(0);
+      setScrollOffset(0);
     } else if (input === 'b') {
       onBack();
     } else if (input === 'q') {
@@ -276,9 +337,10 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const { start: visibleStart, end: visibleEnd } = calculateVisibleEntries();
   const visibleEntries = entries.slice(visibleStart, visibleEnd);
   const hasMore = entries.length > visibleEnd - visibleStart;
-  const scrollIndicator = hasMore 
+  const scrollIndicator = hasMore
     ? ` (${visibleStart + 1}-${visibleEnd} of ${entries.length})`
     : '';
+  const sessionIndicator = sessions.length > 1 ? ` [${sessionIndex + 1}/${sessions.length}]` : '';
 
   if (modalEntry) {
     return React.createElement(EntryModal, { item: modalEntry, onClose: () => setModalEntry(null), height: terminalHeight });
@@ -287,7 +349,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   return React.createElement(
     Box,
     { flexDirection: 'column', height: terminalHeight },
-    React.createElement(Text, { bold: true, wrap: 'truncate-end' }, `DockaShell TUI - ${project}${scrollIndicator}`),
+    React.createElement(Text, { bold: true, wrap: 'truncate-end' }, `DockaShell TUI - ${project}${sessionIndicator}${scrollIndicator}`),
     React.createElement(
       Box,
       { flexDirection: 'column', flexGrow: 1 },
@@ -304,8 +366,8 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       Text,
       { dimColor: true, wrap: 'truncate-end' },
       hasMore
-        ? '[↑↓] Navigate  [Enter] Detail  [PgUp/PgDn] Page  [g] Top  [G] Bottom  [r] Refresh  [b] Back  [q] Quit'
-        : '[↑↓] Navigate  [Enter] Detail  [r] Refresh  [b] Back  [q] Quit'
+        ? '[↑↓] Navigate  [Enter] Detail  [PgUp/PgDn] Page  [g] Top  [G] Bottom  [[/]] Session  [r] Refresh  [b] Back  [q] Quit'
+        : '[↑↓] Navigate  [Enter] Detail  [[/]] Session  [r] Refresh  [b] Back  [q] Quit'
     )
   );
 };
