@@ -96,7 +96,7 @@ export class ContainerManager {
     }
 
     // Create container
-    const container = await this.docker.createContainer({
+    const container = this.docker.createContainer({
       Image: config.image,
       name: containerName,
       Env: config.environment
@@ -320,11 +320,40 @@ export class ContainerManager {
         );
       }
 
-      const exec = await container.exec({
-        Cmd: ['bash', '-c', 'aider --apply -'],
+      // Create temporary file and write diff content to it
+      const tempFile = `/tmp/apply_diff_${Date.now()}.txt`;
+
+      const createExec = await container.exec({
+        Cmd: ['bash', '-c', `cat > ${tempFile}`],
         AttachStdout: true,
         AttachStderr: true,
         AttachStdin: true,
+        Tty: false,
+      });
+
+      const createStream = await createExec.start({
+        Detach: false,
+        Tty: false,
+        hijack: true,
+        stdin: true,
+      });
+
+      createStream.end(diff);
+
+      await new Promise((resolve, reject) => {
+        createStream.on('end', resolve);
+        createStream.on('error', reject);
+      });
+
+      // Apply the diff using the temporary file
+      const exec = await container.exec({
+        Cmd: [
+          'bash',
+          '-c',
+          `aider --apply ${tempFile} --yes && rm -f ${tempFile}`,
+        ],
+        AttachStdout: true,
+        AttachStderr: true,
         Tty: false,
       });
 
@@ -332,15 +361,11 @@ export class ContainerManager {
         Detach: false,
         Tty: false,
         hijack: true,
-        stdin: true,
       });
 
       const stdoutStream = new PassThrough();
       const stderrStream = new PassThrough();
       container.modem.demuxStream(stream, stdoutStream, stderrStream);
-
-      // Ensure diff ends with newline for aider
-      stream.end(diff.endsWith('\n') ? diff : diff + '\n');
 
       let output = '';
       let error = '';
