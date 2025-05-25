@@ -42,7 +42,10 @@ async function validateDefaultImage() {
     if (imageName === 'dockashell/default-dev:latest') {
       console.log('✅ ImageBuilder class working correctly');
     } else {
-      console.error('❌ ImageBuilder returning incorrect image name:', imageName);
+      console.error(
+        '❌ ImageBuilder returning incorrect image name:',
+        imageName
+      );
       errors++;
     }
   } catch (error) {
@@ -57,7 +60,10 @@ async function validateDefaultImage() {
     if (defaultImage === 'dockashell/default-dev:latest') {
       console.log('✅ ProjectManager default image configured correctly');
     } else {
-      console.error('❌ ProjectManager returning incorrect default image:', defaultImage);
+      console.error(
+        '❌ ProjectManager returning incorrect default image:',
+        defaultImage
+      );
       errors++;
     }
   } catch (error) {
@@ -72,22 +78,32 @@ async function validateDefaultImage() {
     if (imageExists) {
       console.log('✅ Default development image already built');
     } else {
-      console.log('ℹ️ Default development image not built yet (run "npm run setup-image")');
+      console.log(
+        'ℹ️ Default development image not built yet (run "npm run setup-image")'
+      );
     }
   } catch (error) {
-    console.log('ℹ️ Could not check if image exists (this is normal if not built yet)');
+    console.log(
+      'ℹ️ Could not check if image exists (this is normal if not built yet)'
+    );
   }
 
   // Summary
-  console.log(`\n📊 Validation Results: ${errors === 0 ? '✅ PASSED' : '❌ FAILED'}`);
-  
+  console.log(
+    `\n📊 Validation Results: ${errors === 0 ? '✅ PASSED' : '❌ FAILED'}`
+  );
+
   if (errors === 0) {
     console.log('\n🎉 Default image implementation is ready!');
     console.log('\nNext steps:');
-    console.log('  1. Run "npm run setup-complete" to build image and create examples');
+    console.log(
+      '  1. Run "npm run setup-complete" to build image and create examples'
+    );
     console.log('  2. Run "npm run debug" to test with MCP inspector');
   } else {
-    console.log(`\n❌ Found ${errors} error(s). Please fix them before proceeding.`);
+    console.log(
+      `\n❌ Found ${errors} error(s). Please fix them before proceeding.`
+    );
     process.exit(1);
   }
 }

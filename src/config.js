@@ -9,20 +9,20 @@ const defaultConfig = {
       max_entries: 100,
       max_visible_entries: 10,
       show_icons: true,
-      theme: 'dark'
+      theme: 'dark',
     },
     projects: {
       default: null,
-      recent: []
-    }
-  }
+      recent: [],
+    },
+  },
 };
 
 export async function loadConfig() {
   const configDir = path.join(os.homedir(), '.dockashell');
   const configPath = path.join(configDir, 'config.json');
   await fs.ensureDir(configDir);
-  if (!await fs.pathExists(configPath)) {
+  if (!(await fs.pathExists(configPath))) {
     await fs.writeJSON(configPath, defaultConfig, { spaces: 2 });
     return { ...defaultConfig };
   }
@@ -32,7 +32,8 @@ export async function loadConfig() {
     if (!cfg.tui.display) cfg.tui.display = { ...defaultConfig.tui.display };
     // Ensure max_visible_entries exists
     if (!cfg.tui.display.max_visible_entries) {
-      cfg.tui.display.max_visible_entries = defaultConfig.tui.display.max_visible_entries;
+      cfg.tui.display.max_visible_entries =
+        defaultConfig.tui.display.max_visible_entries;
     }
     return cfg;
   } catch {

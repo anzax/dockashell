@@ -8,9 +8,11 @@ import os from 'os';
 describe('ProjectManager', () => {
   let projectManager;
   let testConfigDir;
-  
+
   beforeEach(async () => {
-    testConfigDir = await fs.mkdtemp(path.join(os.tmpdir(), 'dockashell-test-'));
+    testConfigDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), 'dockashell-test-')
+    );
     projectManager = new ProjectManager();
     projectManager.configDir = testConfigDir;
     projectManager.projectsDir = path.join(testConfigDir, 'projects');
@@ -34,14 +36,14 @@ describe('ProjectManager', () => {
     await fs.writeJson(path.join(projectDir, 'config.json'), {
       name: 'test-project',
       image: 'ubuntu:latest',
-      description: 'Test project'
+      description: 'Test project',
     });
 
     const projects = await projectManager.listProjects();
     assert.ok(Array.isArray(projects));
     assert.ok(projects.length > 0);
-    
-    const testProject = projects.find(p => p.name === 'test-project');
+
+    const testProject = projects.find((p) => p.name === 'test-project');
     assert.ok(testProject, 'Should find test-project in list');
     assert.strictEqual(testProject.name, 'test-project');
     assert.strictEqual(testProject.image, 'ubuntu:latest');
@@ -56,25 +58,25 @@ describe('ProjectManager', () => {
       name: 'test-project',
       image: 'node:18',
       workingDir: '/workspace',
-      description: 'Test Node.js project'
+      description: 'Test Node.js project',
     };
     await fs.writeJson(path.join(projectDir, 'config.json'), config);
 
     const loadedConfig = await projectManager.loadProject('test-project');
-    
+
     // Check the key properties we care about
     assert.strictEqual(loadedConfig.name, 'test-project');
     assert.strictEqual(loadedConfig.image, 'node:18');
     assert.strictEqual(loadedConfig.description, 'Test Node.js project');
     assert.strictEqual(loadedConfig.working_dir, '/workspace');
-    
+
     // Verify that defaults are applied
     assert.ok(Array.isArray(loadedConfig.mounts));
     assert.ok(Array.isArray(loadedConfig.ports));
     assert.ok(typeof loadedConfig.environment === 'object');
     assert.ok(typeof loadedConfig.security === 'object');
     assert.strictEqual(loadedConfig.shell, '/bin/bash');
-    
+
     // Verify security defaults
     assert.strictEqual(loadedConfig.security.restricted_mode, false);
     assert.ok(Array.isArray(loadedConfig.security.blocked_commands));
@@ -93,12 +95,12 @@ describe('ProjectManager', () => {
       async () => await projectManager.loadProject(''),
       /Project name must be a non-empty string/
     );
-    
+
     await assert.rejects(
       async () => await projectManager.loadProject('../../malicious'),
       /Invalid project name/
     );
-    
+
     await assert.rejects(
       async () => await projectManager.loadProject('project with spaces'),
       /Invalid project name/
@@ -113,17 +115,28 @@ describe('ProjectManager', () => {
 
   test('should ignore invalid config files', async () => {
     // Create a valid project
-    const validProjectDir = path.join(testConfigDir, 'projects', 'valid-project');
+    const validProjectDir = path.join(
+      testConfigDir,
+      'projects',
+      'valid-project'
+    );
     await fs.ensureDir(validProjectDir);
     await fs.writeJson(path.join(validProjectDir, 'config.json'), {
       name: 'valid-project',
-      image: 'ubuntu:latest'
+      image: 'ubuntu:latest',
     });
 
     // Create a directory with invalid config
-    const invalidProjectDir = path.join(testConfigDir, 'projects', 'invalid-project');
+    const invalidProjectDir = path.join(
+      testConfigDir,
+      'projects',
+      'invalid-project'
+    );
     await fs.ensureDir(invalidProjectDir);
-    await fs.writeFile(path.join(invalidProjectDir, 'config.json'), 'invalid json{');
+    await fs.writeFile(
+      path.join(invalidProjectDir, 'config.json'),
+      'invalid json{'
+    );
 
     // Should only return the valid project
     const projects = await projectManager.listProjects();

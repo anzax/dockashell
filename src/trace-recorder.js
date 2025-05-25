@@ -5,7 +5,13 @@ import os from 'os';
 export class TraceRecorder {
   constructor(projectName) {
     this.projectName = projectName;
-    this.baseDir = path.join(os.homedir(), '.dockashell', 'projects', projectName, 'traces');
+    this.baseDir = path.join(
+      os.homedir(),
+      '.dockashell',
+      'projects',
+      projectName,
+      'traces'
+    );
     this.currentFile = path.join(this.baseDir, 'current.jsonl');
     this.sessionsDir = path.join(this.baseDir, 'sessions');
     this.sessionId = this.generateSessionId();
@@ -34,7 +40,7 @@ export class TraceRecorder {
       elapsed_ms: Date.now() - this.sessionStart,
       tool,
       trace_type: traceType,
-      ...data
+      ...data,
     };
 
     await fs.appendFile(this.currentFile, JSON.stringify(entry) + '\n');

@@ -32,11 +32,18 @@ describe('TraceRecorder', () => {
   });
 
   test('writes trace entries and moves on close', async () => {
-    await recorder.execution('run_command', { command: 'echo hi' }, { exit: 0 });
+    await recorder.execution(
+      'run_command',
+      { command: 'echo hi' },
+      { exit: 0 }
+    );
     const fileExists = await fs.pathExists(recorder.currentFile);
     assert.ok(fileExists);
     await recorder.close();
-    const sessionFile = path.join(recorder.sessionsDir, `${recorder.sessionId}.jsonl`);
+    const sessionFile = path.join(
+      recorder.sessionsDir,
+      `${recorder.sessionId}.jsonl`
+    );
     assert.ok(await fs.pathExists(sessionFile));
   });
 });

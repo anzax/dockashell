@@ -13,7 +13,7 @@ export class ContainerManager {
 
   async startContainer(projectName) {
     const containerName = `dockashell-${projectName}`;
-    
+
     try {
       // Check if container already exists
       const existingContainer = this.docker.getContainer(containerName);
@@ -21,13 +21,13 @@ export class ContainerManager {
         const data = await existingContainer.inspect();
         if (data.State.Running) {
           this.containers.set(projectName, existingContainer);
-          
+
           await this.logger.logCommand(projectName, 'start', {
             type: 'start',
             containerId: data.Id.substring(0, 12),
-            note: 'Already running'
+            note: 'Already running',
           });
-          
+
           return {
             success: true,
             containerId: data.Id.substring(0, 12),
@@ -35,19 +35,19 @@ export class ContainerManager {
             image: data.Config.Image,
             created: data.Created,
             ports: this.extractPortMappings(data),
-            mounts: this.extractMounts(data)
+            mounts: this.extractMounts(data),
           };
         } else {
           // Container exists but is stopped, start it
           await existingContainer.start();
           this.containers.set(projectName, existingContainer);
-          
+
           await this.logger.logCommand(projectName, 'start', {
             type: 'start',
             containerId: data.Id.substring(0, 12),
-            note: 'Restarted existing container'
+            note: 'Restarted existing container',
           });
-          
+
           return {
             success: true,
             containerId: data.Id.substring(0, 12),
@@ -55,7 +55,7 @@ export class ContainerManager {
             image: data.Config.Image,
             created: data.Created,
             ports: this.extractPortMappings(data),
-            mounts: this.extractMounts(data)
+            mounts: this.extractMounts(data),
           };
         }
       } catch (inspectError) {
@@ -74,19 +74,21 @@ export class ContainerManager {
     // Create port bindings
     const portBindings = {};
     const exposedPorts = {};
-    
+
     if (config.ports) {
-      config.ports.forEach(portMapping => {
+      config.ports.forEach((portMapping) => {
         const containerPort = `${portMapping.container}/tcp`;
         exposedPorts[containerPort] = {};
-        portBindings[containerPort] = [{ HostPort: portMapping.host.toString() }];
+        portBindings[containerPort] = [
+          { HostPort: portMapping.host.toString() },
+        ];
       });
     }
 
     // Create volume bindings
     const binds = [];
     if (config.mounts) {
-      config.mounts.forEach(mount => {
+      config.mounts.forEach((mount) => {
         const hostPath = mount.host.replace('~', os.homedir());
         const readonlyFlag = mount.readonly ? ':ro' : '';
         binds.push(`${hostPath}:${mount.container}${readonlyFlag}`);
@@ -97,7 +99,11 @@ export class ContainerManager {
     const container = await this.docker.createContainer({
       Image: config.image,
       name: containerName,
-      Env: config.environment ? Object.entries(config.environment).map(([key, value]) => `${key}=${value}`) : [],
+      Env: config.environment
+        ? Object.entries(config.environment).map(
+            ([key, value]) => `${key}=${value}`
+          )
+        : [],
       WorkingDir: config.working_dir || '/workspace',
       Cmd: [config.shell || '/bin/bash'],
       Tty: true,
@@ -107,8 +113,8 @@ export class ContainerManager {
         PortBindings: portBindings,
         Binds: binds,
         AutoRemove: false, // Keep container after stop for persistence
-        RestartPolicy: { Name: 'no' }
-      }
+        RestartPolicy: { Name: 'no' },
+      },
     });
 
     // Start container
@@ -119,7 +125,7 @@ export class ContainerManager {
     const data = await container.inspect();
     await this.logger.logCommand(projectName, 'start', {
       type: 'start',
-      containerId: data.Id.substring(0, 12)
+      containerId: data.Id.substring(0, 12),
     });
 
     return {
@@ -129,39 +135,38 @@ export class ContainerManager {
       image: config.image,
       created: data.Created,
       ports: this.extractPortMappings(data),
-      mounts: this.extractMounts(data)
+      mounts: this.extractMounts(data),
     };
   }
 
   async stopContainer(projectName) {
     const containerName = `dockashell-${projectName}`;
-    
+
     try {
       const container = this.docker.getContainer(containerName);
       const data = await container.inspect();
-      
+
       if (data.State.Running) {
         await container.stop();
       }
-      
+
       this.containers.delete(projectName);
-      
+
       await this.logger.logCommand(projectName, 'stop', {
         type: 'stop',
-        containerId: data.Id.substring(0, 12)
+        containerId: data.Id.substring(0, 12),
       });
-      
+
       return {
         success: true,
         containerId: data.Id.substring(0, 12),
-        status: 'stopped'
+        status: 'stopped',
       };
-      
     } catch (error) {
       if (error.statusCode === 404) {
         return {
           success: true,
-          status: 'not_found'
+          status: 'not_found',
         };
       }
       throw error;
@@ -172,14 +177,16 @@ export class ContainerManager {
     const containerName = `dockashell-${projectName}`;
     const timeoutMs = options.timeout || 30000;
     const startTime = Date.now();
-    
+
     try {
       const container = this.docker.getContainer(containerName);
-      
+
       // Check if container is running
       const data = await container.inspect();
       if (!data.State.Running) {
-        throw new Error('Container is not running. Please start the project first.');
+        throw new Error(
+          'Container is not running. Please start the project first.'
+        );
       }
 
       // Create exec instance
@@ -187,7 +194,7 @@ export class ContainerManager {
         Cmd: ['bash', '-c', command],
         AttachStdout: true,
         AttachStderr: true,
-        Tty: false
+        Tty: false,
       });
 
       // Start exec and capture output
@@ -219,7 +226,7 @@ export class ContainerManager {
                 stdout: output.trim(),
                 stderr: error.trim(),
                 exitCode: inspect.ExitCode,
-                timedOut
+                timedOut,
               });
             } catch (inspectError) {
               reject(inspectError);
@@ -239,7 +246,7 @@ export class ContainerManager {
                     Cmd: ['kill', '-TERM', info.Pid.toString()],
                     AttachStdout: false,
                     AttachStderr: false,
-                    Tty: false
+                    Tty: false,
                   });
                   await killer.start({ Detach: true, Tty: false });
                 }
@@ -248,7 +255,7 @@ export class ContainerManager {
               reject(new Error('Command timed out'));
             })();
           }, timeoutMs);
-        })
+        }),
       ]);
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -259,7 +266,7 @@ export class ContainerManager {
         exitCode: result.exitCode,
         duration: `${duration}s`,
         timedOut: result.timedOut,
-        output: result.stdout || ''
+        output: result.stdout || '',
       });
 
       return {
@@ -268,31 +275,30 @@ export class ContainerManager {
         stdout: result.stdout,
         stderr: result.stderr,
         timedOut: result.timedOut || false,
-        duration: `${duration}s`
+        duration: `${duration}s`,
       };
-
     } catch (error) {
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-      
+
       if (error.message === 'Command timed out') {
         await this.logger.logCommand(projectName, command, {
           type: 'exec',
           exitCode: -1,
           duration: `${duration}s`,
           timedOut: true,
-          output: ''
+          output: '',
         });
-        
+
         return {
           success: false,
           exitCode: -1,
           stdout: '',
           stderr: 'Command timed out',
           timedOut: true,
-          duration: `${duration}s`
+          duration: `${duration}s`,
         };
       }
-      
+
       throw error;
     }
   }
@@ -307,7 +313,9 @@ export class ContainerManager {
 
       const data = await container.inspect();
       if (!data.State.Running) {
-        throw new Error('Container is not running. Please start the project first.');
+        throw new Error(
+          'Container is not running. Please start the project first.'
+        );
       }
 
       const exec = await container.exec({
@@ -315,10 +323,15 @@ export class ContainerManager {
         AttachStdout: true,
         AttachStderr: true,
         AttachStdin: true,
-        Tty: false
+        Tty: false,
       });
 
-      const stream = await exec.start({ Detach: false, Tty: false, hijack: true, stdin: true });
+      const stream = await exec.start({
+        Detach: false,
+        Tty: false,
+        hijack: true,
+        stdin: true,
+      });
 
       const stdoutStream = new PassThrough();
       const stderrStream = new PassThrough();
@@ -348,7 +361,7 @@ export class ContainerManager {
                 stdout: output.trim(),
                 stderr: error.trim(),
                 exitCode: inspect.ExitCode,
-                timedOut
+                timedOut,
               });
             } catch (inspectError) {
               reject(inspectError);
@@ -363,7 +376,7 @@ export class ContainerManager {
             stream.destroy();
             reject(new Error('Patch apply timed out'));
           }, timeoutMs);
-        })
+        }),
       ]);
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -376,7 +389,7 @@ export class ContainerManager {
           exitCode: result.exitCode,
           duration: `${duration}s`,
           timedOut: result.timedOut,
-          output: [result.stdout, result.stderr].filter(Boolean).join('\n')
+          output: [result.stdout, result.stderr].filter(Boolean).join('\n'),
         }
       );
 
@@ -386,9 +399,8 @@ export class ContainerManager {
         stdout: result.stdout,
         stderr: result.stderr,
         timedOut: result.timedOut || false,
-        duration: `${duration}s`
+        duration: `${duration}s`,
       };
-
     } catch (error) {
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
       await this.logger.logToolExecution(
@@ -399,7 +411,7 @@ export class ContainerManager {
           exitCode: -1,
           duration: `${duration}s`,
           timedOut: false,
-          output: error.message || ''
+          output: error.message || '',
         }
       );
       throw error;
@@ -408,11 +420,11 @@ export class ContainerManager {
 
   async getStatus(projectName) {
     const containerName = `dockashell-${projectName}`;
-    
+
     try {
       const container = this.docker.getContainer(containerName);
       const data = await container.inspect();
-      
+
       return {
         success: true,
         containerId: data.Id.substring(0, 12),
@@ -420,13 +432,13 @@ export class ContainerManager {
         image: data.Config.Image,
         created: data.Created,
         ports: this.extractPortMappings(data),
-        mounts: this.extractMounts(data)
+        mounts: this.extractMounts(data),
       };
     } catch (error) {
       if (error.statusCode === 404) {
         return {
           success: true,
-          status: 'not_found'
+          status: 'not_found',
         };
       }
       throw error;
@@ -436,26 +448,26 @@ export class ContainerManager {
   extractMounts(containerData) {
     if (!containerData.Mounts) return [];
 
-    return containerData.Mounts.map(mount => ({
+    return containerData.Mounts.map((mount) => ({
       source: mount.Source,
       destination: mount.Destination,
-      mode: mount.RW ? 'rw' : 'ro'
+      mode: mount.RW ? 'rw' : 'ro',
     }));
   }
 
   extractPortMappings(containerData) {
     const ports = [];
     const portBindings = containerData.HostConfig?.PortBindings || {};
-    
+
     Object.entries(portBindings).forEach(([containerPort, mappings]) => {
       if (mappings && mappings.length > 0) {
         ports.push({
           container: parseInt(containerPort.split('/')[0]),
-          host: parseInt(mappings[0].HostPort)
+          host: parseInt(mappings[0].HostPort),
         });
       }
     });
-    
+
     return ports;
   }
 
@@ -466,7 +478,7 @@ export class ContainerManager {
         setTimeout(() => {
           reject(new Error(`${operation} timed out after ${timeoutMs}ms`));
         }, timeoutMs);
-      })
+      }),
     ]);
   }
 
@@ -474,8 +486,7 @@ export class ContainerManager {
     // DO NOT STOP CONTAINERS - let them persist across MCP restarts
     // Only clear the in-memory references
     this.containers.clear();
-    
+
     // Optionally log that we're disconnecting but leaving containers running
-    
   }
 }

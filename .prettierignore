@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Coverage reports
+coverage/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Environment variables
+.env
+.env.*
+
+# Lock files
+package-lock.json
+yarn.lock
+
+# Generated files
+*.min.js
+*.min.css
+
+# Examples directory (might contain intentionally unformatted code)
+examples/
+
+# Docker image templates (might have special formatting)
+scripts/image/templates/
+
+# Documentation that should preserve formatting
+docs/
+*.md
+README.md

@@ -9,7 +9,7 @@ describe('Logger', () => {
   let logger;
   let tmpHome;
   let oldHome;
-  
+
   beforeEach(async () => {
     tmpHome = await fs.mkdtemp(path.join(os.tmpdir(), 'ds-home-'));
     oldHome = process.env.HOME;
@@ -32,7 +32,7 @@ describe('Logger', () => {
     const result = {
       type: 'exec',
       exitCode: 0,
-      duration: '1.2s'
+      duration: '1.2s',
     };
 
     await logger.logCommand('test-project', 'ls -la', result);
@@ -71,20 +71,28 @@ describe('Logger', () => {
     await logger.logNote('test-project', 'user', 'Second entry');
 
     const entries = await logger.readTraces('test-project', { limit: 10 });
-    const texts = entries.map(e => e.text).filter(Boolean);
+    const texts = entries.map((e) => e.text).filter(Boolean);
     assert.ok(texts.includes('First entry'));
     assert.ok(texts.includes('Second entry'));
   });
 
   test('should log git_apply traces', async () => {
     const diff = 'diff --git a/a b/a\n--- a/a\n+++ b/a\n@@\n-test\n+test2';
-    await logger.logToolExecution('test-project', 'git_apply', { diff }, {
-      exitCode: 1,
-      duration: '0.2s',
-      output: 'error message'
-    });
+    await logger.logToolExecution(
+      'test-project',
+      'git_apply',
+      { diff },
+      {
+        exitCode: 1,
+        duration: '0.2s',
+        output: 'error message',
+      }
+    );
 
-    const entries = await logger.readTraces('test-project', { type: 'git_apply', limit: 5 });
+    const entries = await logger.readTraces('test-project', {
+      type: 'git_apply',
+      limit: 5,
+    });
     assert.strictEqual(entries.length, 1);
     assert.ok(entries[0].diff.startsWith('diff --git'));
     assert.strictEqual(entries[0].result.exitCode, 1);

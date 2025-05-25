@@ -19,7 +19,9 @@ const App = () => {
   const [config, setConfig] = useState(null);
 
   React.useEffect(() => {
-    loadConfig().then(setConfig).catch(() => setConfig(null));
+    loadConfig()
+      .then(setConfig)
+      .catch(() => setConfig(null));
   }, []);
 
   if (!config) return null;
@@ -27,15 +29,17 @@ const App = () => {
   if (!project) {
     return React.createElement(ProjectSelector, {
       onSelect: setProject,
-      onExit: () => process.exit(0)
+      onExit: () => process.exit(0),
     });
   }
 
   return React.createElement(LogViewer, {
-    project: project,
-    config: config.tui || { display: { max_lines_per_entry: 5, max_entries: 100 } },
+    project,
+    config: config.tui || {
+      display: { max_lines_per_entry: 5, max_entries: 100 },
+    },
     onBack: () => setProject(null),
-    onExit: () => process.exit(0)
+    onExit: () => process.exit(0),
   });
 };
 

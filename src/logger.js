@@ -16,7 +16,6 @@ export class Logger {
     return this.traceRecorders.get(projectName);
   }
 
-
   async logCommand(projectName, command, result) {
     try {
       // Validate inputs
@@ -33,11 +32,10 @@ export class Logger {
       // Record trace
       systemLogger.debug('Command executed', {
         projectName,
-        command: (command || '').substring(0, 50)
+        command: (command || '').substring(0, 50),
       });
       const recorder = this.getTraceRecorder(projectName);
       await recorder.execution('run_command', { command }, result);
-
     } catch (error) {
       console.error('Failed to log command:', error.message);
       // Don't throw - logging failures shouldn't break the main operation
@@ -58,7 +56,6 @@ export class Logger {
     }
   }
 
-
   async logNote(projectName, noteType, text) {
     try {
       if (!projectName || typeof projectName !== 'string') {
@@ -72,7 +69,7 @@ export class Logger {
 
       systemLogger.info('Note recorded', {
         projectName,
-        noteType
+        noteType,
       });
       const recorder = this.getTraceRecorder(projectName);
       await recorder.observation(noteType, text);
@@ -98,54 +95,61 @@ export class Logger {
       const lines = (await fs.readFile(tracesFile, 'utf8'))
         .split('\n')
         .filter(Boolean);
-      let entries = lines.map(l => {
-        try {
-          const trace = JSON.parse(l);
-          if (trace.tool === 'run_command') {
-            return {
-              timestamp: trace.timestamp,
-              kind: 'command',
-              command: trace.command,
-              result: trace.result
-            };
-          } else if (trace.tool === 'git_apply') {
-            return {
-              timestamp: trace.timestamp,
-              kind: 'git_apply',
-              diff: trace.diff,
-              result: trace.result
-            };
-          } else if (trace.tool === 'write_trace') {
-            return {
-              timestamp: trace.timestamp,
-              kind: 'note',
-              noteType: trace.type,
-              text: trace.text
-            };
+      let entries = lines
+        .map((l) => {
+          try {
+            const trace = JSON.parse(l);
+            if (trace.tool === 'run_command') {
+              return {
+                timestamp: trace.timestamp,
+                kind: 'command',
+                command: trace.command,
+                result: trace.result,
+              };
+            } else if (trace.tool === 'git_apply') {
+              return {
+                timestamp: trace.timestamp,
+                kind: 'git_apply',
+                diff: trace.diff,
+                result: trace.result,
+              };
+            } else if (trace.tool === 'write_trace') {
+              return {
+                timestamp: trace.timestamp,
+                kind: 'note',
+                noteType: trace.type,
+                text: trace.text,
+              };
+            }
+            return { timestamp: trace.timestamp, ...trace };
+          } catch {
+            return null;
           }
-          return { timestamp: trace.timestamp, ...trace };
-        } catch {
-          return null;
-        }
-      }).filter(Boolean);
+        })
+        .filter(Boolean);
 
       if (type) {
         if (type === 'note') {
-          entries = entries.filter(e => e.kind === 'note');
+          entries = entries.filter((e) => e.kind === 'note');
         } else if (['user', 'agent', 'summary'].includes(type)) {
-          entries = entries.filter(e => e.kind === 'note' && e.noteType === type);
+          entries = entries.filter(
+            (e) => e.kind === 'note' && e.noteType === type
+          );
         } else if (type === 'command') {
-          entries = entries.filter(e => e.kind === 'command');
+          entries = entries.filter((e) => e.kind === 'command');
         } else if (type === 'git_apply') {
-          entries = entries.filter(e => e.kind === 'git_apply');
+          entries = entries.filter((e) => e.kind === 'git_apply');
         } else {
-          entries = entries.filter(e => e.kind === type || e.noteType === type);
+          entries = entries.filter(
+            (e) => e.kind === type || e.noteType === type
+          );
         }
       }
       if (search) {
         const lower = search.toLowerCase();
-        entries = entries.filter(e => {
-          const target = (e.command || '') + (e.text || '') + (e.result?.output || '');
+        entries = entries.filter((e) => {
+          const target =
+            (e.command || '') + (e.text || '') + (e.result?.output || '');
           return target.toLowerCase().includes(lower);
         });
       }
@@ -162,7 +166,9 @@ export class Logger {
       try {
         await recorder.close();
       } catch (error) {
-        systemLogger.warn('Failed to close trace recorder', { error: error.message });
+        systemLogger.warn('Failed to close trace recorder', {
+          error: error.message,
+        });
       }
     }
     this.traceRecorders.clear();

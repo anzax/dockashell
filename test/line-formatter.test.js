@@ -1,17 +1,23 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert';
-import { wrapText, formatMultilineText, truncateText, formatCommandOutput } from '../src/tui/line-formatter.js';
+import {
+  wrapText,
+  formatMultilineText,
+  truncateText,
+  formatCommandOutput,
+} from '../src/tui/line-formatter.js';
 
 describe('wrapText', () => {
   test('wraps long text to specified width', () => {
-    const text = 'This is a very long line that needs to be wrapped because it exceeds the maximum width';
+    const text =
+      'This is a very long line that needs to be wrapped because it exceeds the maximum width';
     const wrapped = wrapText(text, 20);
     assert.deepStrictEqual(wrapped, [
       'This is a very long',
       'line that needs to',
       'be wrapped because',
       'it exceeds the',
-      'maximum width'
+      'maximum width',
     ]);
   });
 
@@ -23,7 +29,7 @@ describe('wrapText', () => {
       'verylongwo',
       'rdthatexce',
       'edsthewidt',
-      'h end'
+      'h end',
     ]);
   });
 
@@ -38,7 +44,7 @@ describe('wrapText', () => {
     assert.deepStrictEqual(wrapped, [
       'This is a line',
       '  that needs',
-      '  wrapping'
+      '  wrapping',
     ]);
   });
 });
@@ -51,14 +57,15 @@ describe('formatMultilineText', () => {
   });
 
   test('wraps long lines within multiline text', () => {
-    const text = 'Short line\nThis is a very long line that needs to be wrapped\nAnother short';
+    const text =
+      'Short line\nThis is a very long line that needs to be wrapped\nAnother short';
     const formatted = formatMultilineText(text, 20);
     assert.deepStrictEqual(formatted, [
       'Short line',
       'This is a very long',
       'line that needs to',
       'be wrapped',
-      'Another short'
+      'Another short',
     ]);
   });
 
@@ -100,13 +107,14 @@ describe('formatCommandOutput', () => {
   });
 
   test('wraps long output lines', () => {
-    const output = 'This is a very long output line that needs wrapping\nShort line';
+    const output =
+      'This is a very long output line that needs wrapping\nShort line';
     const formatted = formatCommandOutput(output, 20);
     assert.deepStrictEqual(formatted, [
       'This is a very long',
       '  output line that',
       '  needs wrapping',
-      'Short line'
+      'Short line',
     ]);
   });
 

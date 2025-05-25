@@ -25,7 +25,7 @@ export async function listSessions(projectName) {
     'sessions'
   );
 
-  if (!await fs.pathExists(dir)) {
+  if (!(await fs.pathExists(dir))) {
     return ['current'];
   }
 
@@ -42,10 +42,14 @@ export async function listSessions(projectName) {
   return [...details.map((d) => d.id), 'current'];
 }
 
-export async function readTraceEntries(projectName, maxEntries = 100, session = 'current') {
+export async function readTraceEntries(
+  projectName,
+  maxEntries = 100,
+  session = 'current'
+) {
   const tracesFile = getTraceFile(projectName, session);
 
-  if (!await fs.pathExists(tracesFile)) {
+  if (!(await fs.pathExists(tracesFile))) {
     throw new Error(`Trace file not found for project '${projectName}'`);
   }
 
@@ -64,21 +68,21 @@ export async function readTraceEntries(projectName, maxEntries = 100, session = 
           timestamp: trace.timestamp,
           kind: 'command',
           command: trace.command,
-          result: trace.result
+          result: trace.result,
         };
       } else if (trace.tool === 'git_apply') {
         entry = {
           timestamp: trace.timestamp,
           kind: 'git_apply',
           diff: trace.diff,
-          result: trace.result
+          result: trace.result,
         };
       } else if (trace.tool === 'write_trace') {
         entry = {
           timestamp: trace.timestamp,
           kind: 'note',
           noteType: trace.type,
-          text: trace.text
+          text: trace.text,
         };
       } else {
         entry = { timestamp: trace.timestamp, ...trace };

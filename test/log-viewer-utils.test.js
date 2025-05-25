@@ -22,14 +22,20 @@ const ensureVisible = (entries, terminalHeight, scrollOffset, index) => {
   return offset;
 };
 
-const calculateVisible = (entries, terminalHeight, scrollOffset, selectedIndex) => {
+const calculateVisible = (
+  entries,
+  terminalHeight,
+  scrollOffset,
+  selectedIndex
+) => {
   if (entries.length === 0) return { start: 0, end: 0 };
   const availableHeight = terminalHeight - 3;
   let height = 0;
   let end = scrollOffset;
   while (
     end < entries.length &&
-    height + getEntryHeight(entries[end], end === selectedIndex) <= availableHeight
+    height + getEntryHeight(entries[end], end === selectedIndex) <=
+      availableHeight
   ) {
     height += getEntryHeight(entries[end], end === selectedIndex);
     end++;
@@ -43,7 +49,8 @@ const initialOffset = (entries, terminalHeight, selectedIndex) => {
   const availableHeight = terminalHeight - 3;
   while (
     offset >= 0 &&
-    height + getEntryHeight(entries[offset], offset === selectedIndex) <= availableHeight
+    height + getEntryHeight(entries[offset], offset === selectedIndex) <=
+      availableHeight
   ) {
     height += getEntryHeight(entries[offset], offset === selectedIndex);
     offset--;

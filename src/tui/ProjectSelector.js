@@ -5,20 +5,28 @@ import path from 'path';
 import os from 'os';
 
 const ProjectItem = ({ project, selected }) => {
-  const timeStr = project.last ? `, last: ${new Date(project.last).toLocaleDateString()}` : '';
+  const timeStr = project.last
+    ? `, last: ${new Date(project.last).toLocaleDateString()}`
+    : '';
   const displayText = `${project.name} (${project.count} entries${timeStr})`;
-  
-  return React.createElement(Box, { 
-    flexDirection: 'row',
-    paddingLeft: 1,
-    paddingRight: 1,
-    borderStyle: selected ? 'single' : undefined,
-    borderColor: selected ? 'cyan' : undefined
-  },
-    React.createElement(Text, { 
-      color: selected ? 'cyan' : undefined,
-      bold: selected
-    }, displayText)
+
+  return React.createElement(
+    Box,
+    {
+      flexDirection: 'row',
+      paddingLeft: 1,
+      paddingRight: 1,
+      borderStyle: selected ? 'single' : undefined,
+      borderColor: selected ? 'cyan' : undefined,
+    },
+    React.createElement(
+      Text,
+      {
+        color: selected ? 'cyan' : undefined,
+        bold: selected,
+      },
+      displayText
+    )
   );
 };
 
@@ -44,7 +52,7 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
     };
 
     updateTerminalSize();
-    
+
     const onResize = () => {
       updateTerminalSize();
     };
@@ -77,9 +85,11 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
       const list = [];
       for (const name of projects) {
         const file = path.join(projectsDir, name, 'traces', 'current.jsonl');
-        if (!await fs.pathExists(file)) continue;
+        if (!(await fs.pathExists(file))) continue;
         try {
-          const lines = (await fs.readFile(file, 'utf8')).split('\n').filter(Boolean);
+          const lines = (await fs.readFile(file, 'utf8'))
+            .split('\n')
+            .filter(Boolean);
           const count = lines.length;
           let last = '';
           if (count > 0) {
@@ -95,7 +105,9 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
           // Skip unreadable files
         }
       }
-      list.sort((a, b) => new Date(b.last).getTime() - new Date(a.last).getTime());
+      list.sort(
+        (a, b) => new Date(b.last).getTime() - new Date(a.last).getTime()
+      );
       setProjects(list);
       setSelectedIndex(0); // Reset selection when projects load
       setScrollOffset(0); // Reset scroll when projects load
@@ -106,7 +118,7 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
     if (key.downArrow && selectedIndex < projects.length - 1) {
       const newIndex = selectedIndex + 1;
       setSelectedIndex(newIndex);
-      
+
       // Auto-scroll down if selection goes below visible area
       if (newIndex >= scrollOffset + maxVisibleProjects) {
         setScrollOffset(newIndex - maxVisibleProjects + 1);
@@ -114,7 +126,7 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
     } else if (key.upArrow && selectedIndex > 0) {
       const newIndex = selectedIndex - 1;
       setSelectedIndex(newIndex);
-      
+
       // Auto-scroll up if selection goes above visible area
       if (newIndex < scrollOffset) {
         setScrollOffset(newIndex);
@@ -128,43 +140,70 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
   });
 
   if (projects.length === 0) {
-    return React.createElement(Box, { 
-      flexDirection: 'column',
-      height: terminalHeight,
-      paddingX: 1
-    },
-      React.createElement(Text, { bold: true }, 'DockaShell TUI - No Projects Found'),
-      React.createElement(Text, null, '🚫 No traces found in ~/.dockashell/projects'),
-      React.createElement(Text, null, 'Use DockaShell to create a project first.'),
+    return React.createElement(
+      Box,
+      {
+        flexDirection: 'column',
+        height: terminalHeight,
+        paddingX: 1,
+      },
+      React.createElement(
+        Text,
+        { bold: true },
+        'DockaShell TUI - No Projects Found'
+      ),
+      React.createElement(
+        Text,
+        null,
+        '🚫 No traces found in ~/.dockashell/projects'
+      ),
+      React.createElement(
+        Text,
+        null,
+        'Use DockaShell to create a project first.'
+      ),
       React.createElement(Text, { dimColor: true }, '[q] Quit')
     );
   }
 
   // Calculate visible projects based on scroll offset
-  const visibleProjects = projects.slice(scrollOffset, scrollOffset + maxVisibleProjects);
-  
+  const visibleProjects = projects.slice(
+    scrollOffset,
+    scrollOffset + maxVisibleProjects
+  );
+
   // Calculate scroll indicator
   const hasMore = projects.length > maxVisibleProjects;
-  const scrollIndicator = hasMore 
-    ? ` (${scrollOffset + 1}-${Math.min(scrollOffset + maxVisibleProjects, projects.length)} of ${projects.length})` 
+  const scrollIndicator = hasMore
+    ? ` (${scrollOffset + 1}-${Math.min(scrollOffset + maxVisibleProjects, projects.length)} of ${projects.length})`
     : '';
 
-  return React.createElement(Box, { 
-    flexDirection: 'column',
-    height: terminalHeight
-  },
-    React.createElement(Text, { bold: true, marginBottom: 1 }, `DockaShell TUI - Select Project${scrollIndicator}`),
-    React.createElement(Box, { flexDirection: 'column', flexGrow: 1 },
+  return React.createElement(
+    Box,
+    {
+      flexDirection: 'column',
+      height: terminalHeight,
+    },
+    React.createElement(
+      Text,
+      { bold: true, marginBottom: 1 },
+      `DockaShell TUI - Select Project${scrollIndicator}`
+    ),
+    React.createElement(
+      Box,
+      { flexDirection: 'column', flexGrow: 1 },
       ...visibleProjects.map((project, i) => {
         const actualIndex = scrollOffset + i;
-        return React.createElement(ProjectItem, { 
-          key: project.name, 
-          project: project,
-          selected: actualIndex === selectedIndex
+        return React.createElement(ProjectItem, {
+          key: project.name,
+          project,
+          selected: actualIndex === selectedIndex,
         });
       })
     ),
-    React.createElement(Text, { dimColor: true, marginTop: 1 }, 
+    React.createElement(
+      Text,
+      { dimColor: true, marginTop: 1 },
       '[↑↓] Navigate  [Enter] Select  [q] Quit'
     )
   );
