@@ -42,4 +42,23 @@ describe('read-traces helpers', () => {
     const currentEntries = await readTraceEntries('proj', 10, 'current');
     assert.strictEqual(currentEntries.length, 1);
   });
+
+  test('parses git_apply entries', async () => {
+    const current = getTraceFile('proj', 'current');
+    await fs.ensureDir(path.dirname(current));
+    const entry = {
+      timestamp: new Date().toISOString(),
+      tool: 'git_apply',
+      trace_type: 'execution',
+      diff: 'diff --git a/a b/a',
+      result: { exitCode: 0, duration: '0.1s' }
+    };
+    await fs.writeFile(current, JSON.stringify(entry) + '\n');
+
+    const entries = await readTraceEntries('proj', 10, 'current');
+    assert.strictEqual(entries.length, 1);
+    assert.strictEqual(entries[0].kind, 'git_apply');
+    assert.strictEqual(entries[0].diff, 'diff --git a/a b/a');
+    assert.strictEqual(entries[0].result.exitCode, 0);
+  });
 });

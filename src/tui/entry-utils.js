@@ -93,14 +93,15 @@ export const buildEntryLines = (entry, maxLines = Infinity, terminalWidth = 80, 
     const result = entry.result || {};
     const exitCode = result.exitCode !== undefined ? result.exitCode : 'N/A';
     const duration = result.duration || 'N/A';
-    
+    const typeColor = exitCode === 0 ? 'green' : 'red';
+
     // First line: header with timestamp, command type, exit code, and duration
     lines.push({
       type: 'header',
       icon: '💻',
       timestamp: formatTimestamp(entry.timestamp),
       typeText: `COMMAND | Exit: ${exitCode} | ${duration}`,
-      typeColor: 'cyan'
+      typeColor
     });
 
     // Command lines
@@ -114,14 +115,7 @@ export const buildEntryLines = (entry, maxLines = Infinity, terminalWidth = 80, 
       if (command.includes('\n')) {
         const firstLine = command.split('\n')[0];
         const lineCount = command.split('\n').length;
-        
-        if (firstLine.includes('<<')) {
-          // Heredoc command
-          displayCommand = firstLine + ` ... (${lineCount} lines)`;
-        } else {
-          // Other multi-line command
-          displayCommand = firstLine + ` ... (+${lineCount - 1} lines)`;
-        }
+        displayCommand = firstLine + ` ... (${lineCount} lines)`;
       }
       
       // Truncate to available width
@@ -173,19 +167,22 @@ export const buildEntryLines = (entry, maxLines = Infinity, terminalWidth = 80, 
     const exitCode = result.exitCode !== undefined ? result.exitCode : 'N/A';
     const duration = result.duration || 'N/A';
 
+    const typeColor = exitCode === 0 ? 'green' : 'red';
     lines.push({
       type: 'header',
       icon: '🩹',
       timestamp: formatTimestamp(entry.timestamp),
       typeText: `GIT_APPLY | Exit: ${exitCode} | ${duration}`,
-      typeColor: 'green'
+      typeColor
     });
 
     const diff = entry.diff || '';
 
     if (compact) {
-      const first = diff.split('\n')[0];
-      lines.push({ type: 'command', text: truncateText(first, contentAvailableWidth) });
+      const diffLines = diff.split('\n');
+      const first = diffLines[0];
+      const display = diffLines.length > 1 ? `${first} ... (${diffLines.length} lines)` : first;
+      lines.push({ type: 'command', text: truncateText(display, contentAvailableWidth) });
     } else {
       const diffLines = formatMultilineText(diff, contentAvailableWidth - 2, Infinity, true);
       diffLines.forEach((line, index) => {

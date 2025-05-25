@@ -22,7 +22,7 @@ const renderLines = (lines, selected, isModal = false) =>
     if (line.type === 'command') {
       return React.createElement(
         Text,
-        { key: idx, bold: selected && !isModal, color: isModal ? 'white' : 'cyan', wrap: 'truncate-end' },
+        { key: idx, bold: selected && !isModal, color: isModal ? 'white' : 'gray', wrap: 'truncate-end' },
         line.text
       );
     }
