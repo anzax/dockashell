@@ -116,10 +116,24 @@ async function testMCPTools() {
   } catch (error) {
     console.log('✅ run_command properly rejected empty command:', error.message);
   }
-  
-  // Test 5: Stop project (should handle gracefully)
+
+  // Test 5: git_apply with nonexistent project
   try {
-    console.log('5. Testing stop_project...');
+    console.log('5. Testing git_apply with nonexistent project...');
+    const diff = 'diff --git a/foo.txt b/foo.txt\nindex 0000000..e69de29 100644\n--- a/foo.txt\n+++ b/foo.txt\n@@\n+test\n';
+    const response = await runMCPCommand('git_apply', { project_name: 'missing', diff });
+    if (response.error || response.result?.isError) {
+      console.log('✅ git_apply handled error:', response.result?.content?.[0]?.text || response.error?.message);
+    } else {
+      console.log('❌ git_apply should have failed for nonexistent project');
+    }
+  } catch (error) {
+    console.log('✅ git_apply handled error gracefully:', error.message);
+  }
+
+  // Test 6: Stop project (should handle gracefully)
+  try {
+    console.log('6. Testing stop_project...');
     const response = await runMCPCommand('stop_project', { project_name: 'test-project' });
     if (response.error || response.result?.isError) {
       const errorMsg = response.result?.content?.[0]?.text || response.error?.message;
