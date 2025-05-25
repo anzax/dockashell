@@ -19,6 +19,7 @@ class DockashellServer {
     this.logger = new Logger();
     this.containerManager = new ContainerManager(this.projectManager);
     this.securityManager = new SecurityManager();
+    this.transport = null;
   }
 
   async initialize() {
@@ -459,24 +460,34 @@ class DockashellServer {
     );
   }
 
+  async cleanup() {
+    try {
+      await this.server.close();
+    } catch {
+      // Ignore errors during close
+    }
+    await this.containerManager.cleanup();
+    await this.logger.cleanup();
+  }
+
   setupCleanupHandlers() {
-    const cleanup = async () => {
-      // console.log("Cleaning up containers...");
-      await this.containerManager.cleanup();
-      await this.logger.cleanup();
+    const exitHandler = async () => {
+      await this.cleanup();
       process.exit(0);
     };
 
-    process.on('SIGINT', cleanup);
-    process.on('SIGTERM', cleanup);
-    process.on('SIGQUIT', cleanup);
+    process.on('SIGINT', exitHandler);
+    process.on('SIGTERM', exitHandler);
+    process.on('SIGQUIT', exitHandler);
+    process.stdin.on('end', exitHandler);
+    process.stdin.on('close', exitHandler);
   }
 
   async run() {
     await this.initialize();
 
-    const transport = new StdioServerTransport();
-    await this.server.connect(transport);
+    this.transport = new StdioServerTransport();
+    await this.server.connect(this.transport);
 
     // console.log("DockaShell MCP server started");
   }
