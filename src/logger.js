@@ -3,15 +3,50 @@ import path from 'path';
 import os from 'os';
 import { systemLogger } from './system-logger.js';
 import { TraceRecorder } from './trace-recorder.js';
+import { loadConfig } from './config.js';
+
+const parseDuration = (value) => {
+  if (typeof value === 'number') return value;
+  const match = /^\s*(\d+)\s*(ms|s|m|h|d)?\s*$/.exec(value || '');
+  if (!match) return 0;
+  const num = parseInt(match[1], 10);
+  const unit = match[2] || 'ms';
+  switch (unit) {
+    case 'd':
+      return num * 86400000;
+    case 'h':
+      return num * 3600000;
+    case 'm':
+      return num * 60000;
+    case 's':
+      return num * 1000;
+    default:
+      return num;
+  }
+};
 
 export class Logger {
   constructor() {
     this.traceRecorders = new Map();
+    this._config = null;
+    loadConfig()
+      .then((c) => {
+        this._config = c;
+      })
+      .catch(() => {
+        this._config = null;
+      });
   }
 
-  getTraceRecorder(projectName) {
+  async getTraceRecorder(projectName) {
     if (!this.traceRecorders.has(projectName)) {
-      this.traceRecorders.set(projectName, new TraceRecorder(projectName));
+      const timeoutStr =
+        this._config?.logging?.traces?.session_timeout || '4h';
+      const timeoutMs = parseDuration(timeoutStr) || 4 * 60 * 60 * 1000;
+      this.traceRecorders.set(
+        projectName,
+        new TraceRecorder(projectName, timeoutMs)
+      );
     }
     return this.traceRecorders.get(projectName);
   }
@@ -34,7 +69,7 @@ export class Logger {
         projectName,
         command: (command || '').substring(0, 50),
       });
-      const recorder = this.getTraceRecorder(projectName);
+      const recorder = await this.getTraceRecorder(projectName);
       await recorder.execution('run_command', { command }, result);
     } catch (error) {
       console.error('Failed to log command:', error.message);
@@ -49,7 +84,7 @@ export class Logger {
         return;
       }
 
-      const recorder = this.getTraceRecorder(projectName);
+      const recorder = await this.getTraceRecorder(projectName);
       await recorder.execution(toolName, params, result || {});
     } catch (error) {
       console.error('Failed to log tool execution:', error.message);
@@ -71,7 +106,7 @@ export class Logger {
         projectName,
         noteType,
       });
-      const recorder = this.getTraceRecorder(projectName);
+      const recorder = await this.getTraceRecorder(projectName);
       await recorder.observation(noteType, text);
     } catch (error) {
       console.error('Failed to log note:', error.message);
