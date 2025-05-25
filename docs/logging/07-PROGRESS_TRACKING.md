@@ -15,4 +15,9 @@ the new logging system.
   `write_trace` and `read_traces`. Documentation updated for the new trace-only
   system.
 
+- **Status 2025-05-04:** `LogViewer` now watches trace files with `chokidar` for
+  real-time updates.
+- **Status 2025-05-05:** Session navigation added. Viewer can jump between
+  archived sessions stored under `traces/sessions/`.
+
 Add further notes below as the migration continues.
