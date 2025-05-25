@@ -12,48 +12,55 @@ async function runTests() {
   console.log('Testing DockaShell components...\n');
 
   // Create test project structure
-  const testProjectPath = path.join(os.homedir(), '.dockashell', 'projects', 'test-project');
+  const testProjectPath = path.join(
+    os.homedir(),
+    '.dockashell',
+    'projects',
+    'test-project'
+  );
   await fs.ensureDir(testProjectPath);
-  
+
   const testConfig = {
-    name: "test-project",
-    description: "Test project for validation",
-    image: "ubuntu:latest",
+    name: 'test-project',
+    description: 'Test project for validation',
+    image: 'ubuntu:latest',
     mounts: [
       {
-        host: "~/test-workspace",
-        container: "/workspace",
-        readonly: false
-      }
+        host: '~/test-workspace',
+        container: '/workspace',
+        readonly: false,
+      },
     ],
     ports: [
       {
         host: 8080,
-        container: 80
-      }
+        container: 80,
+      },
     ],
     environment: {
-      NODE_ENV: "development"
+      NODE_ENV: 'development',
     },
-    working_dir: "/workspace",
-    shell: "/bin/bash",
+    working_dir: '/workspace',
+    shell: '/bin/bash',
     security: {
       restricted_mode: false,
-      blocked_commands: ["rm -rf /"],
-      max_execution_time: 300
-    }
+      blocked_commands: ['rm -rf /'],
+      max_execution_time: 300,
+    },
   };
 
-  await fs.writeJSON(path.join(testProjectPath, 'config.json'), testConfig, { spaces: 2 });
+  await fs.writeJSON(path.join(testProjectPath, 'config.json'), testConfig, {
+    spaces: 2,
+  });
 
   // Test ProjectManager
   console.log('1. Testing ProjectManager...');
   const projectManager = new ProjectManager();
   await projectManager.initialize();
-  
+
   const projects = await projectManager.listProjects();
   console.log(`   Found ${projects.length} projects`);
-  
+
   const testProject = await projectManager.loadProject('test-project');
   console.log(`   Loaded project: ${testProject.name}`);
   console.log(`   Image: ${testProject.image}`);
@@ -62,7 +69,7 @@ async function runTests() {
   // Test SecurityManager
   console.log('2. Testing SecurityManager...');
   const securityManager = new SecurityManager();
-  
+
   try {
     securityManager.validateCommand('ls -la', testConfig);
     console.log('   ✓ Safe command validated');
@@ -75,7 +82,7 @@ async function runTests() {
   try {
     securityManager.validateCommand('rm -rf /', testConfig);
     console.log('   ✗ Dangerous command allowed');
-  } catch (error) {
+  } catch {
     console.log('   ✓ Dangerous command blocked');
   }
   console.log('   ✓ SecurityManager working\n');
@@ -86,12 +93,12 @@ async function runTests() {
   await logger.logCommand('test-project', 'ls -la', {
     type: 'exec',
     exitCode: 0,
-    duration: '0.1s'
+    duration: '0.1s',
   });
   console.log('   ✓ Command logged successfully');
-  
-  const logs = await logger.getProjectLogs('test-project');
-  console.log(`   Log entry created: ${logs.split('\n').length - 1} lines`);
+
+  const traces = await logger.readTraces('test-project');
+  console.log(`   Trace entries: ${traces.length}`);
   console.log('   ✓ Logger working\n');
 
   console.log('✅ All core components working correctly!');

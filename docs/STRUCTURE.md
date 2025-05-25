@@ -9,18 +9,19 @@ dockashell/
 │   ├── container-manager.js     # Docker container operations
 │   ├── project-manager.js       # Project configuration handling
 │   ├── security.js              # Command validation & security
-│   └── logger.js                # Command logging functionality
-├── tests/                        # Test suite
-│   ├── test-error-handling.js   # Error handling tests
-│   ├── test-mcp-tools.js        # MCP tool integration tests
-│   ├── test-server.js           # Server functionality tests
-│   └── test-timeout.js          # Timeout & performance tests
+│   ├── logger.js                # Command logging functionality
+│   └── tui/                     # Terminal user interface components
+├── test/                         # Test suite
+│   ├── *.test.js               # Unit tests (Node.js test runner)
+│   ├── integration/            # Integration tests
+│   └── debug/                  # Debug utilities and scripts
+├── scripts/                      # Build and setup scripts
+│   ├── setup/                  # Project setup utilities
+│   └── image/                  # Docker image management
 ├── utils/                        # Utilities and examples
 │   ├── claude_desktop_config_example.json  # MCP config example
 │   └── create-test-project.js   # Test project setup utility
 ├── package.json                  # Node.js dependencies
-├── tests/                       # Test suite
-├── scripts/setup/create-examples.js           # Project examples generator
 └── README.md                    # Project documentation
 ```
 
@@ -33,11 +34,10 @@ dockashell/
 - **security.js**: Command validation, security policies
 - **logger.js**: Command logging and audit trails
 
-### Testing (`tests/`)
-- **test-error-handling.js**: Docker errors, network issues, validation
-- **test-mcp-tools.js**: MCP tool functionality integration testing
-- **test-server.js**: Server startup, tool registration, basic operations
-- **test-timeout.js**: Long-running commands, timeout handling
+### Testing (`test/`)
+- **\*.test.js**: Unit tests using Node.js built-in test runner
+- **integration/**: Integration tests for MCP tools and error handling
+- **debug/**: Debug utilities and development scripts
 
 ### Utilities (`utils/`)
 - **claude_desktop_config_example.json**: Example MCP configuration
@@ -46,8 +46,9 @@ dockashell/
 ## Development Workflow
 
 1. **Core changes**: Edit files in `src/`
-2. **Testing**: Run tests from `tests/` directory
-3. **Setup**: Use utilities from `utils/` for configuration
-4. **Examples**: Generate with `scripts/setup/create-examples.js`
+2. **Unit testing**: Run `npm test` for quick unit tests
+3. **Integration testing**: Run `npm run test:integration` for full testing
+4. **Setup**: Use utilities from `utils/` for configuration
+5. **Build**: Use scripts from `scripts/` for image management
 
 This structure maintains separation of concerns while keeping the project accessible and maintainable.

@@ -3,7 +3,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
-import path from 'path';
 import { ProjectManager } from './project-manager.js';
 import { ContainerManager } from './container-manager.js';
 import { SecurityManager } from './security.js';
@@ -13,7 +12,7 @@ class DockashellServer {
   constructor() {
     this.server = new McpServer({
       name: 'dockashell',
-      version: '0.1.0'
+      version: '0.1.0',
     });
 
     this.projectManager = new ProjectManager();
@@ -30,45 +29,42 @@ class DockashellServer {
 
   setupTools() {
     // List projects tool
-    this.server.tool(
-      'list_projects',
-      {},
-      async () => {
-        try {
-          const projects = await this.projectManager.listProjects();
+    this.server.tool('list_projects', {}, async () => {
+      try {
+        const projects = await this.projectManager.listProjects();
 
-          let response = "# Configured Projects\n\n";
+        let response = '# Configured Projects\n\n';
 
-          if (projects.length === 0) {
-            response += "No projects configured. Create project configs in `~/.dockashell/projects/`\n";
-          } else {
-            projects.forEach(project => {
-              response += `**${project.name}**\n`;
-              response += `- Description: ${project.description || 'None'}\n`;
-              response += `- Image: ${project.image}\n`;
-              response += `- Status: ${project.status}\n\n`;
-            });
-          }
-
-          return {
-            content: [
-              {
-                type: "text",
-                text: response
-              }
-            ]
-          };
-        } catch (error) {
-          throw new Error(`Failed to list projects: ${error.message}`);
+        if (projects.length === 0) {
+          response +=
+            'No projects configured. Create project configs in `~/.dockashell/projects/`\n';
+        } else {
+          projects.forEach((project) => {
+            response += `**${project.name}**\n`;
+            response += `- Description: ${project.description || 'None'}\n`;
+            response += `- Image: ${project.image}\n`;
+            response += `- Status: ${project.status}\n\n`;
+          });
         }
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: response,
+            },
+          ],
+        };
+      } catch (error) {
+        throw new Error(`Failed to list projects: ${error.message}`);
       }
-    );
+    });
 
     // Start project tool
     this.server.tool(
       'start_project',
       {
-        project_name: z.string().describe('Name of the project to start')
+        project_name: z.string().describe('Name of the project to start'),
       },
       async ({ project_name }) => {
         try {
@@ -81,10 +77,13 @@ class DockashellServer {
           try {
             projectConfig = await this.projectManager.loadProject(project_name);
           } catch (loadError) {
-            throw new Error(`Failed to load project configuration: ${loadError?.message || loadError?.toString() || 'Unknown error'}`);
+            throw new Error(
+              `Failed to load project configuration: ${loadError?.message || loadError?.toString() || 'Unknown error'}`
+            );
           }
 
-          const result = await this.containerManager.startContainer(project_name);
+          const result =
+            await this.containerManager.startContainer(project_name);
 
           let response = `# Project Started: ${project_name}\n\n`;
           response += `**Container ID:** ${result.containerId}\n`;
@@ -93,14 +92,14 @@ class DockashellServer {
 
           if (result.ports && result.ports.length > 0) {
             response += `**Port Mappings:**\n`;
-            result.ports.forEach(port => {
+            result.ports.forEach((port) => {
               response += `- http://localhost:${port.host} → ${port.container}\n`;
             });
           }
 
           if (projectConfig.mounts && projectConfig.mounts.length > 0) {
             response += `**Mounts:**\n`;
-            projectConfig.mounts.forEach(mount => {
+            projectConfig.mounts.forEach((mount) => {
               response += `- ${mount.host} → ${mount.container}\n`;
             });
           }
@@ -108,13 +107,15 @@ class DockashellServer {
           return {
             content: [
               {
-                type: "text",
-                text: response
-              }
-            ]
+                type: 'text',
+                text: response,
+              },
+            ],
           };
         } catch (error) {
-          throw new Error(`Failed to start project '${project_name}': ${error.message}`);
+          throw new Error(
+            `Failed to start project '${project_name}': ${error.message}`
+          );
         }
       }
     );
@@ -125,9 +126,8 @@ class DockashellServer {
       {
         project_name: z.string().describe('Name of the project'),
         command: z.string().describe('Shell command to execute'),
-        log: z.string().optional().describe('Optional reasoning to log')
       },
-      async ({ project_name, command, log }) => {
+      async ({ project_name, command }) => {
         try {
           if (!project_name || typeof project_name !== 'string') {
             throw new Error('Project name must be a non-empty string');
@@ -137,17 +137,19 @@ class DockashellServer {
             throw new Error('Command must be a non-empty string');
           }
 
-          if (log) {
-            await this.logger.logNote(project_name, 'agent', log);
-          }
-
-          const projectConfig = await this.projectManager.loadProject(project_name);
+          const projectConfig =
+            await this.projectManager.loadProject(project_name);
 
           // Validate command security
           this.securityManager.validateCommand(command, projectConfig);
 
-          const maxTime = this.securityManager.getMaxExecutionTime(projectConfig);
-          const result = await this.containerManager.executeCommand(project_name, command, { timeout: maxTime * 1000 });
+          const maxTime =
+            this.securityManager.getMaxExecutionTime(projectConfig);
+          const result = await this.containerManager.executeCommand(
+            project_name,
+            command,
+            { timeout: maxTime * 1000 }
+          );
 
           let response = `# Command Execution: ${project_name}\n\n`;
           response += `**Command:** \`${command}\`\n`;
@@ -169,106 +171,196 @@ class DockashellServer {
           return {
             content: [
               {
-                type: "text",
-                text: response
-              }
-            ]
+                type: 'text',
+                text: response,
+              },
+            ],
           };
         } catch (error) {
-          throw new Error(`Failed to execute command in project '${project_name}': ${error.message}`);
+          throw new Error(
+            `Failed to execute command in project '${project_name}': ${error.message}`
+          );
         }
       }
     );
 
-    // Write log note tool
+    // Git apply patch tool
     this.server.tool(
-      'write_log',
+      'git_apply',
+      {
+        project_name: z.string().describe('Name of the project'),
+        diff: z.string().describe('Unified git diff to apply'),
+      },
+      async ({ project_name, diff }) => {
+        try {
+          if (!project_name || typeof project_name !== 'string') {
+            throw new Error('Project name must be a non-empty string');
+          }
+
+          if (!diff || typeof diff !== 'string') {
+            throw new Error('Diff must be a non-empty string');
+          }
+
+          // Ensure project exists
+          await this.projectManager.loadProject(project_name);
+
+          const result = await this.containerManager.applyPatch(
+            project_name,
+            diff
+          );
+
+          let response = `# Git Apply: ${project_name}\n\n`;
+          response += `**Exit Code:** ${result.exitCode}\n`;
+          response += `**Success:** ${result.success ? '✅' : '❌'}\n\n`;
+
+          if (result.stdout) {
+            response += `**Output:**\n\`\`\`\n${result.stdout}\n\`\`\`\n\n`;
+          }
+
+          if (result.stderr) {
+            response += `**Error Output:**\n\`\`\`\n${result.stderr}\n\`\`\`\n\n`;
+          }
+
+          return { content: [{ type: 'text', text: response }] };
+        } catch (error) {
+          throw new Error(
+            `Failed to apply patch in project '${project_name}': ${error.message}`
+          );
+        }
+      }
+    );
+
+    // Write trace note tool
+    this.server.tool(
+      'write_trace',
       {
         project_name: z.string().describe('Project name'),
         type: z.enum(['user', 'summary', 'agent']).describe('Note type'),
-        text: z.string().describe('Text to record')
+        text: z.string().describe('Text to record'),
       },
       async ({ project_name, type, text }) => {
         try {
           await this.logger.logNote(project_name, type, text);
-          return { content: [{ type: 'text', text: 'Note recorded' }] };
+          return { content: [{ type: 'text', text: 'Trace recorded' }] };
         } catch (error) {
-          throw new Error(`Failed to write log: ${error.message}`);
+          throw new Error(`Failed to write trace: ${error.message}`);
         }
       }
     );
 
-    // Read log tool
+    // Read traces tool
     this.server.tool(
-      'read_log',
+      'read_traces',
       {
         project_name: z.string().describe('Project name'),
-        type: z.string().optional().describe("Filter by 'command', 'note', 'user', 'agent', 'summary'"),
+        type: z
+          .string()
+          .optional()
+          .describe("Filter by 'command', 'note', 'user', 'agent', 'summary'"),
         search: z.string().optional().describe('Search substring'),
         skip: z.number().int().optional().describe('Skip N entries'),
         limit: z.number().int().optional().describe('Limit number of entries'),
-        fields: z.array(z.string()).optional().describe(
-          'Fields to include: timestamp, type, content (always shown), exit_code, duration, output (preview)'
-        )
+        fields: z
+          .array(z.string())
+          .optional()
+          .describe(
+            'Fields to include: timestamp, type, content (always shown), exit_code, duration, output (preview)'
+          ),
       },
       async ({ project_name, type, search, skip = 0, limit = 20, fields }) => {
         try {
-          const entries = await this.logger.readJsonLogs(project_name, { type, search, skip, limit });
+          const entries = await this.logger.readTraces(project_name, {
+            type,
+            search,
+            skip,
+            limit,
+          });
 
-          const validFields = ['timestamp', 'type', 'content', 'exit_code', 'duration', 'output'];
-          let selected = Array.isArray(fields) ? fields.filter(f => validFields.includes(f)) : ['timestamp', 'type', 'content'];
+          const validFields = [
+            'timestamp',
+            'type',
+            'content',
+            'exit_code',
+            'duration',
+            'output',
+          ];
+          const selected = Array.isArray(fields)
+            ? fields.filter((f) => validFields.includes(f))
+            : ['timestamp', 'type', 'content'];
           if (!selected.includes('timestamp')) selected.unshift('timestamp');
           if (!selected.includes('type')) selected.splice(1, 0, 'type');
 
-          const text = entries.map(entry => {
-            const meta = [];
-            const typeLabel = entry.kind === 'command'
-              ? 'COMMAND'
-              : (entry.noteType || entry.kind || 'UNKNOWN').toUpperCase();
+          const text = entries
+            .map((entry) => {
+              const meta = [];
+              const typeLabel =
+                entry.kind === 'command'
+                  ? 'COMMAND'
+                  : entry.kind === 'git_apply'
+                    ? 'GIT_APPLY'
+                    : (entry.noteType || entry.kind || 'UNKNOWN').toUpperCase();
 
-            if (selected.includes('exit_code') && entry.kind === 'command' && entry.result?.exitCode !== undefined) {
-              meta.push(`exit_code=${entry.result.exitCode}`);
-            }
-            if (selected.includes('duration') && entry.kind === 'command' && entry.result?.duration) {
-              meta.push(`duration=${entry.result.duration}`);
-            }
-
-            let header = `## ${entry.timestamp} [${typeLabel}]`;
-            if (meta.length) header += ' ' + meta.join(' ');
-
-            const lines = [header];
-
-            if (selected.includes('content')) {
-              if (entry.kind === 'command') {
-                if (selected.includes('output')) {
-                  lines.push('```bash');
-                  lines.push(entry.command);
-                  lines.push('```');
-                } else {
-                  lines.push(entry.command);
-                }
-              } else {
-                lines.push(entry.text);
+              if (
+                selected.includes('exit_code') &&
+                (entry.kind === 'command' || entry.kind === 'git_apply') &&
+                entry.result?.exitCode !== undefined
+              ) {
+                meta.push(`exit_code=${entry.result.exitCode}`);
               }
-            }
+              if (
+                selected.includes('duration') &&
+                (entry.kind === 'command' || entry.kind === 'git_apply') &&
+                entry.result?.duration
+              ) {
+                meta.push(`duration=${entry.result.duration}`);
+              }
 
-            if (selected.includes('output') && entry.kind === 'command' && entry.output) {
-              lines.push('');
-              lines.push('**Output:**');
-              lines.push('```');
-              const displayOutput = entry.output.length > 200
-                ? entry.output.substring(0, 200) + '...'
-                : entry.output;
-              lines.push(displayOutput);
-              lines.push('```');
-            }
+              let header = `## ${entry.timestamp} [${typeLabel}]`;
+              if (meta.length) header += ' ' + meta.join(' ');
 
-            return lines.join('\n');
-          }).join('\n\n');
+              const lines = [header];
 
-          return { content: [{ type: 'text', text: text || 'No log entries found' }] };
+              if (selected.includes('content')) {
+                if (entry.kind === 'command') {
+                  if (selected.includes('output')) {
+                    lines.push('```bash');
+                    lines.push(entry.command);
+                    lines.push('```');
+                  } else {
+                    lines.push(entry.command);
+                  }
+                } else if (entry.kind === 'git_apply') {
+                  lines.push(entry.diff);
+                } else {
+                  lines.push(entry.text);
+                }
+              }
+
+              if (
+                selected.includes('output') &&
+                (entry.kind === 'command' || entry.kind === 'git_apply') &&
+                entry.result?.output
+              ) {
+                lines.push('');
+                lines.push('**Output:**');
+                lines.push('```');
+                const displayOutput =
+                  entry.result?.output.length > 200
+                    ? entry.result?.output.substring(0, 200) + '...'
+                    : entry.result?.output;
+                lines.push(displayOutput);
+                lines.push('```');
+              }
+
+              return lines.join('\n');
+            })
+            .join('\n\n');
+
+          return {
+            content: [{ type: 'text', text: text || 'No trace entries found' }],
+          };
         } catch (error) {
-          throw new Error(`Failed to read log: ${error.message}`);
+          throw new Error(`Failed to read traces: ${error.message}`);
         }
       }
     );
@@ -277,7 +369,7 @@ class DockashellServer {
     this.server.tool(
       'stop_project',
       {
-        project_name: z.string().describe('Name of the project to stop')
+        project_name: z.string().describe('Name of the project to stop'),
       },
       async ({ project_name }) => {
         try {
@@ -285,7 +377,8 @@ class DockashellServer {
             throw new Error('Project name must be a non-empty string');
           }
 
-          const result = await this.containerManager.stopContainer(project_name);
+          const result =
+            await this.containerManager.stopContainer(project_name);
 
           let response = `# Project Stopped: ${project_name}\n\n`;
           response += `**Status:** ${result.status}\n`;
@@ -297,13 +390,15 @@ class DockashellServer {
           return {
             content: [
               {
-                type: "text",
-                text: response
-              }
-            ]
+                type: 'text',
+                text: response,
+              },
+            ],
           };
         } catch (error) {
-          throw new Error(`Failed to stop project '${project_name}': ${error.message}`);
+          throw new Error(
+            `Failed to stop project '${project_name}': ${error.message}`
+          );
         }
       }
     );
@@ -312,7 +407,7 @@ class DockashellServer {
     this.server.tool(
       'project_status',
       {
-        project_name: z.string().describe('Name of the project to check')
+        project_name: z.string().describe('Name of the project to check'),
       },
       async ({ project_name }) => {
         try {
@@ -325,7 +420,7 @@ class DockashellServer {
           let response = `# Project Status: ${project_name}\n\n`;
 
           if (status.status === 'not_found') {
-            response += "**Status:** Container not found (not started)\n";
+            response += '**Status:** Container not found (not started)\n';
           } else {
             response += `**Container ID:** ${status.containerId}\n`;
             response += `**Status:** ${status.status}\n`;
@@ -334,14 +429,14 @@ class DockashellServer {
 
             if (status.ports && status.ports.length > 0) {
               response += `**Port Mappings:**\n`;
-              status.ports.forEach(port => {
+              status.ports.forEach((port) => {
                 response += `- http://localhost:${port.host} → ${port.container}\n`;
               });
             }
 
             if (status.mounts && status.mounts.length > 0) {
               response += `**Mounts:**\n`;
-              status.mounts.forEach(mount => {
+              status.mounts.forEach((mount) => {
                 response += `- ${mount.source} → ${mount.destination} (${mount.mode})\n`;
               });
             }
@@ -350,13 +445,15 @@ class DockashellServer {
           return {
             content: [
               {
-                type: "text",
-                text: response
-              }
-            ]
+                type: 'text',
+                text: response,
+              },
+            ],
           };
         } catch (error) {
-          throw new Error(`Failed to get status for project '${project_name}': ${error.message}`);
+          throw new Error(
+            `Failed to get status for project '${project_name}': ${error.message}`
+          );
         }
       }
     );
@@ -366,6 +463,7 @@ class DockashellServer {
     const cleanup = async () => {
       // console.log("Cleaning up containers...");
       await this.containerManager.cleanup();
+      await this.logger.cleanup();
       process.exit(0);
     };
 

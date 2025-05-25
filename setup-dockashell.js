@@ -6,7 +6,7 @@ import os from 'os';
 
 async function setupDockashell() {
   console.log('🚀 Setting up DockaShell configuration...\n');
-  
+
   const homeDir = os.homedir();
   const configDir = path.join(homeDir, '.dockashell');
   const projectsDir = path.join(configDir, 'projects');
@@ -20,81 +20,81 @@ async function setupDockashell() {
   // Create global config
   const globalConfigPath = path.join(configDir, 'config.json');
   const globalConfig = {
-    "version": "1.0",
-    "logging": {
-      "enabled": true,
-      "directory": logsDir
-    }
+    version: '1.0',
+    logging: {
+      enabled: true,
+      directory: logsDir,
+    },
   };
   await fs.writeJSON(globalConfigPath, globalConfig, { spaces: 2 });
 
   // Create dockashell project config
   const dockashellProjectDir = path.join(projectsDir, 'dockashell');
   await fs.ensureDir(dockashellProjectDir);
-  
+
   const dockashellConfigPath = path.join(dockashellProjectDir, 'config.json');
   const dockashellConfig = {
-    "name": "dockashell",
-    "description": "dockashell dev environment",
-    "image": "dockashell/default-dev:latest",
-    "mounts": [
+    name: 'dockashell',
+    description: 'dockashell dev environment',
+    image: 'dockashell/default-dev:latest',
+    mounts: [
       {
-        "host": process.cwd(),
-        "container": "/workspace",
-        "readonly": false
-      }
+        host: process.cwd(),
+        container: '/workspace',
+        readonly: false,
+      },
     ],
-    "ports": [
+    ports: [
       {
-        "host": 3333,
-        "container": 3333
-      }
+        host: 3333,
+        container: 3333,
+      },
     ],
-    "environment": {
-      "NODE_ENV": "development"
+    environment: {
+      NODE_ENV: 'development',
     },
-    "working_dir": "/workspace",
-    "shell": "/bin/bash",
-    "security": {
-      "restricted_mode": false,
-      "blocked_commands": [],
-      "max_execution_time": 300
-    }
+    working_dir: '/workspace',
+    shell: '/bin/bash',
+    security: {
+      restricted_mode: false,
+      blocked_commands: [],
+      max_execution_time: 300,
+    },
   };
   await fs.writeJSON(dockashellConfigPath, dockashellConfig, { spaces: 2 });
 
   // Create test-project config
   const testProjectDir = path.join(projectsDir, 'test-project');
   await fs.ensureDir(testProjectDir);
-  
+
   const testConfigPath = path.join(testProjectDir, 'config.json');
   const testConfig = {
-    "name": "test-project",
-    "description": "Test project for validation",
-    "image": "dockashell/default-dev:latest",
-    "mounts": [
+    name: 'test-project',
+    description: 'Test project for validation',
+    image: 'dockashell/default-dev:latest',
+    mounts: [
       {
-        "host": path.join(homeDir, 'tmp', 'test-project'),
-        "container": "/workspace",
-        "readonly": false
-      }
+        host: path.join(homeDir, 'tmp', 'test-project'),
+        container: '/workspace',
+        readonly: false,
+      },
     ],
-    "ports": [
+    ports: [
       {
-        "host": 8080,
-        "container": 8080
-      }
+        host: 8080,
+        container: 8080,
+      },
     ],
-    "environment": {
-      "NODE_ENV": "development"
+    environment: {
+      NODE_ENV: 'development',
     },
-    "working_dir": "/workspace",
-    "shell": "/bin/bash",
-    "security": {
-      "restricted_mode": false,
-      "blocked_commands": [],
-      "max_execution_time": 300
-    }
+    working_dir: '/workspace',
+    shell: '/bin/bash',
+    security: {
+      restricted_mode: false,
+      blocked_commands: [],
+      max_execution_time: 300,
+    },
   };
   await fs.writeJSON(testConfigPath, testConfig, { spaces: 2 });
 

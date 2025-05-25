@@ -246,8 +246,12 @@ Lists all configured projects with their status.
 Starts a Docker container for the specified project.
 
 ### `run_command`
-**Arguments:** `{"project_name": "string", "command": "string", "log?": "string"}`
-Executes a shell command in the project container. When `log` is provided, the text is stored as an agent note before execution.
+**Arguments:** `{"project_name": "string", "command": "string"}`
+Executes a shell command in the project container.
+
+### `git_apply`
+**Arguments:** `{"project_name": "string", "diff": "string"}`
+Applies a unified git diff inside the project container with automatic whitespace fixing. Optimized for incremental file edits with precise error reporting.
 
 ### `project_status`
 **Arguments:** `{"project_name": "string"}`
@@ -257,13 +261,13 @@ Returns detailed status information about the project container.
 **Arguments:** `{"project_name": "string"}`
 Stops the project container.
 
-### `write_log`
+### `write_trace`
 **Arguments:** `{"project_name": "string", "type": "user|summary|agent", "text": "string"}`
-Writes an arbitrary note to the project log.
+Writes an arbitrary note to the project trace log.
 
-### `read_log`
+### `read_traces`
 **Arguments:** `{"project_name": "string", "type?": "string", "search?": "string", "skip?": "number", "limit?": "number", "fields?": "string[]"}`
-Returns formatted log entries with optional filtering and field selection.
+Returns formatted trace entries with optional filtering and field selection.
 
 **Field Options:**
 - `timestamp`, `type`, `content` - Always included for context
@@ -278,13 +282,13 @@ Returns formatted log entries with optional filtering and field selection.
 **Usage Examples:**
 ```javascript
 // Recent activity overview
-read_log("project", {limit: 10})
+read_traces("project", {limit: 10})
 
 // Debug failed commands with output
-read_log("project", {type: "command", fields: ["timestamp", "type", "content", "exit_code", "output"]})
+read_traces("project", {type: "command", fields: ["timestamp", "type", "content", "exit_code", "output"]})
 
 // Search across commands and output
-read_log("project", {search: "error"})
+read_traces("project", {search: "error"})
 ```
 
 ## 🛡️ Security Features
@@ -306,15 +310,20 @@ When `restricted_mode` is enabled:
 
 ## 📊 Logging
 
-Commands are logged to `~/.dockashell/logs/{project-name}.log` and a machine readable `*.jsonl` file:
+Agent traces are stored in `~/.dockashell/projects/{project-name}/traces/current.jsonl`:
 
 ```
-2024-05-22T10:30:15.123Z [START] project=web-app container=abc123 ports=3000:3000
-2024-05-22T10:30:16.456Z [EXEC] project=web-app command="npm install" exit_code=0 duration=2.3s
-2024-05-22T10:30:20.789Z [EXEC] project=web-app command="npm start" exit_code=0 duration=0.1s
+{"id":"tr_abc123","tool":"start_project","trace_type":"execution","project_name":"web-app","result":{"success":true}}
+{"id":"tr_def456","tool":"write_trace","trace_type":"observation","type":"agent","text":"Planning React app"}
+{"id":"tr_ghi789","tool":"run_command","trace_type":"execution","command":"npm start","result":{"exitCode":0,"duration":"0.1s"}}
+{"id":"tr_xyz000","tool":"git_apply","trace_type":"execution","diff":"diff --git a/foo b/foo","result":{"exitCode":0,"duration":"0.2s"}}
 ```
 
-Use `write_log` to store notes and `read_log` to query previous entries.
+Use `write_trace` to store notes and `read_traces` to query previous entries.
+
+Trace sessions rotate automatically when there are more than four hours between
+entries. The timeout can be changed in `~/.dockashell/config.json` using
+`logging.traces.session_timeout` (e.g. `"2h"`).
 
 ## 🔌 MCP Client Integration
 
@@ -427,3 +436,59 @@ Apache License 2.0 - see LICENSE file for details.
 **Built for the AI-first development era** 🚀
 
 DockaShell enables AI agents to work safely and effectively in isolated environments while maintaining the flexibility and power of full development stacks.
+
+## 🖥️ Terminal User Interface (TUI)
+
+DockaShell includes a Terminal User Interface for viewing agent activity and project traces.
+
+### Usage
+
+**Interactive project selector:**
+```bash
+dockashell-tui
+```
+
+**Direct project access:**
+```bash
+dockashell-tui myproject
+```
+
+### Features
+
+- **Project Discovery**: Automatically finds all DockaShell projects
+- **Activity Sorting**: Projects sorted by most recent activity  
+- **Trace Viewing**: Navigate through agent logs with keyboard
+- **Entry Types**: Displays user inputs, agent reasoning, and command results
+- **Configurable**: Customizable display settings via `~/.dockashell/config.json`
+
+### Navigation
+
+**Project Selector:**
+- `↑↓` Navigate projects
+- `Enter` Select project  
+- `q` Quit
+
+**Trace Viewer:**
+- `↑↓` Navigate entries
+- `b` Back to project selector
+- `q` Quit
+
+### Configuration
+
+TUI settings in `~/.dockashell/config.json`:
+
+```json
+{
+  "tui": {
+    "display": {
+      "max_lines_per_entry": 5,
+      "max_entries": 100,
+      "show_icons": true,
+      "theme": "dark"
+    }
+  }
+}
+```
+
+The TUI provides immediate visibility into what agents are working on without interrupting their progress.
+

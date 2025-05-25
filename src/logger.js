@@ -1,22 +1,54 @@
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
+import { systemLogger } from './system-logger.js';
+import { TraceRecorder } from './trace-recorder.js';
+import { loadConfig } from './config.js';
+
+const parseDuration = (value) => {
+  if (typeof value === 'number') return value;
+  const match = /^\s*(\d+)\s*(ms|s|m|h|d)?\s*$/.exec(value || '');
+  if (!match) return 0;
+  const num = parseInt(match[1], 10);
+  const unit = match[2] || 'ms';
+  switch (unit) {
+    case 'd':
+      return num * 86400000;
+    case 'h':
+      return num * 3600000;
+    case 'm':
+      return num * 60000;
+    case 's':
+      return num * 1000;
+    default:
+      return num;
+  }
+};
 
 export class Logger {
   constructor() {
-    this.logsDir = path.join(os.homedir(), '.dockashell', 'logs');
+    this.traceRecorders = new Map();
+    this._config = null;
+    loadConfig()
+      .then((c) => {
+        this._config = c;
+      })
+      .catch(() => {
+        this._config = null;
+      });
   }
 
-  get logDir() {
-    return this.logsDir;
-  }
-
-  set logDir(dir) {
-    this.logsDir = dir;
-  }
-
-  async ensureLogsDirectory() {
-    await fs.ensureDir(this.logsDir);
+  async getTraceRecorder(projectName) {
+    if (!this.traceRecorders.has(projectName)) {
+      const timeoutStr =
+        this._config?.logging?.traces?.session_timeout || '4h';
+      const timeoutMs = parseDuration(timeoutStr) || 4 * 60 * 60 * 1000;
+      this.traceRecorders.set(
+        projectName,
+        new TraceRecorder(projectName, timeoutMs)
+      );
+    }
+    return this.traceRecorders.get(projectName);
   }
 
   async logCommand(projectName, command, result) {
@@ -32,54 +64,30 @@ export class Logger {
         return;
       }
 
-      await this.ensureLogsDirectory();
-
-      // Sanitize project name for filename
-      const safeProjectName = projectName.replace(/[^a-zA-Z0-9_-]/g, '_');
-      const logFile = path.join(this.logsDir, `${safeProjectName}.log`);
-      const jsonLogFile = path.join(this.logsDir, `${safeProjectName}.jsonl`);
-      const timestamp = new Date().toISOString();
-
-      let logEntry;
-      if (result.type === 'start') {
-        logEntry = `${timestamp} [START] project=${projectName} container=${result.containerId || 'unknown'} ports=${result.ports || 'none'}\n`;
-      } else if (result.type === 'stop') {
-        logEntry = `${timestamp} [STOP] project=${projectName} container=${result.containerId || 'unknown'}\n`;
-      } else if (result.type === 'exec') {
-        const duration = result.duration || '0s';
-        const safeCommand = (command || '').replace(/[\r\n]/g, ' ').substring(0, 200);
-        logEntry = `${timestamp} [EXEC] project=${projectName} command="${safeCommand}" exit_code=${result.exitCode !== undefined ? result.exitCode : 'unknown'} duration=${duration}\n`;
-      } else {
-        logEntry = `${timestamp} [INFO] project=${projectName} action="${result.action || 'unknown'}"\n`;
-      }
-
-      await fs.appendFile(logFile, logEntry);
-
-      const jsonEntry = {
-        timestamp,
-        kind: 'command',
-        command,
-        result,
-        output: result.output || ''
-      };
-
-      await fs.appendFile(jsonLogFile, JSON.stringify(jsonEntry) + '\n');
+      // Record trace
+      systemLogger.debug('Command executed', {
+        projectName,
+        command: (command || '').substring(0, 50),
+      });
+      const recorder = await this.getTraceRecorder(projectName);
+      await recorder.execution('run_command', { command }, result);
     } catch (error) {
       console.error('Failed to log command:', error.message);
       // Don't throw - logging failures shouldn't break the main operation
     }
   }
 
-  async getProjectLogs(projectName) {
+  async logToolExecution(projectName, toolName, params, result) {
     try {
-      const logFile = path.join(this.logsDir, `${projectName}.log`);
-      if (await fs.pathExists(logFile)) {
-        return await fs.readFile(logFile, 'utf-8');
+      if (!projectName || typeof projectName !== 'string') {
+        console.error('Invalid project name for logging:', projectName);
+        return;
       }
-      return '';
+
+      const recorder = await this.getTraceRecorder(projectName);
+      await recorder.execution(toolName, params, result || {});
     } catch (error) {
-      console.error('Failed to read logs:', error);
-      return '';
+      console.error('Failed to log tool execution:', error.message);
     }
   }
 
@@ -94,66 +102,110 @@ export class Logger {
         return;
       }
 
-      await this.ensureLogsDirectory();
-
-      const safeProjectName = projectName.replace(/[^a-zA-Z0-9_-]/g, '_');
-      const logFile = path.join(this.logsDir, `${safeProjectName}.log`);
-      const jsonLogFile = path.join(this.logsDir, `${safeProjectName}.jsonl`);
-      const timestamp = new Date().toISOString();
-
-      const noteEntry = `${timestamp} [NOTE] project=${projectName} type=${noteType} ${text}\n`;
-      await fs.appendFile(logFile, noteEntry);
-
-      const jsonEntry = {
-        timestamp,
-        kind: 'note',
+      systemLogger.info('Note recorded', {
+        projectName,
         noteType,
-        text
-      };
-      await fs.appendFile(jsonLogFile, JSON.stringify(jsonEntry) + '\n');
+      });
+      const recorder = await this.getTraceRecorder(projectName);
+      await recorder.observation(noteType, text);
     } catch (error) {
       console.error('Failed to log note:', error.message);
     }
   }
 
-  async readJsonLogs(projectName, { type, search, skip = 0, limit = 20 } = {}) {
+  async readTraces(projectName, { type, search, skip = 0, limit = 20 } = {}) {
     try {
-      const safeProjectName = projectName.replace(/[^a-zA-Z0-9_-]/g, '_');
-      const jsonLogFile = path.join(this.logsDir, `${safeProjectName}.jsonl`);
-      if (!(await fs.pathExists(jsonLogFile))) {
+      const tracesFile = path.join(
+        os.homedir(),
+        '.dockashell',
+        'projects',
+        projectName,
+        'traces',
+        'current.jsonl'
+      );
+      if (!(await fs.pathExists(tracesFile))) {
         return [];
       }
 
-      const lines = (await fs.readFile(jsonLogFile, 'utf8'))
+      const lines = (await fs.readFile(tracesFile, 'utf8'))
         .split('\n')
         .filter(Boolean);
-      let entries = lines.map(l => {
-        try { return JSON.parse(l); } catch { return null; }
-      }).filter(Boolean);
+      let entries = lines
+        .map((l) => {
+          try {
+            const trace = JSON.parse(l);
+            if (trace.tool === 'run_command') {
+              return {
+                timestamp: trace.timestamp,
+                kind: 'command',
+                command: trace.command,
+                result: trace.result,
+              };
+            } else if (trace.tool === 'git_apply') {
+              return {
+                timestamp: trace.timestamp,
+                kind: 'git_apply',
+                diff: trace.diff,
+                result: trace.result,
+              };
+            } else if (trace.tool === 'write_trace') {
+              return {
+                timestamp: trace.timestamp,
+                kind: 'note',
+                noteType: trace.type,
+                text: trace.text,
+              };
+            }
+            return { timestamp: trace.timestamp, ...trace };
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean);
 
       if (type) {
         if (type === 'note') {
-          entries = entries.filter(e => e.kind === 'note');
+          entries = entries.filter((e) => e.kind === 'note');
         } else if (['user', 'agent', 'summary'].includes(type)) {
-          entries = entries.filter(e => e.kind === 'note' && e.noteType === type);
+          entries = entries.filter(
+            (e) => e.kind === 'note' && e.noteType === type
+          );
         } else if (type === 'command') {
-          entries = entries.filter(e => e.kind === 'command');
+          entries = entries.filter((e) => e.kind === 'command');
+        } else if (type === 'git_apply') {
+          entries = entries.filter((e) => e.kind === 'git_apply');
         } else {
-          entries = entries.filter(e => e.kind === type || e.noteType === type);
+          entries = entries.filter(
+            (e) => e.kind === type || e.noteType === type
+          );
         }
       }
       if (search) {
         const lower = search.toLowerCase();
-        entries = entries.filter(e => {
-          const target = (e.command || '') + (e.text || '') + (e.output || '');
+        entries = entries.filter((e) => {
+          const target =
+            (e.command || '') + (e.text || '') + (e.result?.output || '');
           return target.toLowerCase().includes(lower);
         });
       }
 
-      return entries.slice(skip, skip + limit);
+      return entries.reverse().slice(skip, skip + limit);
     } catch (error) {
-      console.error('Failed to read JSON logs:', error.message);
+      console.error('Failed to read traces:', error.message);
       return [];
     }
+  }
+
+  async cleanup() {
+    for (const recorder of this.traceRecorders.values()) {
+      try {
+        await recorder.close();
+      } catch (error) {
+        systemLogger.warn('Failed to close trace recorder', {
+          error: error.message,
+        });
+      }
+    }
+    this.traceRecorders.clear();
   }
 }

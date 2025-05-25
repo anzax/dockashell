@@ -1,3 +1,5 @@
+import { test, describe, beforeEach, afterEach } from 'node:test';
+import assert from 'node:assert';
 import { ProjectManager } from '../src/project-manager.js';
 import fs from 'fs-extra';
 import path from 'path';
@@ -6,99 +8,139 @@ import os from 'os';
 describe('ProjectManager', () => {
   let projectManager;
   let testConfigDir;
-  
-  beforeEach(async () => {
-    projectManager = new ProjectManager();
-    await projectManager.initialize();
-    
-    // Create test project structure
-    testConfigDir = path.join(os.homedir(), '.dockashell', 'projects', 'test-jest-project');
-    await fs.ensureDir(testConfigDir);
-    
-    const testConfig = {
-      name: "test-jest-project",
-      description: "Test project for Jest validation",
-      image: "ubuntu:latest",
-      mounts: [
-        {
-          host: "~/test-workspace",
-          container: "/workspace",
-          readonly: false
-        }
-      ],
-      ports: [
-        {
-          host: 8080,
-          container: 80
-        }
-      ],
-      environment: {
-        NODE_ENV: "development"
-      },
-      working_dir: "/workspace",
-      shell: "/bin/bash",
-      security: {
-        restricted_mode: false,
-        blocked_commands: ["rm -rf /"],
-        max_execution_time: 300
-      }
-    };
 
-    await fs.writeJSON(path.join(testConfigDir, 'config.json'), testConfig, { spaces: 2 });
+  beforeEach(async () => {
+    testConfigDir = await fs.mkdtemp(
+      path.join(os.tmpdir(), 'dockashell-test-')
+    );
+    projectManager = new ProjectManager();
+    projectManager.configDir = testConfigDir;
+    projectManager.projectsDir = path.join(testConfigDir, 'projects');
+    await projectManager.initialize();
   });
 
   afterEach(async () => {
-    // Clean up test project
-    try {
+    if (testConfigDir) {
       await fs.remove(testConfigDir);
-    } catch (error) {
-      // Ignore cleanup errors
     }
   });
 
   test('should initialize successfully', () => {
-    expect(projectManager).toBeDefined();
-    expect(projectManager.configDir).toBeDefined();
+    assert.ok(projectManager instanceof ProjectManager);
   });
 
   test('should list projects', async () => {
+    // Create a test project with proper structure: projects/test-project/config.json
+    const projectDir = path.join(testConfigDir, 'projects', 'test-project');
+    await fs.ensureDir(projectDir);
+    await fs.writeJson(path.join(projectDir, 'config.json'), {
+      name: 'test-project',
+      image: 'ubuntu:latest',
+      description: 'Test project',
+    });
+
     const projects = await projectManager.listProjects();
-    expect(Array.isArray(projects)).toBe(true);
-    expect(projects.length).toBeGreaterThan(0);
-    
-    const testProject = projects.find(p => p.name === 'test-jest-project');
-    expect(testProject).toBeDefined();
-    expect(testProject.image).toBe('ubuntu:latest');
+    assert.ok(Array.isArray(projects));
+    assert.ok(projects.length > 0);
+
+    const testProject = projects.find((p) => p.name === 'test-project');
+    assert.ok(testProject, 'Should find test-project in list');
+    assert.strictEqual(testProject.name, 'test-project');
+    assert.strictEqual(testProject.image, 'ubuntu:latest');
+    assert.strictEqual(testProject.description, 'Test project');
   });
 
-  test('should load a project', async () => {
-    const project = await projectManager.loadProject('test-jest-project');
-    expect(project).toBeDefined();
-    expect(project.name).toBe('test-jest-project');
-    expect(project.image).toBe('ubuntu:latest');
-    expect(project.working_dir).toBe('/workspace');
+  test('should load project configuration', async () => {
+    // Create a test project config in proper structure
+    const projectDir = path.join(testConfigDir, 'projects', 'test-project');
+    await fs.ensureDir(projectDir);
+    const config = {
+      name: 'test-project',
+      image: 'node:18',
+      workingDir: '/workspace',
+      description: 'Test Node.js project',
+    };
+    await fs.writeJson(path.join(projectDir, 'config.json'), config);
+
+    const loadedConfig = await projectManager.loadProject('test-project');
+
+    // Check the key properties we care about
+    assert.strictEqual(loadedConfig.name, 'test-project');
+    assert.strictEqual(loadedConfig.image, 'node:18');
+    assert.strictEqual(loadedConfig.description, 'Test Node.js project');
+    assert.strictEqual(loadedConfig.working_dir, '/workspace');
+
+    // Verify that defaults are applied
+    assert.ok(Array.isArray(loadedConfig.mounts));
+    assert.ok(Array.isArray(loadedConfig.ports));
+    assert.ok(typeof loadedConfig.environment === 'object');
+    assert.ok(typeof loadedConfig.security === 'object');
+    assert.strictEqual(loadedConfig.shell, '/bin/bash');
+
+    // Verify security defaults
+    assert.strictEqual(loadedConfig.security.restricted_mode, false);
+    assert.ok(Array.isArray(loadedConfig.security.blocked_commands));
+    assert.strictEqual(loadedConfig.security.max_execution_time, 300);
   });
 
-  test('should reject empty project name', async () => {
-    await expect(projectManager.loadProject('')).rejects.toThrow('Project name must be a non-empty string');
+  test('should throw error for missing project', async () => {
+    await assert.rejects(
+      async () => await projectManager.loadProject('nonexistent'),
+      /Project 'nonexistent' not found/
+    );
   });
 
-  test('should reject invalid project name', async () => {
-    await expect(projectManager.loadProject('invalid/path')).rejects.toThrow('Invalid project name');
+  test('should handle invalid project names', async () => {
+    await assert.rejects(
+      async () => await projectManager.loadProject(''),
+      /Project name must be a non-empty string/
+    );
+
+    await assert.rejects(
+      async () => await projectManager.loadProject('../../malicious'),
+      /Invalid project name/
+    );
+
+    await assert.rejects(
+      async () => await projectManager.loadProject('project with spaces'),
+      /Invalid project name/
+    );
   });
 
-  test('should reject nonexistent project', async () => {
-    await expect(projectManager.loadProject('nonexistent-project')).rejects.toThrow('not found');
+  test('should return empty list when no projects exist', async () => {
+    const projects = await projectManager.listProjects();
+    assert.ok(Array.isArray(projects));
+    assert.strictEqual(projects.length, 0);
   });
 
-  test('should validate project name format', () => {
-    expect(() => projectManager.validateProjectName('valid-name')).not.toThrow();
-    expect(() => projectManager.validateProjectName('valid_name')).not.toThrow();
-    expect(() => projectManager.validateProjectName('validname123')).not.toThrow();
-    
-    expect(() => projectManager.validateProjectName('')).toThrow();
-    expect(() => projectManager.validateProjectName('invalid/name')).toThrow();
-    expect(() => projectManager.validateProjectName('invalid name')).toThrow();
-    expect(() => projectManager.validateProjectName('invalid.name')).toThrow();
+  test('should ignore invalid config files', async () => {
+    // Create a valid project
+    const validProjectDir = path.join(
+      testConfigDir,
+      'projects',
+      'valid-project'
+    );
+    await fs.ensureDir(validProjectDir);
+    await fs.writeJson(path.join(validProjectDir, 'config.json'), {
+      name: 'valid-project',
+      image: 'ubuntu:latest',
+    });
+
+    // Create a directory with invalid config
+    const invalidProjectDir = path.join(
+      testConfigDir,
+      'projects',
+      'invalid-project'
+    );
+    await fs.ensureDir(invalidProjectDir);
+    await fs.writeFile(
+      path.join(invalidProjectDir, 'config.json'),
+      'invalid json{'
+    );
+
+    // Should only return the valid project
+    const projects = await projectManager.listProjects();
+    assert.strictEqual(projects.length, 1);
+    assert.strictEqual(projects[0].name, 'valid-project');
   });
 });
