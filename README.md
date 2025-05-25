@@ -251,7 +251,7 @@ Executes a shell command in the project container.
 
 ### `git_apply`
 **Arguments:** `{"project_name": "string", "diff": "string"}`
-Applies a unified git diff inside the project container. The patch is only applied if `git apply --check` succeeds, otherwise an error is returned.
+Applies a unified git diff inside the project container with automatic whitespace fixing. Optimized for incremental file edits with precise error reporting.
 
 ### `project_status`
 **Arguments:** `{"project_name": "string"}`
