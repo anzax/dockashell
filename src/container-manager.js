@@ -305,7 +305,7 @@ export class ContainerManager {
     }
   }
 
-  async applyPatch(projectName, diff, options = {}) {
+  async applyDiff(projectName, diff, options = {}) {
     const containerName = `dockashell-${projectName}`;
     const timeoutMs = options.timeout || 30000;
     const startTime = Date.now();
@@ -321,7 +321,7 @@ export class ContainerManager {
       }
 
       const exec = await container.exec({
-        Cmd: ['bash', '-c', 'git apply --whitespace=fix -'],
+        Cmd: ['bash', '-c', 'aider --apply -'],
         AttachStdout: true,
         AttachStderr: true,
         AttachStdin: true,
@@ -339,7 +339,7 @@ export class ContainerManager {
       const stderrStream = new PassThrough();
       container.modem.demuxStream(stream, stdoutStream, stderrStream);
 
-      // Ensure diff ends with newline for git apply
+      // Ensure diff ends with newline for aider
       stream.end(diff.endsWith('\n') ? diff : diff + '\n');
 
       let output = '';
@@ -385,7 +385,7 @@ export class ContainerManager {
 
       await this.logger.logToolExecution(
         projectName,
-        'git_apply',
+        'apply_diff',
         { diff },
         {
           exitCode: result.exitCode,
@@ -407,7 +407,7 @@ export class ContainerManager {
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
       await this.logger.logToolExecution(
         projectName,
-        'git_apply',
+        'apply_diff',
         { diff },
         {
           exitCode: -1,
