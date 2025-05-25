@@ -1,5 +1,6 @@
 import Docker from 'dockerode';
 import os from 'os';
+import { PassThrough } from 'stream';
 import { Logger } from './logger.js';
 
 export class ContainerManager {
@@ -191,24 +192,24 @@ export class ContainerManager {
 
       // Start exec and capture output
       const stream = await exec.start({ Detach: false, Tty: false });
-      
+
       let output = '';
       let error = '';
-      
+
+      const stdoutStream = new PassThrough();
+      const stderrStream = new PassThrough();
+      container.modem.demuxStream(stream, stdoutStream, stderrStream);
+
       let timedOut = false;
 
       const result = await Promise.race([
         new Promise((resolve, reject) => {
-          stream.on('data', (chunk) => {
-            const data = chunk.toString();
-            // Docker multiplexed stream format
-            if (chunk[0] === 1) {
-              output += data.slice(8);
-            } else if (chunk[0] === 2) {
-              error += data.slice(8);
-            } else {
-              output += data;
-            }
+          stdoutStream.on('data', (chunk) => {
+            output += chunk.toString();
+          });
+
+          stderrStream.on('data', (chunk) => {
+            error += chunk.toString();
           });
 
           stream.on('end', async () => {
@@ -319,6 +320,10 @@ export class ContainerManager {
 
       const stream = await exec.start({ Detach: false, Tty: false, hijack: true, stdin: true });
 
+      const stdoutStream = new PassThrough();
+      const stderrStream = new PassThrough();
+      container.modem.demuxStream(stream, stdoutStream, stderrStream);
+
       stream.end(diff);
 
       let output = '';
@@ -327,15 +332,12 @@ export class ContainerManager {
 
       const result = await Promise.race([
         new Promise((resolve, reject) => {
-          stream.on('data', (chunk) => {
-            const data = chunk.toString();
-            if (chunk[0] === 1) {
-              output += data.slice(8);
-            } else if (chunk[0] === 2) {
-              error += data.slice(8);
-            } else {
-              output += data;
-            }
+          stdoutStream.on('data', (chunk) => {
+            output += chunk.toString();
+          });
+
+          stderrStream.on('data', (chunk) => {
+            error += chunk.toString();
           });
 
           stream.on('end', async () => {
