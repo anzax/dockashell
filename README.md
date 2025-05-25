@@ -388,31 +388,6 @@ npm run build-image
 npm run rebuild-image
 ```
 
-## 📁 File Structure
-
-```
-dockashell/
-├── src/
-│   ├── mcp-server.js        # Main MCP server
-│   ├── project-manager.js   # Project config handling
-│   ├── container-manager.js # Docker operations
-│   ├── security.js          # Command validation
-│   └── logger.js            # Command logging
-├── docker/
-│   └── Dockerfile           # Default development image
-├── scripts/
-│   ├── image/               # Image management
-│   │   └── build-default-image.js
-│   └── setup/               # Project setup utilities
-│       └── create-examples.js
-├── setup-dockashell.js      # Generate ~/.dockashell config
-├── package.json
-├── README.md
-├── tests/                   # Test suite
-└── utils/
-    └── claude_desktop_config_example.json
-```
-
 ## 🤝 Contributing
 
 1. Fork the repository
