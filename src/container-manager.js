@@ -311,7 +311,7 @@ export class ContainerManager {
       }
 
       const exec = await container.exec({
-        Cmd: ['bash', '-c', 'git apply --check --whitespace=nowarn - && git apply --whitespace=fix -'],
+        Cmd: ['bash', '-c', 'git apply --whitespace=fix -'],
         AttachStdout: true,
         AttachStderr: true,
         AttachStdin: true,
@@ -324,7 +324,8 @@ export class ContainerManager {
       const stderrStream = new PassThrough();
       container.modem.demuxStream(stream, stdoutStream, stderrStream);
 
-      stream.end(diff);
+      // Ensure diff ends with newline for git apply
+      stream.end(diff.endsWith('\n') ? diff : diff + '\n');
 
       let output = '';
       let error = '';
