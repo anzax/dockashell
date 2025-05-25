@@ -76,11 +76,11 @@ describe('Logger', () => {
     assert.ok(texts.includes('Second entry'));
   });
 
-  test('should log git_apply traces', async () => {
+  test('should log apply_diff traces', async () => {
     const diff = 'diff --git a/a b/a\n--- a/a\n+++ b/a\n@@\n-test\n+test2';
     await logger.logToolExecution(
       'test-project',
-      'git_apply',
+      'apply_diff',
       { diff },
       {
         exitCode: 1,
@@ -90,7 +90,7 @@ describe('Logger', () => {
     );
 
     const entries = await logger.readTraces('test-project', {
-      type: 'git_apply',
+      type: 'apply_diff',
       limit: 5,
     });
     assert.strictEqual(entries.length, 1);

@@ -249,9 +249,9 @@ Starts a Docker container for the specified project.
 **Arguments:** `{"project_name": "string", "command": "string"}`
 Executes a shell command in the project container.
 
-### `git_apply`
+### `apply_diff`
 **Arguments:** `{"project_name": "string", "diff": "string"}`
-Applies a unified git diff inside the project container with automatic whitespace fixing. Optimized for incremental file edits with precise error reporting.
+Applies an [Aider diff](docs/better-edit-tool/aider.md) inside the project container using `aider --apply`. More tolerant than `git apply` for iterative edits.
 
 ### `project_status`
 **Arguments:** `{"project_name": "string"}`
@@ -316,7 +316,7 @@ Agent traces are stored in `~/.dockashell/projects/{project-name}/traces/current
 {"id":"tr_abc123","tool":"start_project","trace_type":"execution","project_name":"web-app","result":{"success":true}}
 {"id":"tr_def456","tool":"write_trace","trace_type":"observation","type":"agent","text":"Planning React app"}
 {"id":"tr_ghi789","tool":"run_command","trace_type":"execution","command":"npm start","result":{"exitCode":0,"duration":"0.1s"}}
-{"id":"tr_xyz000","tool":"git_apply","trace_type":"execution","diff":"diff --git a/foo b/foo","result":{"exitCode":0,"duration":"0.2s"}}
+{"id":"tr_xyz000","tool":"apply_diff","trace_type":"execution","diff":"diff --git a/foo b/foo","result":{"exitCode":0,"duration":"0.2s"}}
 ```
 
 Use `write_trace` to store notes and `read_traces` to query previous entries.

@@ -191,7 +191,7 @@ export const buildEntryLines = (
         );
       }
     }
-  } else if (entry.kind === 'git_apply') {
+  } else if (entry.kind === 'apply_diff') {
     const result = entry.result || {};
     const exitCode = result.exitCode !== undefined ? result.exitCode : 'N/A';
     const duration = result.duration || 'N/A';
@@ -201,7 +201,7 @@ export const buildEntryLines = (
       type: 'header',
       icon: '🩹',
       timestamp: formatTimestamp(entry.timestamp),
-      typeText: `GIT_APPLY | Exit: ${exitCode} | ${duration}`,
+      typeText: `APPLY_DIFF | Exit: ${exitCode} | ${duration}`,
       typeColor,
     });
 

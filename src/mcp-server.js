@@ -185,9 +185,9 @@ class DockashellServer {
       }
     );
 
-    // Git apply patch tool
+    // Diff apply tool via aider
     this.server.tool(
-      'git_apply',
+      'apply_diff',
       {
         project_name: z.string().describe('Name of the project'),
         diff: z.string().describe('Unified git diff to apply'),
@@ -205,12 +205,12 @@ class DockashellServer {
           // Ensure project exists
           await this.projectManager.loadProject(project_name);
 
-          const result = await this.containerManager.applyPatch(
+          const result = await this.containerManager.applyDiff(
             project_name,
             diff
           );
 
-          let response = `# Git Apply: ${project_name}\n\n`;
+          let response = `# Apply Diff: ${project_name}\n\n`;
           response += `**Exit Code:** ${result.exitCode}\n`;
           response += `**Success:** ${result.success ? '✅' : '❌'}\n\n`;
 
@@ -297,20 +297,20 @@ class DockashellServer {
               const typeLabel =
                 entry.kind === 'command'
                   ? 'COMMAND'
-                  : entry.kind === 'git_apply'
-                    ? 'GIT_APPLY'
+                  : entry.kind === 'apply_diff'
+                    ? 'APPLY_DIFF'
                     : (entry.noteType || entry.kind || 'UNKNOWN').toUpperCase();
 
               if (
                 selected.includes('exit_code') &&
-                (entry.kind === 'command' || entry.kind === 'git_apply') &&
+                (entry.kind === 'command' || entry.kind === 'apply_diff') &&
                 entry.result?.exitCode !== undefined
               ) {
                 meta.push(`exit_code=${entry.result.exitCode}`);
               }
               if (
                 selected.includes('duration') &&
-                (entry.kind === 'command' || entry.kind === 'git_apply') &&
+                (entry.kind === 'command' || entry.kind === 'apply_diff') &&
                 entry.result?.duration
               ) {
                 meta.push(`duration=${entry.result.duration}`);
@@ -330,7 +330,7 @@ class DockashellServer {
                   } else {
                     lines.push(entry.command);
                   }
-                } else if (entry.kind === 'git_apply') {
+                } else if (entry.kind === 'apply_diff') {
                   lines.push(entry.diff);
                 } else {
                   lines.push(entry.text);
@@ -339,7 +339,7 @@ class DockashellServer {
 
               if (
                 selected.includes('output') &&
-                (entry.kind === 'command' || entry.kind === 'git_apply') &&
+                (entry.kind === 'command' || entry.kind === 'apply_diff') &&
                 entry.result?.output
               ) {
                 lines.push('');

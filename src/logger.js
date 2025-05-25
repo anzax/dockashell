@@ -40,8 +40,7 @@ export class Logger {
 
   async getTraceRecorder(projectName) {
     if (!this.traceRecorders.has(projectName)) {
-      const timeoutStr =
-        this._config?.logging?.traces?.session_timeout || '4h';
+      const timeoutStr = this._config?.logging?.traces?.session_timeout || '4h';
       const timeoutMs = parseDuration(timeoutStr) || 4 * 60 * 60 * 1000;
       this.traceRecorders.set(
         projectName,
@@ -141,10 +140,10 @@ export class Logger {
                 command: trace.command,
                 result: trace.result,
               };
-            } else if (trace.tool === 'git_apply') {
+            } else if (trace.tool === 'apply_diff') {
               return {
                 timestamp: trace.timestamp,
-                kind: 'git_apply',
+                kind: 'apply_diff',
                 diff: trace.diff,
                 result: trace.result,
               };
@@ -172,8 +171,8 @@ export class Logger {
           );
         } else if (type === 'command') {
           entries = entries.filter((e) => e.kind === 'command');
-        } else if (type === 'git_apply') {
-          entries = entries.filter((e) => e.kind === 'git_apply');
+        } else if (type === 'apply_diff') {
+          entries = entries.filter((e) => e.kind === 'apply_diff');
         } else {
           entries = entries.filter(
             (e) => e.kind === type || e.noteType === type
