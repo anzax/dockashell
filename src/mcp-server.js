@@ -261,12 +261,14 @@ class DockashellServer {
             const meta = [];
             const typeLabel = entry.kind === 'command'
               ? 'COMMAND'
-              : (entry.noteType || entry.kind || 'UNKNOWN').toUpperCase();
+              : entry.kind === 'git_apply'
+                ? 'GIT_APPLY'
+                : (entry.noteType || entry.kind || 'UNKNOWN').toUpperCase();
 
-            if (selected.includes('exit_code') && entry.kind === 'command' && entry.result?.exitCode !== undefined) {
+            if (selected.includes('exit_code') && (entry.kind === 'command' || entry.kind === 'git_apply') && entry.result?.exitCode !== undefined) {
               meta.push(`exit_code=${entry.result.exitCode}`);
             }
-            if (selected.includes('duration') && entry.kind === 'command' && entry.result?.duration) {
+            if (selected.includes('duration') && (entry.kind === 'command' || entry.kind === 'git_apply') && entry.result?.duration) {
               meta.push(`duration=${entry.result.duration}`);
             }
 
@@ -284,12 +286,14 @@ class DockashellServer {
                 } else {
                   lines.push(entry.command);
                 }
+              } else if (entry.kind === 'git_apply') {
+                lines.push(entry.diff);
               } else {
                 lines.push(entry.text);
               }
             }
 
-            if (selected.includes('output') && entry.kind === 'command' && entry.result?.output) {
+            if (selected.includes('output') && (entry.kind === 'command' || entry.kind === 'git_apply') && entry.result?.output) {
               lines.push('');
               lines.push('**Output:**');
               lines.push('```');

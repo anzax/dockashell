@@ -375,7 +375,7 @@ export class ContainerManager {
           exitCode: result.exitCode,
           duration: `${duration}s`,
           timedOut: result.timedOut,
-          output: result.stdout || ''
+          output: [result.stdout, result.stderr].filter(Boolean).join('\n')
         }
       );
 
@@ -398,7 +398,7 @@ export class ContainerManager {
           exitCode: -1,
           duration: `${duration}s`,
           timedOut: false,
-          output: ''
+          output: error.message || ''
         }
       );
       throw error;
