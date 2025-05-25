@@ -25,6 +25,13 @@ const renderLines = (lines, selected, isModal = false) =>
         line.text
       );
     }
+    if (line.type === 'separator') {
+      return React.createElement(
+        Text,
+        { key: idx, dimColor: true, wrap: 'truncate-end' },
+        line.text
+      );
+    }
     if (line.type === 'status') {
       return React.createElement(
         Box,
@@ -63,7 +70,7 @@ const Entry = ({ item, selected }) => {
 };
 
 export const getEntryHeight = (entry, isSelected) =>
-  entry.height + (isSelected ? 2 : 0);
+  3 + (isSelected ? 2 : 0); // Always 3 lines (2 content + 1 margin) + 2 for border if selected
 
 const EntryModal = ({ item, onClose, height }) => {
   const [offset, setOffset] = useState(0);
@@ -107,6 +114,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [scrollOffset, setScrollOffset] = useState(0);
   const [terminalHeight, setTerminalHeight] = useState(20);
+  const [terminalWidth, setTerminalWidth] = useState(80);
   const [modalEntry, setModalEntry] = useState(null);
   const { stdout } = useStdout();
 
@@ -140,6 +148,12 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       } else if (process.stdout?.rows) {
         setTerminalHeight(process.stdout.rows);
       }
+      
+      if (stdout?.columns) {
+        setTerminalWidth(stdout.columns);
+      } else if (process.stdout?.columns) {
+        setTerminalWidth(process.stdout.columns);
+      }
     };
 
     updateTerminalSize();
@@ -170,7 +184,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     (async () => {
       try {
         const raw = await readTraceEntries(project, config?.display?.max_entries || 100);
-        const prepared = raw.map((e) => prepareEntry(e, maxLinesPerEntry));
+        const prepared = raw.map((e) => prepareEntry(e, maxLinesPerEntry, terminalWidth));
         setEntries(prepared);
 
         if (prepared.length > 0) {
@@ -201,12 +215,13 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
               timestamp: new Date().toISOString(),
               text: `Error loading traces: ${err.message}`
             },
-            maxLinesPerEntry
+            maxLinesPerEntry,
+            terminalWidth
           )
         ]);
       }
     })();
-  }, [project, config, terminalHeight, maxLinesPerEntry]);
+  }, [project, config, terminalHeight, terminalWidth, maxLinesPerEntry]);
 
   // Input handling
   useInput((input, key) => {
@@ -247,7 +262,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       (async () => {
         try {
           const raw = await readTraceEntries(project, config?.display?.max_entries || 100);
-          const prepared = raw.map((e) => prepareEntry(e, maxLinesPerEntry));
+          const prepared = raw.map((e) => prepareEntry(e, maxLinesPerEntry, terminalWidth));
           setEntries(prepared);
           if (selectedIndex >= prepared.length) {
             setSelectedIndex(Math.max(0, prepared.length - 1));
@@ -261,7 +276,8 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
                 timestamp: new Date().toISOString(),
                 text: `Error loading traces: ${err.message}`
               },
-              maxLinesPerEntry
+              maxLinesPerEntry,
+              terminalWidth
             )
           ]);
         }
