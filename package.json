@@ -15,7 +15,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "setup-config": "node setup-dockashell.js",
+    "setup-config": "node scripts/setup-dockashell.js",
     "setup-examples": "node scripts/setup/create-examples.js",
     "build-image": "node scripts/image/build-default-image.js",
     "rebuild-image": "node scripts/image/build-default-image.js --rebuild",
