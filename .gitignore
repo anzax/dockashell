@@ -149,3 +149,4 @@ dist
 
 # JetBrains IDE project files
 .idea/
+.aider*
