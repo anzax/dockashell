@@ -15,7 +15,7 @@ export class ImageBuilder {
     try {
       console.log('🔨 Building DockaShell default development image...');
 
-      const dockerfilePath = path.join(process.cwd(), 'Dockerfile');
+      const dockerfilePath = path.join(process.cwd(), 'docker/Dockerfile');
       if (!(await fs.pathExists(dockerfilePath))) {
         throw new Error('Dockerfile not found in current directory');
       }
@@ -26,10 +26,11 @@ export class ImageBuilder {
       const stream = await this.docker.buildImage(
         {
           context: buildContext,
-          src: ['Dockerfile', '.'],
+          src: ['.'],
         },
         {
           t: `${this.imageName}:${this.imageTag}`,
+          dockerfile: 'docker/Dockerfile',
         }
       );
 

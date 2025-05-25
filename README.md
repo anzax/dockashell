@@ -105,10 +105,10 @@ Arguments: {"project_name": "web-app"}
 DockaShell includes a comprehensive default development image (`dockashell/default-dev:latest`) based on:
 
 - **Ubuntu 24.04 LTS (Noble Numbat)** - Long-term support until 2029
-- **Node.js 22 LTS** - Active LTS support until April 2027
+- **Node.js 20 LTS** - Active LTS support
 - **Python 3** with pip and venv
 - **Essential CLI Tools**: patch, diff, grep, sed, gawk, rg, cat, head, tail, find, tree, zip, unzip, curl, wget, nano, vim, git, jq
-- **Development Tools**: gcc, g++, make, cmake, build-essential, pkg-config
+- **Aider AI Assistant** - AI-powered pair programming tool
 - **Package Managers**: npm, pnpm, pip3
 - **Non-root developer user** with sudo access
 
@@ -456,7 +456,7 @@ dockashell-tui myproject
 ### Features
 
 - **Project Discovery**: Automatically finds all DockaShell projects
-- **Activity Sorting**: Projects sorted by most recent activity  
+- **Activity Sorting**: Projects sorted by most recent activity
 - **Trace Viewing**: Navigate through agent logs with keyboard
 - **Entry Types**: Displays user inputs, agent reasoning, and command results
 - **Configurable**: Customizable display settings via `~/.dockashell/config.json`
@@ -465,7 +465,7 @@ dockashell-tui myproject
 
 **Project Selector:**
 - `↑↓` Navigate projects
-- `Enter` Select project  
+- `Enter` Select project
 - `q` Quit
 
 **Trace Viewer:**
@@ -491,4 +491,3 @@ TUI settings in `~/.dockashell/config.json`:
 ```
 
 The TUI provides immediate visibility into what agents are working on without interrupting their progress.
-
