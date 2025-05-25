@@ -249,6 +249,10 @@ Starts a Docker container for the specified project.
 **Arguments:** `{"project_name": "string", "command": "string"}`
 Executes a shell command in the project container.
 
+### `git_apply`
+**Arguments:** `{"project_name": "string", "diff": "string"}`
+Applies a unified git diff inside the project container. The patch is only applied if `git apply --check` succeeds, otherwise an error is returned.
+
 ### `project_status`
 **Arguments:** `{"project_name": "string"}`
 Returns detailed status information about the project container.
