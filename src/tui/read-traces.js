@@ -66,6 +66,13 @@ export async function readTraceEntries(projectName, maxEntries = 100, session = 
           command: trace.command,
           result: trace.result
         };
+      } else if (trace.tool === 'git_apply') {
+        entry = {
+          timestamp: trace.timestamp,
+          kind: 'git_apply',
+          diff: trace.diff,
+          result: trace.result
+        };
       } else if (trace.tool === 'write_trace') {
         entry = {
           timestamp: trace.timestamp,

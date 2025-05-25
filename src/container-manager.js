@@ -367,13 +367,17 @@ export class ContainerManager {
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
-      await this.logger.logCommand(projectName, 'git_apply', {
-        type: 'git_apply',
-        exitCode: result.exitCode,
-        duration: `${duration}s`,
-        timedOut: result.timedOut,
-        output: result.stdout || ''
-      });
+      await this.logger.logToolExecution(
+        projectName,
+        'git_apply',
+        { diff },
+        {
+          exitCode: result.exitCode,
+          duration: `${duration}s`,
+          timedOut: result.timedOut,
+          output: result.stdout || ''
+        }
+      );
 
       return {
         success: result.exitCode === 0,
@@ -386,13 +390,17 @@ export class ContainerManager {
 
     } catch (error) {
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-      await this.logger.logCommand(projectName, 'git_apply', {
-        type: 'git_apply',
-        exitCode: -1,
-        duration: `${duration}s`,
-        timedOut: false,
-        output: ''
-      });
+      await this.logger.logToolExecution(
+        projectName,
+        'git_apply',
+        { diff },
+        {
+          exitCode: -1,
+          duration: `${duration}s`,
+          timedOut: false,
+          output: ''
+        }
+      );
       throw error;
     }
   }
