@@ -13,14 +13,12 @@ dockashell/
 │   └── tui/                     # Terminal user interface components
 ├── test/                         # Test suite
 │   ├── *.test.js               # Unit tests (Node.js test runner)
-│   ├── integration/            # Integration tests
-│   └── debug/                  # Debug utilities and scripts
+│   └── integration/            # Integration tests
 ├── scripts/                      # Build and setup scripts
 │   ├── setup/                  # Project setup utilities
 │   └── image/                  # Docker image management
 ├── utils/                        # Utilities and examples
-│   ├── claude_desktop_config_example.json  # MCP config example
-│   └── create-test-project.js   # Test project setup utility
+│   └── claude_desktop_config_example.json  # MCP config example
 ├── package.json                  # Node.js dependencies
 └── README.md                    # Project documentation
 ```
@@ -37,11 +35,9 @@ dockashell/
 ### Testing (`test/`)
 - **\*.test.js**: Unit tests using Node.js built-in test runner
 - **integration/**: Integration tests for MCP tools and error handling
-- **debug/**: Debug utilities and development scripts
 
 ### Utilities (`utils/`)
 - **claude_desktop_config_example.json**: Example MCP configuration
-- **create-test-project.js**: Helper to create test project configurations
 
 ## Development Workflow
 

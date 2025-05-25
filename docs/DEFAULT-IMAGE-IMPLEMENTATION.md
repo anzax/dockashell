@@ -7,11 +7,8 @@ This implementation adds a comprehensive default Docker image approach to DockaS
 ## 🗂️ Files Created/Modified
 
 ### New Files
-- `Dockerfile` - Default development image definition
+- `docker/Dockerfile` - Default development image definition
 - `build-default-image.js` - Image builder with Docker API integration
-- `setup-default-image.js` - Image setup script with user guidance
-- `setup-complete.js` - Complete DockaShell setup workflow
-- `validate-default-image.js` - Validation script for implementation
 
 ### Modified Files
 - `src/project-manager.js` - Updated to use default image (`dockashell/default-dev:latest`)
@@ -22,7 +19,7 @@ This implementation adds a comprehensive default Docker image approach to DockaS
 ## 🐳 Default Image Specifications
 
 **Base:** Ubuntu 24.04 LTS (Noble Numbat)  
-**Node.js:** 22 LTS (Active LTS until April 2027)  
+**Node.js:** 20 LTS (Active LTS until April 2026)
 **Python:** 3.x with pip and venv support  
 
 ### Included CLI Tools
@@ -43,11 +40,10 @@ This implementation adds a comprehensive default Docker image approach to DockaS
 ## 📦 NPM Scripts Added
 
 ```bash
-npm run build-image        # Build default image manually
-npm run setup-image        # Build image with user guidance  
-npm run rebuild-image       # Force rebuild existing image
-npm run setup-complete     # Complete setup (image + examples)
-npm run validate-image      # Validate implementation
+npm run build-image        # Build default image
+npm run rebuild-image      # Force rebuild existing image
+npm run setup-examples     # Create example projects
+npm run setup-config       # Initialize ~/.dockashell
 ```
 
 ## 🔄 Project Configuration Changes
@@ -95,22 +91,21 @@ The `image` field is now optional - projects without it automatically use `docka
 git clone <repository>
 cd dockashell
 npm install
-npm run setup-complete
-npm run debug
+npm run build-image
+npm run setup-examples
 ```
 
 ### Development Workflow
 ```bash
-# Build/rebuild image
-npm run setup-image
+# Build or rebuild the default image
+npm run build-image
 npm run rebuild-image
 
-# Create and test projects  
+# Create example projects
 npm run setup-examples
-npm run debug
 
-# Validate implementation
-npm run validate-image
+# Start the MCP server
+npm start
 ```
 
 ## 🧪 Testing
@@ -123,7 +118,6 @@ The implementation includes comprehensive validation:
 - ProjectManager default image configuration
 - Optional image existence check
 
-Run `npm run validate-image` to verify the implementation.
 
 ## 📋 Migration Notes
 

@@ -13,7 +13,7 @@ DockaShell provides isolated, persistent Docker containers for AI agents to safe
 - **🛡️ Security Controls**: Configurable command blocking and timeouts
 - **📊 Command Logging**: Full audit trail of all executed commands
 - **🔧 MCP Integration**: Standard Model Context Protocol interface
-- **🐳 Default Development Image**: Pre-built Ubuntu 24.04 LTS with Node.js 22 LTS, Python 3, and essential CLI tools
+- **🐳 Default Development Image**: Pre-built Ubuntu 24.04 LTS with Node.js 20 LTS, Python 3, and essential CLI tools
 
 ## 🚀 Quick Start
 
@@ -25,31 +25,22 @@ cd dockashell
 npm install
 ```
 
-### 2. Complete Setup (Recommended)
+### 2. Build the Default Image
 
 ```bash
-npm run setup-complete
+npm run build-image
 ```
 
-This will:
-- Build the default development image (`dockashell/default-dev:latest`)
-- Create example projects with simplified configurations
-- Set up the complete DockaShell environment
-
-Or run individual setup steps:
+### 3. Create Example Projects
 
 ```bash
-# Build just the default image
-npm run setup-image
-
-# Create just the example projects
 npm run setup-examples
 ```
 
-### 3. Test with MCP Inspector
+### 4. Test with MCP Inspector
 
 ```bash
-npm run debug
+npx @modelcontextprotocol/inspector node src/mcp-server.js
 ```
 
 This creates four example projects:
@@ -135,13 +126,10 @@ You can still specify custom Docker images in your project configuration when ne
 
 ```bash
 # Build the default image
-npm run setup-image
+npm run build-image
 
 # Force rebuild
 npm run rebuild-image
-
-# Build manually
-npm run build-image
 ```
 
 ## 📝 Example Workflow
@@ -378,20 +366,21 @@ DockaShell
 
 ## 🧪 Development
 
-### Complete Setup
+### Setup Steps
 ```bash
-npm run setup-complete
+# Build the default image
+npm run build-image
+
+# Create example projects
+npm run setup-examples
 ```
 
 ### Individual Commands
 ```bash
-# Create test projects
+# Create example projects
 npm run setup-examples
 
-# Test with MCP Inspector
-npm run debug
-
-# Run server directly
+# Run the MCP server
 npm start
 
 # Build/rebuild default image
@@ -409,14 +398,19 @@ dockashell/
 │   ├── container-manager.js # Docker operations
 │   ├── security.js          # Command validation
 │   └── logger.js            # Command logging
-├── Dockerfile               # Default development image
-├── build-default-image.js   # Image builder
-├── setup-default-image.js   # Image setup script
-├── setup-complete.js        # Complete setup script
+├── docker/
+│   └── Dockerfile           # Default development image
+├── scripts/
+│   ├── image/               # Image management
+│   │   └── build-default-image.js
+│   └── setup/               # Project setup utilities
+│       └── create-examples.js
+├── setup-dockashell.js      # Generate ~/.dockashell config
 ├── package.json
 ├── README.md
-├── tests/                  # Test suite
-└── scripts/setup/create-examples.js       # Example project setup
+├── tests/                   # Test suite
+└── utils/
+    └── claude_desktop_config_example.json
 ```
 
 ## 🤝 Contributing
