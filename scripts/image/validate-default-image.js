@@ -82,7 +82,7 @@ async function validateDefaultImage() {
         'ℹ️ Default development image not built yet (run "npm run setup-image")'
       );
     }
-  } catch (error) {
+  } catch {
     console.log(
       'ℹ️ Could not check if image exists (this is normal if not built yet)'
     );

@@ -66,7 +66,7 @@ export class ImageBuilder {
         .getImage(`${this.imageName}:${this.imageTag}`)
         .inspect();
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -79,7 +79,7 @@ export class ImageBuilder {
         `🗑️ Removed existing image ${this.imageName}:${this.imageTag}`
       );
       return true;
-    } catch (error) {
+    } catch {
       // Image doesn't exist, which is fine
       return true;
     }

@@ -65,7 +65,7 @@ export class SecurityManager {
           `\\b${normalizedBlocked.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`
         );
         return regex.test(normalizedCommand);
-      } catch (error) {
+      } catch {
         // If regex fails, fall back to simple string matching
         return normalizedCommand.includes(normalizedBlocked);
       }

@@ -58,7 +58,7 @@ export class ProjectManager {
               image: config.image || this.getDefaultImage(),
               status: 'configured',
             });
-          } catch (error) {
+          } catch {
             // console.warn(`Failed to read config for project ${dir}:`, error.message);
           }
         }
@@ -208,7 +208,7 @@ export class ProjectManager {
           });
         }
       }
-    } catch (error) {
+    } catch {
       // console.warn('Failed to parse devcontainer:', error.message);
     }
   }

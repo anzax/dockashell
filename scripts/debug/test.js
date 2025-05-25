@@ -82,7 +82,7 @@ async function runTests() {
   try {
     securityManager.validateCommand('rm -rf /', testConfig);
     console.log('   ✗ Dangerous command allowed');
-  } catch (error) {
+  } catch {
     console.log('   ✓ Dangerous command blocked');
   }
   console.log('   ✓ SecurityManager working\n');

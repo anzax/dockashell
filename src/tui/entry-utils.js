@@ -60,14 +60,14 @@ export const buildEntryLines = (
   terminalWidth = 80,
   options = {}
 ) => {
-  const { showOutput = true, compact = false, isDetailView = false } = options;
+  const { showOutput = true, compact = false, _isDetailView = false } = options;
   const lines = [];
 
   // Calculate available width for content
   const contentAvailableWidth = Math.max(40, terminalWidth - 10); // Leave some margin
 
   // Always use 2 lines for list view (compact mode)
-  const effectiveMaxLines = compact ? 2 : maxLines;
+  const _effectiveMaxLines = compact ? 2 : maxLines;
 
   if (entry.type === 'note' || entry.kind === 'note') {
     const noteType = entry.noteType || 'note';

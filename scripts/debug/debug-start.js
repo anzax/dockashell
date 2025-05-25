@@ -33,7 +33,7 @@ function runMCPCommand(toolName, args = {}) {
       stderr += data.toString();
     });
 
-    process.on('close', (code) => {
+    process.on('close', (_code) => {
       clearTimeout(timeout);
       console.log('Stderr:', stderr);
       try {
@@ -41,7 +41,7 @@ function runMCPCommand(toolName, args = {}) {
         console.log('Full response:', JSON.stringify(response, null, 2));
         resolve(response);
       } catch (error) {
-        reject(new Error(`Failed to parse response: ${output}`));
+        reject(new Error(`Failed to parse response: ${error.message}`));
       }
     });
 
@@ -59,7 +59,7 @@ function runMCPCommand(toolName, args = {}) {
 async function debugTest() {
   try {
     console.log('Testing start_project with test-project...');
-    const result = await runMCPCommand('start_project', {
+    await runMCPCommand('start_project', {
       project_name: 'test-project',
     });
   } catch (error) {

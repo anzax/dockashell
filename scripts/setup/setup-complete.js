@@ -2,8 +2,6 @@
 
 // Complete setup script for DockaShell with default image
 import { ImageBuilder } from '../image/build-default-image.js';
-import fs from 'fs-extra';
-import path from 'path';
 import { execSync } from 'child_process';
 
 async function setupDockaShell() {
@@ -15,7 +13,7 @@ async function setupDockaShell() {
   // Check Docker is available
   try {
     execSync('docker --version', { stdio: 'ignore' });
-  } catch (error) {
+  } catch {
     console.error(
       "❌ Docker not found. Please install Docker and ensure it's running."
     );

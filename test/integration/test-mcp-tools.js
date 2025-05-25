@@ -33,13 +33,13 @@ function runMCPCommand(toolName, args = {}) {
       console.error('Server stderr:', data.toString());
     });
 
-    process.on('close', (code) => {
+    process.on('close', (_code) => {
       clearTimeout(timeout);
       try {
         const response = JSON.parse(output);
         resolve(response);
       } catch (error) {
-        reject(new Error(`Failed to parse response: ${output}`));
+        reject(new Error(`Failed to parse response: ${error.message}`));
       }
     });
 

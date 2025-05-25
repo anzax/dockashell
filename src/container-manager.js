@@ -64,7 +64,7 @@ export class ContainerManager {
         }
         // Container doesn't exist, create it below
       }
-    } catch (error) {
+    } catch {
       // Container doesn't exist, continue to create it
     }
 
@@ -250,7 +250,9 @@ export class ContainerManager {
                   });
                   await killer.start({ Detach: true, Tty: false });
                 }
-              } catch (_) {}
+              } catch {
+                // Ignore errors when killing container
+              }
               stream.destroy();
               reject(new Error('Command timed out'));
             })();
