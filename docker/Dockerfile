@@ -1,90 +1,40 @@
-# DockaShell Default Development Environment
-# Ubuntu 24.04 LTS with Node.js 22 LTS + Python 3 + Essential Dev Tools
+# syntax=docker/dockerfile:1
+FROM mcr.microsoft.com/devcontainers/python:3.12
 
-FROM ubuntu:24.04
+###############################################################################
+# 1. Root section – add the missing bits
+###############################################################################
+USER root
+ARG DEBIAN_FRONTEND=noninteractive
 
-# Prevent interactive prompts during package installation
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=UTC
+# - Node 20 LTS (via NodeSource)
+# - ripgrep, jq, git-lfs, build chain
+# - Corepack activation (gives you yarn + pnpm without npm -g)
+# - Aider for AI-assisted coding
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    ca-certificates curl gnupg jq git-lfs build-essential ripgrep \
+    \
+    # ----- Node 20 LTS ----------------------------------------------------------
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash -      \
+    && apt-get install -y --no-install-recommends nodejs             \
+    \
+    # ----- Enable Corepack shims for yarn / pnpm -------------------------------
+    && corepack enable                                               \
+    && corepack prepare yarn@stable --activate                       \
+    && corepack prepare pnpm@latest --activate                       \
+    \
+    # ----- Python helpers ------------------------------------------------------
+    && python -m pip install --no-cache-dir --upgrade pip wheel      \
+    && python -m pip install --no-cache-dir aider-chat               \
+    \
+    # ----- Cleanup -------------------------------------------------------------
+    && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Set up basic environment
-ENV LANG=C.UTF-8
-ENV LC_ALL=C.UTF-8
-
-# Create a non-root user for development
-RUN useradd -m -u 1000 -s /bin/bash developer && \
-    usermod -aG sudo developer && \
-    echo 'developer ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-
-# Install essential packages and development tools
-RUN apt-get update && apt-get install -y \
-    # Core system utilities
-    curl \
-    wget \
-    ca-certificates \
-    gnupg \
-    lsb-release \
-    # File operations and text processing
-    patch \
-    diffutils \
-    grep \
-    sed \
-    gawk \
-    tree \
-    zip \
-    unzip \
-    jq \
-    # Text editors
-    nano \
-    vim \
-    # Development tools
-    git \
-    build-essential \
-    gcc \
-    g++ \
-    make \
-    cmake \
-    pkg-config \
-    # Python development
-    python3 \
-    python3-pip \
-    python3-venv \
-    python3-dev \
-    # Other useful tools
-    htop \
-    procps \
-    sudo \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install ripgrep (modern grep replacement)
-RUN curl -LO https://github.com/BurntSushi/ripgrep/releases/download/14.1.1/ripgrep_14.1.1-1_amd64.deb && \
-    dpkg -i ripgrep_14.1.1-1_amd64.deb && \
-    rm ripgrep_14.1.1-1_amd64.deb
-
-# Install Node.js 22 LTS
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
-    apt-get install -y nodejs
-
-# Install pnpm globally
-RUN npm install -g pnpm
-
-# Set up Python environment
-RUN python3 -m pip install --upgrade pip setuptools wheel
-
-# Create workspace directory
-RUN mkdir -p /workspace && chown developer:developer /workspace
-
-# Set default working directory
+###############################################################################
+# 2. Back to the non-root dev user that ships with devcontainers (UID 1000)
+###############################################################################
+USER vscode
 WORKDIR /workspace
 
-# Switch to non-root user
-USER developer
-
-# Set up default shell environment
-RUN echo 'export PATH="/workspace/node_modules/.bin:$PATH"' >> ~/.bashrc && \
-    echo 'alias ll="ls -la"' >> ~/.bashrc && \
-    echo 'alias la="ls -la"' >> ~/.bashrc && \
-    echo 'alias grep="grep --color=auto"' >> ~/.bashrc
-
-# Default command
-CMD ["/bin/bash"]
+CMD ["bash"]
