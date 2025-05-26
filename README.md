@@ -265,7 +265,17 @@ Trace sessions rotate automatically when there are more than four hours between
 entries. If DockaShell restarts within this window, the same `current.jsonl`
 file continues to be used so history remains visible in the TUI. The timeout can
 be changed in `~/.dockashell/config.json` using `logging.traces.session_timeout`
-(e.g. `"2h"`).
+(e.g. `"2h"`). The default configuration sets this to `"4h"`:
+
+```json
+{
+  "logging": {
+    "traces": {
+      "session_timeout": "4h"
+    }
+  }
+}
+```
 
 ## 🔌 MCP Client Integration
 
@@ -346,10 +356,7 @@ TUI settings in `~/.dockashell/config.json`:
 {
   "tui": {
     "display": {
-      "max_lines_per_entry": 5,
-      "max_entries": 100,
-      "show_icons": true,
-      "theme": "dark"
+      "max_entries": 100
     }
   }
 }

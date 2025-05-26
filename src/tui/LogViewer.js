@@ -114,7 +114,6 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const [buffer, setBuffer] = useState(null);
   const { stdout } = useStdout();
 
-  const maxLinesPerEntry = config?.display?.max_lines_per_entry || 10;
 
   // Keep refs synced with state for callbacks
   useEffect(() => {
@@ -209,9 +208,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
 
     const update = () => {
       const raw = buf.getTraces();
-      const prepared = raw.map((e) =>
-        prepareEntry(e, maxLinesPerEntry, terminalWidth)
-      );
+      const prepared = raw.map((e) => prepareEntry(e, null, terminalWidth));
 
       setEntries(prepared);
       if (prepared.length > 0) {
@@ -254,7 +251,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     return () => {
       buf.close();
     };
-  }, [project, config, terminalHeight, terminalWidth, maxLinesPerEntry]);
+  }, [project, config, terminalHeight, terminalWidth]);
 
   // Input handling
   useInput((input, key) => {

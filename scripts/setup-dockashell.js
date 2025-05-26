@@ -17,13 +17,18 @@ async function setupDockashell() {
   await fs.ensureDir(projectsDir);
   await fs.ensureDir(logsDir);
 
-  // Create global config
+  // Create global config matching src/config.js defaultConfig
   const globalConfigPath = path.join(configDir, 'config.json');
   const globalConfig = {
-    version: '1.0',
+    tui: {
+      display: {
+        max_entries: 100,
+      },
+    },
     logging: {
-      enabled: true,
-      directory: logsDir,
+      traces: {
+        session_timeout: '4h',
+      },
     },
   };
   await fs.writeJSON(globalConfigPath, globalConfig, { spaces: 2 });

@@ -16,11 +16,7 @@ const projectArg = program.args[0];
 
 const defaultTuiConfig = {
   display: {
-    max_lines_per_entry: 5,
     max_entries: 100,
-    max_visible_entries: 10,
-    show_icons: true,
-    theme: 'dark',
   },
 };
 
