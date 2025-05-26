@@ -113,17 +113,9 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
 
   const maxLinesPerEntry = config?.display?.max_lines_per_entry || 10;
 
-  // Determine trace type from entry
-  const getTraceType = (entry) => {
-    if (entry.command) return 'command';
-    if (entry.diff) return 'apply_diff';
-    if (entry.type) return entry.type; // user, agent, summary
-    return 'unknown';
-  };
-
   // Filter entries based on current filters
   const filteredEntries = entries.filter((entry) => {
-    const traceType = getTraceType(entry);
+    const traceType = entry.traceType || 'unknown';
     return filters[traceType] !== false; // Show if filter is true or undefined
   });
   const ensureVisible = useCallback(

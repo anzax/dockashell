@@ -4,6 +4,7 @@ import {
   buildEntryLines,
   formatTimestamp,
   prepareEntry,
+  detectTraceType,
 } from '../src/tui/entry-utils.js';
 
 const sampleCommand = {
@@ -147,5 +148,18 @@ describe('prepareEntry', () => {
     assert.strictEqual(prepared.height, 3); // Always 3 for list view
     assert.strictEqual(prepared.lines.length, 2); // Header + command
     assert(prepared.fullLines.length > 2); // Has output in detail view
+    assert.strictEqual(prepared.traceType, 'command');
+  });
+});
+
+describe('detectTraceType', () => {
+  test('handles various entry shapes', () => {
+    const note = { kind: 'note', noteType: 'agent' };
+    const diff = { kind: 'apply_diff', diff: 'diff' };
+    const cmd = { kind: 'command', command: 'ls' };
+
+    assert.strictEqual(detectTraceType(note), 'agent');
+    assert.strictEqual(detectTraceType(diff), 'apply_diff');
+    assert.strictEqual(detectTraceType(cmd), 'command');
   });
 });
