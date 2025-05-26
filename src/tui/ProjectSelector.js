@@ -6,9 +6,9 @@ import os from 'os';
 
 const ProjectItem = ({ project, selected }) => {
   const timeStr = project.last
-    ? `, last: ${new Date(project.last).toLocaleDateString()}`
-    : '';
-  const displayText = `${project.name} (${project.count} entries${timeStr})`;
+    ? ` - ${new Date(project.last).toLocaleString()}`
+    : ' - no traces yet';
+  const displayText = `${project.name}${timeStr}`;
 
   return React.createElement(
     Box,

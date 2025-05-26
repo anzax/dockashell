@@ -16,22 +16,24 @@ export class TraceBuffer extends EventEmitter {
 
   async loadFromFiles() {
     const sessions = await listSessions(this.projectName);
-    const aggregated = [];
-    for (
-      let i = sessions.length - 1;
-      i >= 0 && aggregated.length < this.maxEntries;
-      i--
-    ) {
+    const allTraces = [];
+    
+    // Load traces from all sessions in chronological order
+    for (let i = 0; i < sessions.length; i++) {
       const id = sessions[i];
-      const remaining = this.maxEntries - aggregated.length;
       try {
-        const traces = await readTraceEntries(this.projectName, remaining, id);
-        aggregated.unshift(...traces.reverse());
+        const traces = await readTraceEntries(this.projectName, Infinity, id);
+        allTraces.push(...traces);
       } catch {
         // ignore malformed or missing files
       }
     }
-    this.entries = aggregated;
+    
+    // Sort by timestamp to ensure proper chronological order across sessions
+    allTraces.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    
+    // Keep only the most recent entries
+    this.entries = allTraces.slice(-this.maxEntries);
   }
 
   async refresh() {
