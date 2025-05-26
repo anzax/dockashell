@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 
-const renderLines = (lines, isModal = true) =>
+const renderLines = (lines, offset = 0, isModal = true) =>
   lines.map((line, idx) => {
     if (line.type === 'header') {
       return React.createElement(
         Box,
-        { key: idx },
+        { key: offset + idx },
         React.createElement(Text, { wrap: 'truncate-end' }, line.icon + ' '),
         React.createElement(
           Text,
@@ -28,7 +28,7 @@ const renderLines = (lines, isModal = true) =>
       return React.createElement(
         Text,
         {
-          key: idx,
+          key: offset + idx,
           bold: false,
           color: isModal ? 'white' : 'gray',
           wrap: 'truncate-end',
@@ -39,14 +39,14 @@ const renderLines = (lines, isModal = true) =>
     if (line.type === 'separator') {
       return React.createElement(
         Text,
-        { key: idx, dimColor: true, wrap: 'truncate-end' },
+        { key: offset + idx, dimColor: true, wrap: 'truncate-end' },
         line.text
       );
     }
     if (line.type === 'status') {
       return React.createElement(
         Box,
-        { key: idx },
+        { key: offset + idx },
         React.createElement(
           Text,
           { color: line.color, wrap: 'truncate-end' },
@@ -62,13 +62,21 @@ const renderLines = (lines, isModal = true) =>
     if (line.type === 'output') {
       return React.createElement(
         Text,
-        { key: idx, color: isModal ? 'white' : 'gray', wrap: 'truncate-end' },
+        {
+          key: offset + idx,
+          color: isModal ? 'white' : 'gray',
+          wrap: 'truncate-end',
+        },
         '  ' + line.text
       );
     }
     return React.createElement(
       Text,
-      { key: idx, color: isModal ? 'white' : 'gray', wrap: 'truncate-end' },
+      {
+        key: offset + idx,
+        color: isModal ? 'white' : 'gray',
+        wrap: 'truncate-end',
+      },
       line.text
     );
   });
@@ -154,7 +162,7 @@ export const TraceDetailsView = ({
         paddingRight: 1,
         marginY: 1,
       },
-      ...renderLines(visibleLines, true)
+      ...renderLines(visibleLines, scrollOffset, true)
     ),
 
     React.createElement(
