@@ -8,24 +8,17 @@ import { FilterModal } from './FilterModal.js';
 const renderLines = (lines, selected) =>
   lines.map((line, idx) => {
     if (line.type === 'header') {
+      // Use single Text component to avoid layout overlap issues
+      const headerText = `${line.icon} ${line.timestamp} [${line.typeText}]`;
       return React.createElement(
-        Box,
-        { key: idx },
-        React.createElement(Text, { wrap: 'truncate-end' }, line.icon + ' '),
-        React.createElement(
-          Text,
-          { dimColor: true, wrap: 'truncate-end' },
-          line.timestamp + ' '
-        ),
-        React.createElement(
-          Text,
-          {
-            bold: selected,
-            color: line.typeColor,
-            wrap: 'truncate-end',
-          },
-          `[${line.typeText}]`
-        )
+        Text,
+        {
+          key: idx,
+          bold: selected,
+          color: line.typeColor,
+          wrap: 'truncate-end',
+        },
+        headerText
       );
     }
     if (line.type === 'command') {
@@ -184,16 +177,21 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   // Handle terminal resize
   useEffect(() => {
     const updateTerminalSize = () => {
+      // Provide fallbacks for undefined terminal dimensions
       if (stdout?.rows) {
         setTerminalHeight(stdout.rows);
       } else if (process.stdout?.rows) {
         setTerminalHeight(process.stdout.rows);
+      } else {
+        setTerminalHeight(24); // Fallback height
       }
 
       if (stdout?.columns) {
         setTerminalWidth(stdout.columns);
       } else if (process.stdout?.columns) {
         setTerminalWidth(process.stdout.columns);
+      } else {
+        setTerminalWidth(80); // Fallback width
       }
     };
 

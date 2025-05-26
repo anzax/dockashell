@@ -3,32 +3,26 @@ import { Box, Text, useInput } from 'ink';
 
 const renderLines = (lines, offset = 0, isModal = true) =>
   lines.map((line, idx) => {
+    // Use offset + idx to get the actual position in the full array for stable React keys
+    const stableKey = offset + idx;
     if (line.type === 'header') {
+      // Use single Text component to avoid layout overlap issues
+      const headerText = `${line.icon} ${line.timestamp} [${line.typeText}]`;
       return React.createElement(
-        Box,
-        { key: offset + idx },
-        React.createElement(Text, { wrap: 'truncate-end' }, line.icon + ' '),
-        React.createElement(
-          Text,
-          { dimColor: !isModal, wrap: 'truncate-end' },
-          line.timestamp + ' '
-        ),
-        React.createElement(
-          Text,
-          {
-            bold: false,
-            color: line.typeColor,
-            wrap: 'truncate-end',
-          },
-          `[${line.typeText}]`
-        )
+        Text,
+        {
+          key: stableKey,
+          color: line.typeColor,
+          wrap: 'truncate-end',
+        },
+        headerText
       );
     }
     if (line.type === 'command') {
       return React.createElement(
         Text,
         {
-          key: offset + idx,
+          key: stableKey,
           bold: false,
           color: isModal ? 'white' : 'gray',
           wrap: 'truncate-end',
@@ -39,14 +33,14 @@ const renderLines = (lines, offset = 0, isModal = true) =>
     if (line.type === 'separator') {
       return React.createElement(
         Text,
-        { key: offset + idx, dimColor: true, wrap: 'truncate-end' },
+        { key: stableKey, dimColor: true, wrap: 'truncate-end' },
         line.text
       );
     }
     if (line.type === 'status') {
       return React.createElement(
         Box,
-        { key: offset + idx },
+        { key: stableKey },
         React.createElement(
           Text,
           { color: line.color, wrap: 'truncate-end' },
@@ -63,7 +57,7 @@ const renderLines = (lines, offset = 0, isModal = true) =>
       return React.createElement(
         Text,
         {
-          key: offset + idx,
+          key: stableKey,
           color: isModal ? 'white' : 'gray',
           wrap: 'truncate-end',
         },
@@ -73,7 +67,7 @@ const renderLines = (lines, offset = 0, isModal = true) =>
     return React.createElement(
       Text,
       {
-        key: offset + idx,
+        key: stableKey,
         color: isModal ? 'white' : 'gray',
         wrap: 'truncate-end',
       },
