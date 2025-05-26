@@ -262,8 +262,10 @@ Agent traces are stored in `~/.dockashell/projects/{project-name}/traces/current
 Use `write_trace` to store notes and `read_traces` to query previous entries.
 
 Trace sessions rotate automatically when there are more than four hours between
-entries. The timeout can be changed in `~/.dockashell/config.json` using
-`logging.traces.session_timeout` (e.g. `"2h"`).
+entries. If DockaShell restarts within this window, the same `current.jsonl`
+file continues to be used so history remains visible in the TUI. The timeout can
+be changed in `~/.dockashell/config.json` using `logging.traces.session_timeout`
+(e.g. `"2h"`).
 
 ## 🔌 MCP Client Integration
 

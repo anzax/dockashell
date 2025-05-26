@@ -196,9 +196,12 @@ export class Logger {
   }
 
   async cleanup() {
+    const now = Date.now();
     for (const recorder of this.traceRecorders.values()) {
       try {
-        await recorder.close();
+        if (now - recorder.lastTraceTime > recorder.sessionTimeoutMs) {
+          await recorder.close();
+        }
       } catch (error) {
         systemLogger.warn('Failed to close trace recorder', {
           error: error.message,
