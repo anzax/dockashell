@@ -2,18 +2,25 @@
 
 > AI agent secure Docker environments for project work
 
-DockaShell provides isolated, persistent Docker containers for AI agents to safely execute code and build projects. Each project gets its own container with configurable security, port mappings, and file mounts.
+DockaShell provides isolated, persistent Docker containers for AI agents to safely execute code and build projects. Each project gets its own container with configurable security, port mappings, and volume mounts.
 
 ## ✨ Features
 
 - **🔒 Project Isolation**: Each project runs in its own Docker container
 - **🚀 Persistent State**: Containers maintain state across command executions
 - **🌐 Port Mapping**: Easy web development with automatic port forwarding
-- **📁 File Mounting**: Seamless file access between host and container
+- **📁 Project Directory Mounting**: Seamless file access between host and container
 - **🛡️ Security Controls**: Configurable command blocking and timeouts
 - **📊 Command Logging**: Full audit trail of all executed commands
 - **🔧 MCP Integration**: Standard Model Context Protocol interface
 - **🐳 Default Development Image**: Pre-built Ubuntu 24.04 LTS with Node.js 20 LTS, Python 3, and essential CLI tools
+
+---
+
+## Experimental technology disclaimer
+DockaShell is an experimental project under active development. It is not yet stable, may contain bugs, incomplete features, or undergo breaking changes.
+
+---
 
 ## 🚀 Quick Start
 
@@ -25,7 +32,7 @@ cd dockashell
 npm install
 ```
 
-### 2. Build the Default Image
+### 2. Build the Default Docker Image
 
 ```bash
 npm run build-image
@@ -37,60 +44,6 @@ npm run build-image
 npm run setup-examples
 ```
 
-### 4. Test with MCP Inspector
-
-```bash
-npx @modelcontextprotocol/inspector node src/mcp-server.js
-```
-
-This creates four example projects:
-- `web-app` - Node.js development (ports 3000, 8080) [DEFAULT IMAGE]
-- `data-science` - Python environment (port 8888) [DEFAULT IMAGE]
-- `react-app` - React/TypeScript setup (port 3000) [DEFAULT IMAGE]
-- `fullstack-legacy` - Custom Node.js 16 environment [CUSTOM IMAGE]
-
-In the MCP inspector interface, try these commands:
-
-**List all projects:**
-```json
-Tool: list_projects
-```
-
-**Start a project:**
-```json
-Tool: start_project
-Arguments: {"project_name": "web-app"}
-```
-
-**Run commands:**
-```json
-Tool: run_command
-Arguments: {"project_name": "web-app", "command": "node --version"}
-```
-
-**Test available tools:**
-```json
-Tool: run_command
-Arguments: {"project_name": "web-app", "command": "python3 --version"}
-```
-
-```json
-Tool: run_command
-Arguments: {"project_name": "web-app", "command": "which rg jq tree curl"}
-```
-
-**Check project status:**
-```json
-Tool: project_status
-Arguments: {"project_name": "web-app"}
-```
-
-**Stop the project:**
-```json
-Tool: stop_project
-Arguments: {"project_name": "web-app"}
-```
-
 ## 🐳 Default Development Image
 
 DockaShell includes a comprehensive default development image (`dockashell/default-dev:latest`) based on:
@@ -99,7 +52,7 @@ DockaShell includes a comprehensive default development image (`dockashell/defau
 - **Node.js 20 LTS** - Active LTS support
 - **Python 3** with pip and venv
 - **Essential CLI Tools**: patch, diff, grep, sed, gawk, rg, cat, head, tail, find, tree, zip, unzip, curl, wget, nano, vim, git, jq
-- **Aider AI Assistant** - AI-powered pair programming tool
+- **Aider AI Assistant** - Aider could be used as sub-agent
 - **Package Managers**: npm, pnpm, pip3
 - **Non-root developer user** with sudo access
 
@@ -304,7 +257,6 @@ Agent traces are stored in `~/.dockashell/projects/{project-name}/traces/current
 {"id":"tr_abc123","tool":"start_project","trace_type":"execution","project_name":"web-app","result":{"success":true}}
 {"id":"tr_def456","tool":"write_trace","trace_type":"observation","type":"agent","text":"Planning React app"}
 {"id":"tr_ghi789","tool":"run_command","trace_type":"execution","command":"npm start","result":{"exitCode":0,"duration":"0.1s"}}
-{"id":"tr_xyz000","tool":"apply_diff","trace_type":"execution","diff":"diff --git a/foo b/foo","result":{"exitCode":0,"duration":"0.2s"}}
 ```
 
 Use `write_trace` to store notes and `read_traces` to query previous entries.
@@ -346,65 +298,7 @@ Or if installed globally:
 - **Docker** installed and running
 - **Home directory write access** for configuration storage
 
-## 🏗️ Architecture
-
-```
-DockaShell
-├── MCP Server (src/mcp-server.js)
-│   └── Exposes 5 tools via Model Context Protocol
-├── Project Manager (src/project-manager.js)
-│   └── Loads configs, parses devcontainers
-├── Container Manager (src/container-manager.js)
-│   └── Docker operations via dockerode
-├── Security Manager (src/security.js)
-│   └── Command validation and blocking
-├── Logger (src/logger.js)
-│   └── Persistent command logging
-└── Image Builder (build-default-image.js)
-    └── Builds comprehensive default development image
-```
-
-## 🧪 Development
-
-### Setup Steps
-```bash
-# Build the default image
-npm run build-image
-
-# Create example projects
-npm run setup-examples
-```
-
-### Individual Commands
-```bash
-# Create example projects
-npm run setup-examples
-
-# Run the MCP server
-npm start
-
-# Build/rebuild default image
-npm run build-image
-npm run rebuild-image
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run `npm test` to test
-5. Submit a pull request
-
-## 📄 License
-
-Apache License 2.0 - see LICENSE file for details.
-
 ---
-
-**Built for the AI-first development era** 🚀
-
-DockaShell enables AI agents to work safely and effectively in isolated environments while maintaining the flexibility and power of full development stacks.
 
 ## 🖥️ Terminal User Interface (TUI)
 
@@ -460,3 +354,9 @@ TUI settings in `~/.dockashell/config.json`:
 ```
 
 The TUI provides immediate visibility into what agents are working on without interrupting their progress.
+
+---
+
+## 📄 License
+
+Apache License 2.0 - see LICENSE file for details.
