@@ -50,36 +50,40 @@ export const FilterModal = ({ onClose, onApply, currentFilters }) => {
     {
       flexDirection: 'column',
       borderStyle: 'round',
-      paddingLeft: 2,
-      paddingRight: 2,
-      paddingY: 1,
-      width: 40,
+      borderColor: 'cyan',
+      paddingLeft: 3,
+      paddingRight: 3,
+      paddingY: 2,
+      width: 50,
     },
     React.createElement(
       Text,
-      { bold: true, marginBottom: 1 },
-      `Filter Trace Types (${enabledCount}/${totalCount})`
+      { bold: true, marginBottom: 2, fontSize: 'large' },
+      `🔍 Filter Trace Types (${enabledCount}/${totalCount})`
     ),
 
     // Trace type checkboxes
     ...traceTypes.map((traceType, index) => {
       const isSelected = index === selectedIndex;
       const isChecked = filters[traceType.key];
-      const checkbox = isChecked ? '☑' : '☐';
+      const checkbox = isChecked ? '█ ✓' : '□  ';
 
       return React.createElement(
         Box,
         {
           key: traceType.key,
-          marginBottom: index === traceTypes.length - 1 ? 1 : 0,
+          marginBottom: 1,
+          paddingLeft: 1,
+          paddingRight: 1,
         },
         React.createElement(
           Text,
           {
             backgroundColor: isSelected ? 'blue' : undefined,
             color: isSelected ? 'white' : traceType.color,
+            bold: isSelected,
           },
-          `${isSelected ? '>' : ' '} ${checkbox} ${traceType.label}`
+          `${isSelected ? '▶' : ' '} ${checkbox} ${traceType.label}`
         )
       );
     }),
@@ -87,7 +91,7 @@ export const FilterModal = ({ onClose, onApply, currentFilters }) => {
     // Help text
     React.createElement(
       Text,
-      { dimColor: true, textAlign: 'center' },
+      { dimColor: true, textAlign: 'center', marginTop: 1 },
       '[↑↓] Navigate  [Space] Toggle  [Enter] Apply  [Esc/q] Cancel'
     )
   );
