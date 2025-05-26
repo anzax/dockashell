@@ -118,7 +118,6 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const [buffer, setBuffer] = useState(null);
   const { stdout } = useStdout();
 
-
   // Keep refs synced with state for callbacks
   useEffect(() => {
     autoScrollRef.current = autoScroll;
