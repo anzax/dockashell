@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Box, Text, useInput, useStdout } from 'ink';
 import { TraceBuffer } from './trace-buffer.js';
 import { prepareEntry } from './entry-utils.js';
@@ -101,6 +101,9 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const [terminalWidth, setTerminalWidth] = useState(80);
   const [detailsViewIndex, setDetailsViewIndex] = useState(null);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [autoScroll, setAutoScroll] = useState(true);
+  const autoScrollRef = useRef(true);
+  const detailsViewRef = useRef(null);
   const [filters, setFilters] = useState({
     user: true,
     agent: true,
@@ -112,6 +115,15 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const { stdout } = useStdout();
 
   const maxLinesPerEntry = config?.display?.max_lines_per_entry || 10;
+
+  // Keep refs synced with state for callbacks
+  useEffect(() => {
+    autoScrollRef.current = autoScroll;
+  }, [autoScroll]);
+
+  useEffect(() => {
+    detailsViewRef.current = detailsViewIndex;
+  }, [detailsViewIndex]);
 
   // Filter entries based on current filters
   const filteredEntries = entries.filter((entry) => {
@@ -140,6 +152,15 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     },
     [filteredEntries, scrollOffset, terminalHeight]
   );
+
+  const updateAutoScrollState = (idx) => {
+    const threshold = 5;
+    if (filteredEntries.length - idx > threshold) {
+      setAutoScroll(false);
+    } else if (idx >= filteredEntries.length - 1) {
+      setAutoScroll(true);
+    }
+  };
 
   // Handle terminal resize
   useEffect(() => {
@@ -193,30 +214,36 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       );
 
       setEntries(prepared);
-
       if (prepared.length > 0) {
         const lastIndex = prepared.length - 1;
-        setSelectedIndex(lastIndex);
 
-        // Calculate scroll offset to show maximum entries while keeping selected visible
-        const availableHeight = terminalHeight - 3;
-        let totalHeight = 0;
-        let visibleCount = 0;
+        // Clamp selected index to avoid pointing past end
+        setSelectedIndex((idx) => Math.min(idx, lastIndex));
+        setScrollOffset((off) => Math.min(off, lastIndex));
 
-        // Count how many entries we can fit starting from the selected entry
-        for (let i = lastIndex; i >= 0; i--) {
-          const entryHeight = getEntryHeight(prepared[i], i === lastIndex);
-          if (totalHeight + entryHeight <= availableHeight) {
-            totalHeight += entryHeight;
-            visibleCount++;
-          } else {
-            break;
+        if (autoScrollRef.current && detailsViewRef.current === null) {
+          setSelectedIndex(lastIndex);
+
+          // Calculate scroll offset to show maximum entries while keeping selected visible
+          const availableHeight = terminalHeight - 3;
+          let totalHeight = 0;
+          let visibleCount = 0;
+
+          // Count how many entries we can fit starting from the selected entry
+          for (let i = lastIndex; i >= 0; i--) {
+            const entryHeight = getEntryHeight(prepared[i], i === lastIndex);
+            if (totalHeight + entryHeight <= availableHeight) {
+              totalHeight += entryHeight;
+              visibleCount++;
+            } else {
+              break;
+            }
           }
-        }
 
-        // Set scroll offset to show the maximum number of entries
-        const newOffset = Math.max(0, lastIndex - visibleCount + 1);
-        setScrollOffset(newOffset);
+          // Set scroll offset to show the maximum number of entries
+          const newOffset = Math.max(0, lastIndex - visibleCount + 1);
+          setScrollOffset(newOffset);
+        }
       }
     };
 
@@ -243,10 +270,12 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       const idx = selectedIndex + 1;
       setSelectedIndex(idx);
       ensureVisible(idx);
+      updateAutoScrollState(idx);
     } else if (key.upArrow && selectedIndex > 0) {
       const idx = selectedIndex - 1;
       setSelectedIndex(idx);
       ensureVisible(idx);
+      updateAutoScrollState(idx);
     } else if (key.pageDown) {
       const idx = Math.min(
         filteredEntries.length - 1,
@@ -254,17 +283,23 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       );
       setSelectedIndex(idx);
       ensureVisible(idx);
+      updateAutoScrollState(idx);
     } else if (key.pageUp) {
       const idx = Math.max(0, selectedIndex - pageSize);
       setSelectedIndex(idx);
       ensureVisible(idx);
+      updateAutoScrollState(idx);
     } else if (input === 'g') {
       setSelectedIndex(0);
       ensureVisible(0);
+      updateAutoScrollState(0);
     } else if (input === 'G') {
       const idx = filteredEntries.length - 1;
       setSelectedIndex(idx);
       ensureVisible(idx);
+      updateAutoScrollState(idx);
+    } else if (input === 'a') {
+      setAutoScroll((s) => !s);
     } else if (input === 'f') {
       setShowFilterModal(true);
     } else if (input === 'r') {
@@ -288,6 +323,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const scrollIndicator = hasMore
     ? ` (${visibleStart + 1}-${visibleEnd} of ${filteredEntries.length}${filterIndicator})`
     : filterIndicator;
+  const autoIndicator = ` [a] Auto:${autoScroll ? 'ON' : 'OFF'}`;
 
   // Show filter modal if requested
   if (showFilterModal) {
@@ -349,8 +385,8 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       Text,
       { dimColor: true, wrap: 'truncate-end' },
       hasMore
-        ? '[↑↓] Navigate  [Enter] Detail  [PgUp/PgDn] Page  [g] Top  [G] Bottom  [f] Filter  [r] Refresh  [b] Back  [q] Quit'
-        : '[↑↓] Navigate  [Enter] Detail  [f] Filter  [r] Refresh  [b] Back  [q] Quit'
+        ? `[↑↓] Navigate  [Enter] Detail  [PgUp/PgDn] Page  [g] Top  [G] Bottom  [f] Filter  [r] Refresh${autoIndicator}  [b] Back  [q] Quit`
+        : `[↑↓] Navigate  [Enter] Detail  [f] Filter  [r] Refresh${autoIndicator}  [b] Back  [q] Quit`
     )
   );
 };
