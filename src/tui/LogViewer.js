@@ -237,21 +237,25 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
         const lastIndex = prepared.length - 1;
         setSelectedIndex(lastIndex);
 
-        let height = 0;
-        let offset = lastIndex;
+        // Calculate scroll offset to show maximum entries while keeping selected visible
         const availableHeight = terminalHeight - 3;
-
-        while (
-          offset >= 0 &&
-          height + getEntryHeight(prepared[offset], offset === lastIndex) <=
-            availableHeight
-        ) {
-          height += getEntryHeight(prepared[offset], offset === lastIndex);
-          offset--;
+        let totalHeight = 0;
+        let visibleCount = 0;
+        
+        // Count how many entries we can fit starting from the selected entry
+        for (let i = lastIndex; i >= 0; i--) {
+          const entryHeight = getEntryHeight(prepared[i], i === lastIndex);
+          if (totalHeight + entryHeight <= availableHeight) {
+            totalHeight += entryHeight;
+            visibleCount++;
+          } else {
+            break;
+          }
         }
-
-        offset = Math.max(0, Math.min(prepared.length - 1, offset + 1));
-        setScrollOffset(offset);
+        
+        // Set scroll offset to show the maximum number of entries
+        const newOffset = Math.max(0, lastIndex - visibleCount + 1);
+        setScrollOffset(newOffset);
       }
     };
 
