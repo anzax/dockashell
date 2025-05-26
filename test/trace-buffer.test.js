@@ -8,7 +8,7 @@ let mockReadTraceEntries = null;
 let mockGetTraceFile = null;
 
 // Override the import to use our mocks
-const originalImport = await import('../src/tui/read-traces.js');
+const _originalImport = await import('../src/tui/read-traces.js');
 const mockReadTraces = {
   listSessions: (...args) => mockListSessions(...args),
   readTraceEntries: (...args) => mockReadTraceEntries(...args),
