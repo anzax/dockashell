@@ -77,6 +77,13 @@ export async function readTraceEntries(
           patch: trace.patch,
           result: trace.result,
         };
+      } else if (trace.tool === 'write_file') {
+        entry = {
+          timestamp: trace.timestamp,
+          kind: 'write_file',
+          path: trace.path,
+          result: trace.result,
+        };
       } else if (trace.tool === 'write_trace') {
         entry = {
           timestamp: trace.timestamp,

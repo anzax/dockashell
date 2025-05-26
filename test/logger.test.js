@@ -97,4 +97,21 @@ describe('Logger', () => {
     assert.ok(entries[0].diff.startsWith('diff --git'));
     assert.strictEqual(entries[0].result.exitCode, 1);
   });
+
+  test('should log write_file traces', async () => {
+    await logger.logToolExecution(
+      'test-project',
+      'write_file',
+      { path: 'foo.txt', overwrite: true },
+      { exitCode: 0, duration: '0.1s', output: '' }
+    );
+
+    const entries = await logger.readTraces('test-project', {
+      type: 'write_file',
+      limit: 5,
+    });
+    assert.strictEqual(entries.length, 1);
+    assert.strictEqual(entries[0].path, 'foo.txt');
+    assert.strictEqual(entries[0].result.exitCode, 0);
+  });
 });

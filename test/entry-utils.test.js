@@ -152,9 +152,11 @@ describe('detectTraceType', () => {
     const note = { kind: 'note', noteType: 'agent' };
     const patch = { kind: 'apply_patch', patch: 'patch' };
     const cmd = { kind: 'command', command: 'ls' };
+    const write = { kind: 'write_file', path: 'f' };
 
     assert.strictEqual(detectTraceType(note), 'agent');
     assert.strictEqual(detectTraceType(patch), 'apply_patch');
     assert.strictEqual(detectTraceType(cmd), 'command');
+    assert.strictEqual(detectTraceType(write), 'write_file');
   });
 });
