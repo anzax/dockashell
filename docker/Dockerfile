@@ -10,7 +10,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 # - Node 20 LTS (via NodeSource)
 # - ripgrep, jq, git-lfs, build chain
 # - Corepack activation (gives you yarn + pnpm without npm -g)
-# - Aider for AI-assisted coding
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
     ca-certificates curl gnupg jq git-lfs build-essential ripgrep \
@@ -26,10 +25,13 @@ RUN apt-get update \
     \
     # ----- Python helpers ------------------------------------------------------
     && python -m pip install --no-cache-dir --upgrade pip wheel      \
-    && python -m pip install --no-cache-dir aider-chat               \
     \
     # ----- Cleanup -------------------------------------------------------------
     && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Add apply_patch script
+COPY docker/apply_patch.py /usr/local/bin/apply_patch.py
+RUN chmod +x /usr/local/bin/apply_patch.py
 
 ###############################################################################
 # 2. Back to the non-root dev user that ships with devcontainers (UID 1000)

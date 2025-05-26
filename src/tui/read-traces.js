@@ -70,10 +70,10 @@ export async function readTraceEntries(
           command: trace.command,
           result: trace.result,
         };
-      } else if (trace.tool === 'apply_diff') {
+      } else if (trace.tool === 'apply_patch') {
         entry = {
           timestamp: trace.timestamp,
-          kind: 'apply_diff',
+          kind: 'apply_patch',
           diff: trace.diff,
           result: trace.result,
         };

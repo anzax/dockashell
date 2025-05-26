@@ -135,25 +135,29 @@ async function testMCPTools() {
     );
   }
 
-  // Test 5: apply_diff with nonexistent project
+  // Test 5: apply_patch with nonexistent project
   try {
-    console.log('5. Testing apply_diff with nonexistent project...');
-    const diff =
-      'diff --git a/foo.txt b/foo.txt\nindex 0000000..e69de29 100644\n--- a/foo.txt\n+++ b/foo.txt\n@@\n+test\n';
-    const response = await runMCPCommand('apply_diff', {
+    console.log('5. Testing apply_patch with nonexistent project...');
+    const patch = `*** Begin Patch
+*** Update File: foo.txt
+ existing line
++new line
+ another existing line
+*** End Patch`;
+    const response = await runMCPCommand('apply_patch', {
       project_name: 'missing',
-      diff,
+      patch,
     });
     if (response.error || response.result?.isError) {
       console.log(
-        '✅ apply_diff handled error:',
+        '✅ apply_patch handled error:',
         response.result?.content?.[0]?.text || response.error?.message
       );
     } else {
-      console.log('❌ apply_diff should have failed for nonexistent project');
+      console.log('❌ apply_patch should have failed for nonexistent project');
     }
   } catch (error) {
-    console.log('✅ apply_diff handled error gracefully:', error.message);
+    console.log('✅ apply_patch handled error gracefully:', error.message);
   }
 
   // Test 6: Stop project (should handle gracefully)

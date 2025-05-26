@@ -140,10 +140,10 @@ export class Logger {
                 command: trace.command,
                 result: trace.result,
               };
-            } else if (trace.tool === 'apply_diff') {
+            } else if (trace.tool === 'apply_patch') {
               return {
                 timestamp: trace.timestamp,
-                kind: 'apply_diff',
+                kind: 'apply_patch',
                 diff: trace.diff,
                 result: trace.result,
               };
@@ -171,8 +171,8 @@ export class Logger {
           );
         } else if (type === 'command') {
           entries = entries.filter((e) => e.kind === 'command');
-        } else if (type === 'apply_diff') {
-          entries = entries.filter((e) => e.kind === 'apply_diff');
+        } else if (type === 'apply_patch') {
+          entries = entries.filter((e) => e.kind === 'apply_patch');
         } else {
           entries = entries.filter(
             (e) => e.kind === type || e.noteType === type

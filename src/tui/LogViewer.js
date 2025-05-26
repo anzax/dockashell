@@ -106,7 +106,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     agent: true,
     summary: true,
     command: true,
-    apply_diff: true,
+    apply_patch: true,
   });
   const [buffer, setBuffer] = useState(null);
   const { stdout } = useStdout();

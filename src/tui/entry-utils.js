@@ -32,7 +32,7 @@ export const formatLines = (text, maxLines = Infinity) => {
 export const detectTraceType = (entry) => {
   if (!entry) return 'unknown';
   if (entry.kind === 'command' || entry.command) return 'command';
-  if (entry.kind === 'apply_diff' || entry.diff) return 'apply_diff';
+  if (entry.kind === 'apply_patch' || entry.diff) return 'apply_patch';
   if (entry.kind === 'note') return entry.noteType || 'note';
   if (entry.noteType) return entry.noteType;
   if (entry.type) return entry.type; // legacy notes
@@ -202,7 +202,7 @@ export const buildEntryLines = (
         );
       }
     }
-  } else if (entry.kind === 'apply_diff') {
+  } else if (entry.kind === 'apply_patch') {
     const result = entry.result || {};
     const exitCode = result.exitCode !== undefined ? result.exitCode : 'N/A';
     const duration = result.duration || 'N/A';

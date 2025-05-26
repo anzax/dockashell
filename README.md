@@ -52,7 +52,7 @@ DockaShell includes a comprehensive default development image (`dockashell/defau
 - **Node.js 20 LTS** - Active LTS support
 - **Python 3** with pip and venv
 - **Essential CLI Tools**: patch, diff, grep, sed, gawk, rg, cat, head, tail, find, tree, zip, unzip, curl, wget, nano, vim, git, jq
-- **Aider AI Assistant** - Aider could be used as sub-agent
+
 - **Package Managers**: npm, pnpm, pip3
 - **Non-root developer user** with sudo access
 
@@ -190,9 +190,9 @@ Starts a Docker container for the specified project.
 **Arguments:** `{"project_name": "string", "command": "string"}`
 Executes a shell command in the project container.
 
-### `apply_diff`
-**Arguments:** `{"project_name": "string", "diff": "string"}`
-Applies an [Aider diff](docs/better-edit-tool/aider.md) inside the project container using `aider --apply`. More tolerant than `git apply` for iterative edits.
+### `apply_patch`
+**Arguments:** `{"project_name": "string", "patch": "string"}`
+Applies patches using the [OpenAI format](https://cookbook.openai.com/examples/gpt4-1_prompting_guide#appendix-generating-and-applying-file-diffs) inside the project container with context-based matching. More reliable than line-number based diffs for iterative edits.
 
 ### `project_status`
 **Arguments:** `{"project_name": "string"}`
