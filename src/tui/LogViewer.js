@@ -3,6 +3,7 @@ import { Box, Text, useInput, useStdout } from 'ink';
 import { TraceBuffer } from './trace-buffer.js';
 import { prepareEntry } from './entry-utils.js';
 import { TraceDetailsView } from './TraceDetailsView.js';
+import { FilterModal } from './FilterModal.js';
 
 const renderLines = (lines, selected) =>
   lines.map((line, idx) => {
@@ -99,13 +100,35 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const [terminalHeight, setTerminalHeight] = useState(20);
   const [terminalWidth, setTerminalWidth] = useState(80);
   const [detailsViewIndex, setDetailsViewIndex] = useState(null);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [filters, setFilters] = useState({
+    user: true,
+    agent: true,
+    summary: true,
+    command: true,
+    apply_diff: true,
+  });
   const [buffer, setBuffer] = useState(null);
   const { stdout } = useStdout();
 
   const maxLinesPerEntry = config?.display?.max_lines_per_entry || 10;
+
+  // Determine trace type from entry
+  const getTraceType = (entry) => {
+    if (entry.command) return 'command';
+    if (entry.diff) return 'apply_diff';
+    if (entry.type) return entry.type; // user, agent, summary
+    return 'unknown';
+  };
+
+  // Filter entries based on current filters
+  const filteredEntries = entries.filter((entry) => {
+    const traceType = getTraceType(entry);
+    return filters[traceType] !== false; // Show if filter is true or undefined
+  });
   const ensureVisible = useCallback(
     (index) => {
-      if (entries.length === 0) return;
+      if (filteredEntries.length === 0) return;
       let offset = scrollOffset;
       if (index < offset) {
         offset = index;
@@ -113,17 +136,17 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
         const availableHeight = terminalHeight - 3;
         let height = 0;
         for (let i = index; i >= offset; i--) {
-          height += getEntryHeight(entries[i], i === index);
+          height += getEntryHeight(filteredEntries[i], i === index);
           if (height > availableHeight) {
             offset = i + 1;
             break;
           }
         }
       }
-      offset = Math.min(Math.max(offset, 0), entries.length - 1);
+      offset = Math.min(Math.max(offset, 0), filteredEntries.length - 1);
       setScrollOffset(offset);
     },
-    [entries, scrollOffset, terminalHeight]
+    [filteredEntries, scrollOffset, terminalHeight]
   );
 
   // Handle terminal resize
@@ -148,23 +171,23 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   }, [stdout]);
 
   const calculateVisibleEntries = useCallback(() => {
-    if (entries.length === 0) return { start: 0, end: 0 };
+    if (filteredEntries.length === 0) return { start: 0, end: 0 };
 
     const availableHeight = terminalHeight - 3; // header + help
     let height = 0;
     let end = scrollOffset;
 
     while (
-      end < entries.length &&
-      height + getEntryHeight(entries[end], end === selectedIndex) <=
+      end < filteredEntries.length &&
+      height + getEntryHeight(filteredEntries[end], end === selectedIndex) <=
         availableHeight
     ) {
-      height += getEntryHeight(entries[end], end === selectedIndex);
+      height += getEntryHeight(filteredEntries[end], end === selectedIndex);
       end++;
     }
 
     return { start: scrollOffset, end };
-  }, [entries, scrollOffset, terminalHeight, selectedIndex]);
+  }, [filteredEntries, scrollOffset, terminalHeight, selectedIndex]);
 
   // Load entries using TraceBuffer and update when buffer changes
   useEffect(() => {
@@ -217,14 +240,14 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   // Input handling
   useInput((input, key) => {
     // Skip input handling when details view is open (it handles its own input)
-    if (detailsViewIndex !== null) return;
+    if (detailsViewIndex !== null || showFilterModal) return;
 
     const { start, end } = calculateVisibleEntries();
     const pageSize = end - start || 1;
 
     if (key.return) {
       setDetailsViewIndex(selectedIndex);
-    } else if (key.downArrow && selectedIndex < entries.length - 1) {
+    } else if (key.downArrow && selectedIndex < filteredEntries.length - 1) {
       const idx = selectedIndex + 1;
       setSelectedIndex(idx);
       ensureVisible(idx);
@@ -233,7 +256,10 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       setSelectedIndex(idx);
       ensureVisible(idx);
     } else if (key.pageDown) {
-      const idx = Math.min(entries.length - 1, selectedIndex + pageSize);
+      const idx = Math.min(
+        filteredEntries.length - 1,
+        selectedIndex + pageSize
+      );
       setSelectedIndex(idx);
       ensureVisible(idx);
     } else if (key.pageUp) {
@@ -244,9 +270,11 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       setSelectedIndex(0);
       ensureVisible(0);
     } else if (input === 'G') {
-      const idx = entries.length - 1;
+      const idx = filteredEntries.length - 1;
       setSelectedIndex(idx);
       ensureVisible(idx);
+    } else if (input === 'f') {
+      setShowFilterModal(true);
     } else if (input === 'r') {
       buffer?.refresh().catch(() => {});
     } else if (input === 'b') {
@@ -257,16 +285,44 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   });
 
   const { start: visibleStart, end: visibleEnd } = calculateVisibleEntries();
-  const visibleEntries = entries.slice(visibleStart, visibleEnd);
-  const hasMore = entries.length > visibleEnd - visibleStart;
+  const visibleEntries = filteredEntries.slice(visibleStart, visibleEnd);
+  const hasMore = filteredEntries.length > visibleEnd - visibleStart;
+  const activeFilters = Object.values(filters).filter(Boolean).length;
+  const totalFilters = Object.keys(filters).length;
+  const filterIndicator =
+    activeFilters < totalFilters
+      ? ` [${activeFilters}/${totalFilters} filtered]`
+      : '';
   const scrollIndicator = hasMore
-    ? ` (${visibleStart + 1}-${visibleEnd} of ${entries.length})`
-    : '';
+    ? ` (${visibleStart + 1}-${visibleEnd} of ${filteredEntries.length}${filterIndicator})`
+    : filterIndicator;
 
+  // Show filter modal if requested
+  if (showFilterModal) {
+    return React.createElement(
+      Box,
+      {
+        flexDirection: 'column',
+        height: terminalHeight,
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      React.createElement(FilterModal, {
+        currentFilters: filters,
+        onClose: () => setShowFilterModal(false),
+        onApply: (newFilters) => {
+          setFilters(newFilters);
+          setShowFilterModal(false);
+          setSelectedIndex(0); // Reset selection after filtering
+          setScrollOffset(0);
+        },
+      })
+    );
+  }
   // Show details view if index is set
   if (detailsViewIndex !== null) {
     return React.createElement(TraceDetailsView, {
-      traces: entries,
+      traces: filteredEntries,
       currentIndex: detailsViewIndex,
       onClose: () => setDetailsViewIndex(null),
       onNavigate: (newIndex) => {
@@ -301,8 +357,8 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       Text,
       { dimColor: true, wrap: 'truncate-end' },
       hasMore
-        ? '[↑↓] Navigate  [Enter] Detail  [PgUp/PgDn] Page  [g] Top  [G] Bottom  [r] Refresh  [b] Back  [q] Quit'
-        : '[↑↓] Navigate  [Enter] Detail  [r] Refresh  [b] Back  [q] Quit'
+        ? '[↑↓] Navigate  [Enter] Detail  [PgUp/PgDn] Page  [g] Top  [G] Bottom  [f] Filter  [r] Refresh  [b] Back  [q] Quit'
+        : '[↑↓] Navigate  [Enter] Detail  [f] Filter  [r] Refresh  [b] Back  [q] Quit'
     )
   );
 };
