@@ -28,6 +28,17 @@ export const formatLines = (text, maxLines = Infinity) => {
   ];
 };
 
+// Helper to determine the high level trace type
+export const detectTraceType = (entry) => {
+  if (!entry) return 'unknown';
+  if (entry.kind === 'command' || entry.command) return 'command';
+  if (entry.kind === 'apply_diff' || entry.diff) return 'apply_diff';
+  if (entry.kind === 'note') return entry.noteType || 'note';
+  if (entry.noteType) return entry.noteType;
+  if (entry.type) return entry.type; // legacy notes
+  return 'unknown';
+};
+
 export const getNoteTypeColor = (noteType) => {
   switch (noteType) {
     case 'user':
@@ -294,6 +305,7 @@ export const prepareEntry = (entry, maxLines, terminalWidth = 80) => {
 
   // Height is always 3 for list view (2 lines + 1 margin)
   const height = 3;
+  const traceType = detectTraceType(entry);
 
-  return { entry, lines, fullLines, height };
+  return { entry, lines, fullLines, height, traceType };
 };
