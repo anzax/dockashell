@@ -303,7 +303,9 @@ class DockashellServer {
         type: z
           .string()
           .optional()
-          .describe("Filter by 'command', 'note', 'user', 'agent', 'summary'"),
+          .describe(
+            "Filter by 'command', 'apply_patch', 'write_file', 'note', 'user', 'agent', 'summary'"
+          ),
         search: z.string().optional().describe('Search substring'),
         skip: z.number().int().optional().describe('Skip N entries'),
         limit: z.number().int().optional().describe('Limit number of entries'),
@@ -389,7 +391,27 @@ class DockashellServer {
                 } else if (entry.kind === 'apply_patch') {
                   lines.push(entry.diff);
                 } else if (entry.kind === 'write_file') {
-                  lines.push(entry.path);
+                  // Show file path with metadata
+                  const pathText = entry.path || '';
+                  const overwriteText = entry.overwrite ? ' (overwrite)' : '';
+                  const sizeText =
+                    entry.contentLength !== undefined
+                      ? ` [${entry.contentLength} bytes]`
+                      : '';
+                  lines.push(`${pathText}${overwriteText}${sizeText}`);
+
+                  // Show content preview if available
+                  if (entry.content) {
+                    lines.push('');
+                    lines.push('**Content:**');
+                    lines.push('```');
+                    const contentDisplay =
+                      entry.content.length > 300
+                        ? entry.content.substring(0, 300) + '...'
+                        : entry.content;
+                    lines.push(contentDisplay);
+                    lines.push('```');
+                  }
                 } else {
                   lines.push(entry.text);
                 }

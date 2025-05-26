@@ -433,6 +433,12 @@ export class ContainerManager {
     const timeoutMs = options.timeout || 30000;
     const startTime = Date.now();
 
+    // Create a preview of content for logging (first 500 chars)
+    const contentPreview =
+      content && content.length > 500
+        ? content.substring(0, 500) + '...[truncated]'
+        : content || '';
+
     try {
       const container = this.docker.getContainer(containerName);
       const data = await container.inspect();
@@ -511,7 +517,12 @@ export class ContainerManager {
       await this.logger.logToolExecution(
         projectName,
         'write_file',
-        { path: filePath, overwrite },
+        {
+          path: filePath,
+          overwrite,
+          content: contentPreview,
+          contentLength: content ? content.length : 0,
+        },
         {
           exitCode: result.exitCode,
           duration: `${duration}s`,
@@ -533,7 +544,12 @@ export class ContainerManager {
       await this.logger.logToolExecution(
         projectName,
         'write_file',
-        { path: filePath, overwrite },
+        {
+          path: filePath,
+          overwrite,
+          content: contentPreview,
+          contentLength: content ? content.length : 0,
+        },
         {
           exitCode: -1,
           duration: `${duration}s`,

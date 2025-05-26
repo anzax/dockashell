@@ -152,6 +152,9 @@ export class Logger {
                 timestamp: trace.timestamp,
                 kind: 'write_file',
                 path: trace.path,
+                content: trace.content,
+                overwrite: trace.overwrite,
+                contentLength: trace.contentLength,
                 result: trace.result,
               };
             } else if (trace.tool === 'write_trace') {
