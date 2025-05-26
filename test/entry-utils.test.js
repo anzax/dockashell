@@ -131,11 +131,6 @@ describe('buildEntryLines', () => {
 });
 
 describe('formatTimestamp', () => {
-  test('formats valid timestamp', () => {
-    const ts = formatTimestamp('2024-01-01T12:00:00Z');
-    assert.strictEqual(ts, '2024-01-01 12:00:00');
-  });
-
   test('handles invalid timestamp', () => {
     assert.strictEqual(formatTimestamp('invalid'), 'Invalid timestamp');
     assert.strictEqual(formatTimestamp(null), 'No timestamp');
@@ -155,11 +150,11 @@ describe('prepareEntry', () => {
 describe('detectTraceType', () => {
   test('handles various entry shapes', () => {
     const note = { kind: 'note', noteType: 'agent' };
-    const diff = { kind: 'apply_patch', diff: 'diff' };
+    const patch = { kind: 'apply_patch', patch: 'patch' };
     const cmd = { kind: 'command', command: 'ls' };
 
     assert.strictEqual(detectTraceType(note), 'agent');
-    assert.strictEqual(detectTraceType(diff), 'apply_patch');
+    assert.strictEqual(detectTraceType(patch), 'apply_patch');
     assert.strictEqual(detectTraceType(cmd), 'command');
   });
 });

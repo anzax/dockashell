@@ -300,7 +300,7 @@ class DockashellServer {
                 entry.kind === 'command'
                   ? 'COMMAND'
                   : entry.kind === 'apply_patch'
-                    ? 'APPLY_DIFF'
+                    ? 'APPLY_PATCH'
                     : (entry.noteType || entry.kind || 'UNKNOWN').toUpperCase();
 
               if (

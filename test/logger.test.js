@@ -81,7 +81,7 @@ describe('Logger', () => {
     await logger.logToolExecution(
       'test-project',
       'apply_patch',
-      { diff },
+      { patch: diff },
       {
         exitCode: 1,
         duration: '0.2s',

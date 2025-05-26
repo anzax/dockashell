@@ -74,7 +74,7 @@ export async function readTraceEntries(
         entry = {
           timestamp: trace.timestamp,
           kind: 'apply_patch',
-          diff: trace.diff,
+          patch: trace.patch,
           result: trace.result,
         };
       } else if (trace.tool === 'write_trace') {
