@@ -115,9 +115,7 @@ class DockashellServer {
           };
         } catch (error) {
           return {
-            content: [
-              { type: 'text', text: `Error: ${error.message}` },
-            ],
+            content: [{ type: 'text', text: `Error: ${error.message}` }],
             isError: true,
           };
         }
@@ -141,7 +139,6 @@ class DockashellServer {
         }
 
         try {
-
           const projectConfig =
             await this.projectManager.loadProject(project_name);
 
@@ -183,9 +180,7 @@ class DockashellServer {
           };
         } catch (error) {
           return {
-            content: [
-              { type: 'text', text: `Error: ${error.message}` },
-            ],
+            content: [{ type: 'text', text: `Error: ${error.message}` }],
             isError: true,
           };
         }
@@ -211,7 +206,6 @@ class DockashellServer {
         }
 
         try {
-
           // Ensure project exists
           await this.projectManager.loadProject(project_name);
 
@@ -235,9 +229,7 @@ class DockashellServer {
           return { content: [{ type: 'text', text: response }] };
         } catch (error) {
           return {
-            content: [
-              { type: 'text', text: `Error: ${error.message}` },
-            ],
+            content: [{ type: 'text', text: `Error: ${error.message}` }],
             isError: true,
           };
         }
@@ -262,7 +254,6 @@ class DockashellServer {
         }
 
         try {
-
           await this.projectManager.loadProject(project_name);
           const result = await this.containerManager.writeFile(
             project_name,
@@ -283,9 +274,7 @@ class DockashellServer {
           return { content: [{ type: 'text', text: response }] };
         } catch (error) {
           return {
-            content: [
-              { type: 'text', text: `Error: ${error.message}` },
-            ],
+            content: [{ type: 'text', text: `Error: ${error.message}` }],
             isError: true,
           };
         }
@@ -475,7 +464,6 @@ class DockashellServer {
         }
 
         try {
-
           const result =
             await this.containerManager.stopContainer(project_name);
 
@@ -496,9 +484,7 @@ class DockashellServer {
           };
         } catch (error) {
           return {
-            content: [
-              { type: 'text', text: `Error: ${error.message}` },
-            ],
+            content: [{ type: 'text', text: `Error: ${error.message}` }],
             isError: true,
           };
         }
