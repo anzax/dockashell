@@ -68,11 +68,11 @@ class DockashellServer {
         project_name: z.string().describe('Name of the project to start'),
       },
       async ({ project_name }) => {
-        try {
-          if (!project_name || typeof project_name !== 'string') {
-            throw new Error('Project name must be a non-empty string');
-          }
+        if (!project_name || typeof project_name !== 'string') {
+          throw new Error('Project name must be a non-empty string');
+        }
 
+        try {
           // Load project configuration
           let projectConfig;
           try {
@@ -114,9 +114,12 @@ class DockashellServer {
             ],
           };
         } catch (error) {
-          throw new Error(
-            `Failed to start project '${project_name}': ${error.message}`
-          );
+          return {
+            content: [
+              { type: 'text', text: `Error: ${error.message}` },
+            ],
+            isError: true,
+          };
         }
       }
     );
@@ -129,14 +132,15 @@ class DockashellServer {
         command: z.string().describe('Shell command to execute'),
       },
       async ({ project_name, command }) => {
-        try {
-          if (!project_name || typeof project_name !== 'string') {
-            throw new Error('Project name must be a non-empty string');
-          }
+        if (!project_name || typeof project_name !== 'string') {
+          throw new Error('Project name must be a non-empty string');
+        }
 
-          if (!command || typeof command !== 'string') {
-            throw new Error('Command must be a non-empty string');
-          }
+        if (!command || typeof command !== 'string') {
+          throw new Error('Command must be a non-empty string');
+        }
+
+        try {
 
           const projectConfig =
             await this.projectManager.loadProject(project_name);
@@ -178,9 +182,12 @@ class DockashellServer {
             ],
           };
         } catch (error) {
-          throw new Error(
-            `Failed to execute command in project '${project_name}': ${error.message}`
-          );
+          return {
+            content: [
+              { type: 'text', text: `Error: ${error.message}` },
+            ],
+            isError: true,
+          };
         }
       }
     );
@@ -195,14 +202,15 @@ class DockashellServer {
           .describe('Patch in OpenAI format (*** Begin Patch / *** End Patch)'),
       },
       async ({ project_name, patch }) => {
-        try {
-          if (!project_name || typeof project_name !== 'string') {
-            throw new Error('Project name must be a non-empty string');
-          }
+        if (!project_name || typeof project_name !== 'string') {
+          throw new Error('Project name must be a non-empty string');
+        }
 
-          if (!patch || typeof patch !== 'string') {
-            throw new Error('Patch must be a non-empty string');
-          }
+        if (!patch || typeof patch !== 'string') {
+          throw new Error('Patch must be a non-empty string');
+        }
+
+        try {
 
           // Ensure project exists
           await this.projectManager.loadProject(project_name);
@@ -226,9 +234,12 @@ class DockashellServer {
 
           return { content: [{ type: 'text', text: response }] };
         } catch (error) {
-          throw new Error(
-            `Failed to apply patch in project '${project_name}': ${error.message}`
-          );
+          return {
+            content: [
+              { type: 'text', text: `Error: ${error.message}` },
+            ],
+            isError: true,
+          };
         }
       }
     );
@@ -243,13 +254,14 @@ class DockashellServer {
         overwrite: z.boolean().optional().describe('Overwrite existing file'),
       },
       async ({ project_name, path, content, overwrite = false }) => {
+        if (!project_name || typeof project_name !== 'string') {
+          throw new Error('Project name must be a non-empty string');
+        }
+        if (!path || typeof path !== 'string') {
+          throw new Error('Path must be a non-empty string');
+        }
+
         try {
-          if (!project_name || typeof project_name !== 'string') {
-            throw new Error('Project name must be a non-empty string');
-          }
-          if (!path || typeof path !== 'string') {
-            throw new Error('Path must be a non-empty string');
-          }
 
           await this.projectManager.loadProject(project_name);
           const result = await this.containerManager.writeFile(
@@ -270,9 +282,12 @@ class DockashellServer {
 
           return { content: [{ type: 'text', text: response }] };
         } catch (error) {
-          throw new Error(
-            `Failed to write file in project '${project_name}': ${error.message}`
-          );
+          return {
+            content: [
+              { type: 'text', text: `Error: ${error.message}` },
+            ],
+            isError: true,
+          };
         }
       }
     );
@@ -455,10 +470,11 @@ class DockashellServer {
         project_name: z.string().describe('Name of the project to stop'),
       },
       async ({ project_name }) => {
+        if (!project_name || typeof project_name !== 'string') {
+          throw new Error('Project name must be a non-empty string');
+        }
+
         try {
-          if (!project_name || typeof project_name !== 'string') {
-            throw new Error('Project name must be a non-empty string');
-          }
 
           const result =
             await this.containerManager.stopContainer(project_name);
@@ -479,9 +495,12 @@ class DockashellServer {
             ],
           };
         } catch (error) {
-          throw new Error(
-            `Failed to stop project '${project_name}': ${error.message}`
-          );
+          return {
+            content: [
+              { type: 'text', text: `Error: ${error.message}` },
+            ],
+            isError: true,
+          };
         }
       }
     );
