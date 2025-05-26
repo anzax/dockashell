@@ -350,7 +350,7 @@ export class ContainerManager {
         Cmd: [
           'bash',
           '-c',
-          `aider --apply ${tempFile} --yes && rm -f ${tempFile}`,
+          `aider --apply ${tempFile} --yes --no-auto-commits && rm -f ${tempFile}`,
         ],
         AttachStdout: true,
         AttachStderr: true,
