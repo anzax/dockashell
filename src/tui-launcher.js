@@ -14,17 +14,27 @@ program
 
 const projectArg = program.args[0];
 
+const defaultTuiConfig = {
+  display: {
+    max_lines_per_entry: 5,
+    max_entries: 100,
+    max_visible_entries: 10,
+    show_icons: true,
+    theme: 'dark',
+  },
+};
+
 const App = () => {
   const [project, setProject] = useState(projectArg || null);
-  const [config, setConfig] = useState(null);
+  const [config, setConfig] = useState({ tui: defaultTuiConfig });
 
   React.useEffect(() => {
     loadConfig()
       .then(setConfig)
-      .catch(() => setConfig(null));
+      .catch(() => {
+        // Keep default config on error
+      });
   }, []);
-
-  if (!config) return null;
 
   if (!project) {
     return React.createElement(ProjectSelector, {
@@ -35,9 +45,7 @@ const App = () => {
 
   return React.createElement(LogViewer, {
     project,
-    config: config.tui || {
-      display: { max_lines_per_entry: 5, max_entries: 100 },
-    },
+    config: config.tui || defaultTuiConfig,
     onBack: () => setProject(null),
     onExit: () => process.exit(0),
   });

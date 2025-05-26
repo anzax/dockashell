@@ -2,8 +2,9 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Box, Text, useInput, useStdout } from 'ink';
 import { TraceBuffer } from './trace-buffer.js';
 import { prepareEntry } from './entry-utils.js';
+import { TraceDetailsView } from './TraceDetailsView.js';
 
-const renderLines = (lines, selected, isModal = false) =>
+const renderLines = (lines, selected) =>
   lines.map((line, idx) => {
     if (line.type === 'header') {
       return React.createElement(
@@ -12,13 +13,13 @@ const renderLines = (lines, selected, isModal = false) =>
         React.createElement(Text, { wrap: 'truncate-end' }, line.icon + ' '),
         React.createElement(
           Text,
-          { dimColor: !isModal, wrap: 'truncate-end' },
+          { dimColor: true, wrap: 'truncate-end' },
           line.timestamp + ' '
         ),
         React.createElement(
           Text,
           {
-            bold: selected && !isModal,
+            bold: selected,
             color: line.typeColor,
             wrap: 'truncate-end',
           },
@@ -31,8 +32,8 @@ const renderLines = (lines, selected, isModal = false) =>
         Text,
         {
           key: idx,
-          bold: selected && !isModal,
-          color: isModal ? 'white' : 'gray',
+          bold: selected,
+          color: 'gray',
           wrap: 'truncate-end',
         },
         line.text
@@ -56,7 +57,7 @@ const renderLines = (lines, selected, isModal = false) =>
         ),
         React.createElement(
           Text,
-          { dimColor: !isModal, wrap: 'truncate-end' },
+          { dimColor: true, wrap: 'truncate-end' },
           line.extra
         )
       );
@@ -64,19 +65,19 @@ const renderLines = (lines, selected, isModal = false) =>
     if (line.type === 'output') {
       return React.createElement(
         Text,
-        { key: idx, color: isModal ? 'white' : 'gray', wrap: 'truncate-end' },
+        { key: idx, color: 'gray', wrap: 'truncate-end' },
         '  ' + line.text
       );
     }
     return React.createElement(
       Text,
-      { key: idx, color: isModal ? 'white' : 'gray', wrap: 'truncate-end' },
+      { key: idx, color: 'gray', wrap: 'truncate-end' },
       line.text
     );
   });
 
-const Entry = ({ item, selected }) => {
-  return React.createElement(
+const Entry = ({ item, selected }) =>
+  React.createElement(
     Box,
     {
       flexDirection: 'column',
@@ -86,65 +87,10 @@ const Entry = ({ item, selected }) => {
       paddingRight: 1,
       marginBottom: 1,
     },
-    ...renderLines(item.lines, selected, false)
+    ...renderLines(item.lines, selected)
   );
-};
 
 export const getEntryHeight = (entry, isSelected) => 3 + (isSelected ? 2 : 0); // Always 3 lines (2 content + 1 margin) + 2 for border if selected
-
-const EntryModal = ({ item, onClose, height }) => {
-  const [offset, setOffset] = useState(0);
-
-  const availableHeight = Math.max(1, height - 6); // header, help, borders
-  const maxOffset = Math.max(0, item.fullLines.length - availableHeight);
-  const visible = item.fullLines.slice(offset, offset + availableHeight);
-
-  useInput((input, key) => {
-    if (key.escape || key.return || input === 'q') {
-      onClose();
-      return;
-    }
-    if (key.downArrow) setOffset((o) => Math.min(maxOffset, o + 1));
-    else if (key.upArrow) setOffset((o) => Math.max(0, o - 1));
-    else if (key.pageDown)
-      setOffset((o) => Math.min(maxOffset, o + availableHeight));
-    else if (key.pageUp) setOffset((o) => Math.max(0, o - availableHeight));
-    else if (input === 'g') setOffset(0);
-    else if (input === 'G') setOffset(maxOffset);
-  });
-
-  const indicator =
-    item.fullLines.length > availableHeight
-      ? ` (${offset + 1}-${Math.min(item.fullLines.length, offset + availableHeight)} of ${item.fullLines.length})`
-      : '';
-
-  return React.createElement(
-    Box,
-    { flexDirection: 'column', height },
-    React.createElement(
-      Text,
-      { bold: true, wrap: 'truncate-end' },
-      `Log Entry Detail${indicator}`
-    ),
-    React.createElement(
-      Box,
-      {
-        flexDirection: 'column',
-        flexGrow: 1,
-        borderStyle: 'double',
-        paddingLeft: 1,
-        paddingRight: 1,
-        marginY: 1,
-      },
-      ...renderLines(visible, false, true)
-    ),
-    React.createElement(
-      Text,
-      { dimColor: true, wrap: 'truncate-end' },
-      '[↑↓ PgUp/PgDn g/G] Scroll  [Enter/Esc/q] Close'
-    )
-  );
-};
 
 export const LogViewer = ({ project, onBack, onExit, config }) => {
   const [entries, setEntries] = useState([]);
@@ -152,7 +98,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const [scrollOffset, setScrollOffset] = useState(0);
   const [terminalHeight, setTerminalHeight] = useState(20);
   const [terminalWidth, setTerminalWidth] = useState(80);
-  const [modalEntry, setModalEntry] = useState(null);
+  const [detailsViewIndex, setDetailsViewIndex] = useState(null);
   const [buffer, setBuffer] = useState(null);
   const { stdout } = useStdout();
 
@@ -241,7 +187,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
         const availableHeight = terminalHeight - 3;
         let totalHeight = 0;
         let visibleCount = 0;
-        
+
         // Count how many entries we can fit starting from the selected entry
         for (let i = lastIndex; i >= 0; i--) {
           const entryHeight = getEntryHeight(prepared[i], i === lastIndex);
@@ -252,7 +198,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
             break;
           }
         }
-        
+
         // Set scroll offset to show the maximum number of entries
         const newOffset = Math.max(0, lastIndex - visibleCount + 1);
         setScrollOffset(newOffset);
@@ -270,16 +216,14 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
 
   // Input handling
   useInput((input, key) => {
+    // Skip input handling when details view is open (it handles its own input)
+    if (detailsViewIndex !== null) return;
+
     const { start, end } = calculateVisibleEntries();
     const pageSize = end - start || 1;
 
-    if (modalEntry) {
-      if (key.escape || key.return || input === 'q') setModalEntry(null);
-      return;
-    }
-
     if (key.return) {
-      setModalEntry(entries[selectedIndex]);
+      setDetailsViewIndex(selectedIndex);
     } else if (key.downArrow && selectedIndex < entries.length - 1) {
       const idx = selectedIndex + 1;
       setSelectedIndex(idx);
@@ -318,12 +262,17 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const scrollIndicator = hasMore
     ? ` (${visibleStart + 1}-${visibleEnd} of ${entries.length})`
     : '';
-  const sessionIndicator = '';
 
-  if (modalEntry) {
-    return React.createElement(EntryModal, {
-      item: modalEntry,
-      onClose: () => setModalEntry(null),
+  // Show details view if index is set
+  if (detailsViewIndex !== null) {
+    return React.createElement(TraceDetailsView, {
+      traces: entries,
+      currentIndex: detailsViewIndex,
+      onClose: () => setDetailsViewIndex(null),
+      onNavigate: (newIndex) => {
+        setDetailsViewIndex(newIndex);
+        setSelectedIndex(newIndex); // Keep main list in sync
+      },
       height: terminalHeight,
     });
   }
@@ -334,7 +283,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     React.createElement(
       Text,
       { bold: true, wrap: 'truncate-end' },
-      `DockaShell TUI - ${project}${sessionIndicator}${scrollIndicator}`
+      `DockaShell TUI - ${project}${scrollIndicator}`
     ),
     React.createElement(
       Box,
