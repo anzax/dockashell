@@ -320,9 +320,9 @@ export class ContainerManager {
         );
       }
 
-      // Apply the patch using the Python script
+      // Apply the patch using the JavaScript tool
       const exec = await container.exec({
-        Cmd: ['python3', '/usr/local/bin/apply_patch.py'],
+        Cmd: ['/usr/local/bin/apply_patch'],
         AttachStdout: true,
         AttachStderr: true,
         AttachStdin: true,
