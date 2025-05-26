@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Box, Text, useInput, useStdout } from 'ink';
-import chokidar from 'chokidar';
-import { readTraceEntries, listSessions, getTraceFile } from './read-traces.js';
+import { TraceBuffer } from './trace-buffer.js';
 import { prepareEntry } from './entry-utils.js';
 
 const renderLines = (lines, selected, isModal = false) =>
@@ -154,33 +153,10 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const [terminalHeight, setTerminalHeight] = useState(20);
   const [terminalWidth, setTerminalWidth] = useState(80);
   const [modalEntry, setModalEntry] = useState(null);
-  const [sessions, setSessions] = useState([]);
-  const [sessionIndex, setSessionIndex] = useState(0);
-  const [watcher, setWatcher] = useState(null);
+  const [buffer, setBuffer] = useState(null);
   const { stdout } = useStdout();
 
   const maxLinesPerEntry = config?.display?.max_lines_per_entry || 10;
-
-  useEffect(() => {
-    return () => {
-      if (watcher) watcher.close().catch(() => {});
-    };
-  }, [watcher]);
-
-  // Load sessions on mount
-  useEffect(() => {
-    (async () => {
-      try {
-        const ses = await listSessions(project);
-        setSessions(ses);
-        setSessionIndex(Math.max(0, ses.length - 1));
-      } catch {
-        setSessions(['current']);
-        setSessionIndex(0);
-      }
-    })();
-  }, [project]);
-
   const ensureVisible = useCallback(
     (index) => {
       if (entries.length === 0) return;
@@ -244,93 +220,49 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     return { start: scrollOffset, end };
   }, [entries, scrollOffset, terminalHeight, selectedIndex]);
 
-  // Load entries for the active session and watch for updates
+  // Load entries using TraceBuffer and update when buffer changes
   useEffect(() => {
-    if (sessions.length === 0) return;
-    const sessionId = sessions[sessionIndex];
+    const buf = new TraceBuffer(project, config?.display?.max_entries || 100);
+    setBuffer(buf);
 
-    let active = true;
-    let w;
+    const update = () => {
+      const raw = buf.getTraces();
+      const prepared = raw.map((e) =>
+        prepareEntry(e, maxLinesPerEntry, terminalWidth)
+      );
 
-    const load = async () => {
-      try {
-        const raw = await readTraceEntries(
-          project,
-          config?.display?.max_entries || 100,
-          sessionId
-        );
-        const prepared = raw.map((e) =>
-          prepareEntry(e, maxLinesPerEntry, terminalWidth)
-        );
-        if (!active) return;
+      setEntries(prepared);
 
-        setEntries(prepared);
+      if (prepared.length > 0) {
+        const lastIndex = prepared.length - 1;
+        setSelectedIndex(lastIndex);
 
-        if (prepared.length > 0) {
-          const lastIndex = prepared.length - 1;
-          setSelectedIndex(lastIndex);
+        let height = 0;
+        let offset = lastIndex;
+        const availableHeight = terminalHeight - 3;
 
-          let height = 0;
-          let offset = lastIndex;
-          const availableHeight = terminalHeight - 3;
-
-          while (
-            offset >= 0 &&
-            height + getEntryHeight(prepared[offset], offset === lastIndex) <=
-              availableHeight
-          ) {
-            height += getEntryHeight(prepared[offset], offset === lastIndex);
-            offset--;
-          }
-
-          offset = Math.max(0, Math.min(prepared.length - 1, offset + 1));
-          setScrollOffset(offset);
+        while (
+          offset >= 0 &&
+          height + getEntryHeight(prepared[offset], offset === lastIndex) <=
+            availableHeight
+        ) {
+          height += getEntryHeight(prepared[offset], offset === lastIndex);
+          offset--;
         }
-      } catch (err) {
-        if (!active) return;
-        setEntries([
-          prepareEntry(
-            {
-              type: 'note',
-              noteType: 'error',
-              timestamp: new Date().toISOString(),
-              text: `Error loading traces: ${err.message}`,
-            },
-            maxLinesPerEntry,
-            terminalWidth
-          ),
-        ]);
+
+        offset = Math.max(0, Math.min(prepared.length - 1, offset + 1));
+        setScrollOffset(offset);
       }
     };
 
-    load();
-
-    if (watcher) {
-      watcher.close().catch(() => {});
-      setWatcher(null);
-    }
-
-    if (sessionId === 'current') {
-      const file = getTraceFile(project, 'current');
-      w = chokidar.watch(file, { ignoreInitial: true });
-      w.on('add', load);
-      w.on('change', load);
-      setWatcher(w);
-    }
+    buf.onUpdate(update);
+    buf.start().catch(() => {});
+    update();
 
     return () => {
-      active = false;
-      if (w) w.close();
+      buf.close();
     };
-  }, [
-    project,
-    sessions,
-    sessionIndex,
-    config,
-    terminalHeight,
-    terminalWidth,
-    maxLinesPerEntry,
-  ]);
+  }, [project, config, terminalHeight, terminalWidth, maxLinesPerEntry]);
 
   // Input handling
   useInput((input, key) => {
@@ -368,45 +300,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       setSelectedIndex(idx);
       ensureVisible(idx);
     } else if (input === 'r') {
-      (async () => {
-        try {
-          const sessionId = sessions[sessionIndex];
-          const raw = await readTraceEntries(
-            project,
-            config?.display?.max_entries || 100,
-            sessionId
-          );
-          const prepared = raw.map((e) =>
-            prepareEntry(e, maxLinesPerEntry, terminalWidth)
-          );
-
-          setEntries(prepared);
-          if (selectedIndex >= prepared.length) {
-            setSelectedIndex(Math.max(0, prepared.length - 1));
-          }
-        } catch (err) {
-          setEntries([
-            prepareEntry(
-              {
-                type: 'note',
-                noteType: 'error',
-                timestamp: new Date().toISOString(),
-                text: `Error loading traces: ${err.message}`,
-              },
-              maxLinesPerEntry,
-              terminalWidth
-            ),
-          ]);
-        }
-      })();
-    } else if (input === ']' && sessionIndex < sessions.length - 1) {
-      setSessionIndex((i) => Math.min(sessions.length - 1, i + 1));
-      setSelectedIndex(0);
-      setScrollOffset(0);
-    } else if (input === '[' && sessionIndex > 0) {
-      setSessionIndex((i) => Math.max(0, i - 1));
-      setSelectedIndex(0);
-      setScrollOffset(0);
+      buffer?.refresh().catch(() => {});
     } else if (input === 'b') {
       onBack();
     } else if (input === 'q') {
@@ -420,8 +314,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const scrollIndicator = hasMore
     ? ` (${visibleStart + 1}-${visibleEnd} of ${entries.length})`
     : '';
-  const sessionIndicator =
-    sessions.length > 1 ? ` [${sessionIndex + 1}/${sessions.length}]` : '';
+  const sessionIndicator = '';
 
   if (modalEntry) {
     return React.createElement(EntryModal, {
@@ -455,8 +348,8 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       Text,
       { dimColor: true, wrap: 'truncate-end' },
       hasMore
-        ? '[↑↓] Navigate  [Enter] Detail  [PgUp/PgDn] Page  [g] Top  [G] Bottom  [[/]] Session  [r] Refresh  [b] Back  [q] Quit'
-        : '[↑↓] Navigate  [Enter] Detail  [[/]] Session  [r] Refresh  [b] Back  [q] Quit'
+        ? '[↑↓] Navigate  [Enter] Detail  [PgUp/PgDn] Page  [g] Top  [G] Bottom  [r] Refresh  [b] Back  [q] Quit'
+        : '[↑↓] Navigate  [Enter] Detail  [r] Refresh  [b] Back  [q] Quit'
     )
   );
 };
