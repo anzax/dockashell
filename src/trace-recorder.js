@@ -18,6 +18,33 @@ export class TraceRecorder {
     this.sessionStart = Date.now();
     this.sessionTimeoutMs = sessionTimeoutMs;
     this.lastTraceTime = this.sessionStart;
+
+    // Restore previous session if the current trace file exists and is recent
+    if (fs.pathExistsSync(this.currentFile)) {
+      try {
+        const data = fs.readFileSync(this.currentFile, 'utf8');
+        const lines = data.trim().split('\n').filter(Boolean);
+        if (lines.length > 0) {
+          const first = JSON.parse(lines[0]);
+          const last = JSON.parse(lines[lines.length - 1]);
+          if (first.session_id) this.sessionId = first.session_id;
+          this.sessionStart =
+            new Date(first.timestamp).getTime() || this.sessionStart;
+          this.lastTraceTime =
+            new Date(last.timestamp).getTime() || this.sessionStart;
+
+          if (Date.now() - this.lastTraceTime > this.sessionTimeoutMs) {
+            // Archive old session and start fresh
+            this.closeSync();
+            this.sessionId = this.generateSessionId();
+            this.sessionStart = Date.now();
+            this.lastTraceTime = this.sessionStart;
+          }
+        }
+      } catch {
+        // ignore parse errors and start new session
+      }
+    }
   }
 
   generateSessionId() {
@@ -46,7 +73,6 @@ export class TraceRecorder {
       session_id: this.sessionId,
       project_name: this.projectName,
       timestamp: new Date().toISOString(),
-      elapsed_ms: Date.now() - this.sessionStart,
       tool,
       trace_type: traceType,
       ...data,
@@ -70,14 +96,23 @@ export class TraceRecorder {
 
   async close() {
     await fs.ensureDir(this.sessionsDir);
-    const timestamp = new Date(this.sessionStart)
-      .toISOString()
-      .slice(0, 16)
-      .replace(':', '-') +
+    const timestamp =
+      new Date(this.sessionStart).toISOString().slice(0, 16).replace(':', '-') +
       'Z';
     const sessionFile = path.join(this.sessionsDir, `${timestamp}.jsonl`);
     if (await fs.pathExists(this.currentFile)) {
       await fs.move(this.currentFile, sessionFile, { overwrite: true });
+    }
+  }
+
+  closeSync() {
+    fs.ensureDirSync(this.sessionsDir);
+    const timestamp =
+      new Date(this.sessionStart).toISOString().slice(0, 16).replace(':', '-') +
+      'Z';
+    const sessionFile = path.join(this.sessionsDir, `${timestamp}.jsonl`);
+    if (fs.pathExistsSync(this.currentFile)) {
+      fs.moveSync(this.currentFile, sessionFile, { overwrite: true });
     }
   }
 }
