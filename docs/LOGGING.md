@@ -25,7 +25,6 @@ Trace entries capture tool activity and notes. Each includes:
 - `session_id` – current session identifier
 - `project_name` – project context
 - `timestamp` – ISO time string
-- `elapsed_ms` – milliseconds since session start
 - `tool` – component emitting the trace
 - `trace_type` – `execution`, `observation` or `decision`
 - Additional tool‑specific data (command, result, diff, etc.)

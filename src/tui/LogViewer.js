@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Box, Text, useInput, useStdout } from 'ink';
 import chokidar from 'chokidar';
+import path from 'path';
+import os from 'os';
 import { readTraceEntries, listSessions, getTraceFile } from './read-traces.js';
 import { prepareEntry } from './entry-utils.js';
 
@@ -156,29 +158,50 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const [modalEntry, setModalEntry] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [sessionIndex, setSessionIndex] = useState(0);
-  const [watcher, setWatcher] = useState(null);
+  const [fileWatcher, setFileWatcher] = useState(null);
+  const [sessionWatcher, setSessionWatcher] = useState(null);
   const { stdout } = useStdout();
 
   const maxLinesPerEntry = config?.display?.max_lines_per_entry || 10;
 
   useEffect(() => {
     return () => {
-      if (watcher) watcher.close().catch(() => {});
+      if (fileWatcher) fileWatcher.close().catch(() => {});
+      if (sessionWatcher) sessionWatcher.close().catch(() => {});
     };
-  }, [watcher]);
+  }, [fileWatcher, sessionWatcher]);
 
-  // Load sessions on mount
+  // Load sessions on mount and watch for new ones
   useEffect(() => {
-    (async () => {
+    const load = async () => {
       try {
         const ses = await listSessions(project);
         setSessions(ses);
-        setSessionIndex(Math.max(0, ses.length - 1));
+        setSessionIndex((idx) => Math.min(ses.length - 1, idx));
       } catch {
         setSessions(['current']);
         setSessionIndex(0);
       }
-    })();
+    };
+
+    load();
+
+    const sessionsDir = path.join(
+      os.homedir(),
+      '.dockashell',
+      'projects',
+      project,
+      'traces',
+      'sessions'
+    );
+    const watcher = chokidar.watch(sessionsDir, { ignoreInitial: true });
+    watcher.on('add', load);
+    watcher.on('unlink', load);
+    setSessionWatcher(watcher);
+
+    return () => {
+      watcher.close();
+    };
   }, [project]);
 
   const ensureVisible = useCallback(
@@ -305,9 +328,9 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
 
     load();
 
-    if (watcher) {
-      watcher.close().catch(() => {});
-      setWatcher(null);
+    if (fileWatcher) {
+      fileWatcher.close().catch(() => {});
+      setFileWatcher(null);
     }
 
     if (sessionId === 'current') {
@@ -315,7 +338,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       w = chokidar.watch(file, { ignoreInitial: true });
       w.on('add', load);
       w.on('change', load);
-      setWatcher(w);
+      setFileWatcher(w);
     }
 
     return () => {
