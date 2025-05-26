@@ -212,31 +212,31 @@ export const buildEntryLines = (
       type: 'header',
       icon: '🩹',
       timestamp: formatTimestamp(entry.timestamp),
-      typeText: `APPLY_DIFF | Exit: ${exitCode} | ${duration}`,
+      typeText: `APPLY_PATCH | Exit: ${exitCode} | ${duration}`,
       typeColor,
     });
 
-    const diff = entry.diff || '';
+    const patch = entry.patch || '';
 
     if (compact) {
-      const diffLines = diff.split('\n');
-      const first = diffLines[0];
+      const patchLines = patch.split('\n');
+      const first = patchLines[0];
       const display =
-        diffLines.length > 1
-          ? `${first} ... (${diffLines.length} lines)`
+        patchLines.length > 1
+          ? `${first} ... (${patchLines.length} lines)`
           : first;
       lines.push({
         type: 'command',
         text: truncateText(display, contentAvailableWidth),
       });
     } else {
-      const diffLines = formatMultilineText(
-        diff,
+      const patchLines = formatMultilineText(
+        patch,
         contentAvailableWidth - 2,
         Infinity,
         true
       );
-      diffLines.forEach((line, index) => {
+      patchLines.forEach((line, index) => {
         lines.push({ type: 'command', text: index === 0 ? line : `  ${line}` });
       });
 

@@ -144,7 +144,7 @@ export class Logger {
               return {
                 timestamp: trace.timestamp,
                 kind: 'apply_patch',
-                diff: trace.diff,
+                diff: trace.patch,
                 result: trace.result,
               };
             } else if (trace.tool === 'write_trace') {
