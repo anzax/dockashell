@@ -8,7 +8,7 @@ export const FilterModal = ({ onClose, onApply, currentFilters }) => {
     { key: 'agent', label: 'Agent', color: 'yellow' },
     { key: 'summary', label: 'Summary', color: 'green' },
     { key: 'command', label: 'Command', color: 'white' },
-    { key: 'apply_diff', label: 'Apply Diff', color: 'cyan' },
+    { key: 'apply_patch', label: 'Apply Diff', color: 'cyan' },
   ];
 
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -18,7 +18,7 @@ export const FilterModal = ({ onClose, onApply, currentFilters }) => {
       agent: true,
       summary: true,
       command: true,
-      apply_diff: true,
+      apply_patch: true,
     }
   );
 

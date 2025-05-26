@@ -155,11 +155,11 @@ describe('prepareEntry', () => {
 describe('detectTraceType', () => {
   test('handles various entry shapes', () => {
     const note = { kind: 'note', noteType: 'agent' };
-    const diff = { kind: 'apply_diff', diff: 'diff' };
+    const diff = { kind: 'apply_patch', diff: 'diff' };
     const cmd = { kind: 'command', command: 'ls' };
 
     assert.strictEqual(detectTraceType(note), 'agent');
-    assert.strictEqual(detectTraceType(diff), 'apply_diff');
+    assert.strictEqual(detectTraceType(diff), 'apply_patch');
     assert.strictEqual(detectTraceType(cmd), 'command');
   });
 });

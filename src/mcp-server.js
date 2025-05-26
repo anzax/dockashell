@@ -185,32 +185,34 @@ class DockashellServer {
       }
     );
 
-    // Diff apply tool via aider
+    // Patch apply tool using OpenAI format
     this.server.tool(
-      'apply_diff',
+      'apply_patch',
       {
         project_name: z.string().describe('Name of the project'),
-        diff: z.string().describe('Unified git diff to apply'),
+        patch: z
+          .string()
+          .describe('Patch in OpenAI format (*** Begin Patch / *** End Patch)'),
       },
-      async ({ project_name, diff }) => {
+      async ({ project_name, patch }) => {
         try {
           if (!project_name || typeof project_name !== 'string') {
             throw new Error('Project name must be a non-empty string');
           }
 
-          if (!diff || typeof diff !== 'string') {
-            throw new Error('Diff must be a non-empty string');
+          if (!patch || typeof patch !== 'string') {
+            throw new Error('Patch must be a non-empty string');
           }
 
           // Ensure project exists
           await this.projectManager.loadProject(project_name);
 
-          const result = await this.containerManager.applyDiff(
+          const result = await this.containerManager.applyPatch(
             project_name,
-            diff
+            patch
           );
 
-          let response = `# Apply Diff: ${project_name}\n\n`;
+          let response = `# Apply Patch: ${project_name}\n\n`;
           response += `**Exit Code:** ${result.exitCode}\n`;
           response += `**Success:** ${result.success ? '✅' : '❌'}\n\n`;
 
@@ -297,20 +299,20 @@ class DockashellServer {
               const typeLabel =
                 entry.kind === 'command'
                   ? 'COMMAND'
-                  : entry.kind === 'apply_diff'
+                  : entry.kind === 'apply_patch'
                     ? 'APPLY_DIFF'
                     : (entry.noteType || entry.kind || 'UNKNOWN').toUpperCase();
 
               if (
                 selected.includes('exit_code') &&
-                (entry.kind === 'command' || entry.kind === 'apply_diff') &&
+                (entry.kind === 'command' || entry.kind === 'apply_patch') &&
                 entry.result?.exitCode !== undefined
               ) {
                 meta.push(`exit_code=${entry.result.exitCode}`);
               }
               if (
                 selected.includes('duration') &&
-                (entry.kind === 'command' || entry.kind === 'apply_diff') &&
+                (entry.kind === 'command' || entry.kind === 'apply_patch') &&
                 entry.result?.duration
               ) {
                 meta.push(`duration=${entry.result.duration}`);
@@ -330,7 +332,7 @@ class DockashellServer {
                   } else {
                     lines.push(entry.command);
                   }
-                } else if (entry.kind === 'apply_diff') {
+                } else if (entry.kind === 'apply_patch') {
                   lines.push(entry.diff);
                 } else {
                   lines.push(entry.text);
@@ -339,7 +341,7 @@ class DockashellServer {
 
               if (
                 selected.includes('output') &&
-                (entry.kind === 'command' || entry.kind === 'apply_diff') &&
+                (entry.kind === 'command' || entry.kind === 'apply_patch') &&
                 entry.result?.output
               ) {
                 lines.push('');

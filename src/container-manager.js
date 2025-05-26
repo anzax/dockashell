@@ -96,7 +96,7 @@ export class ContainerManager {
     }
 
     // Create container
-    const container = this.docker.createContainer({
+    const container = await this.docker.createContainer({
       Image: config.image,
       name: containerName,
       Env: config.environment
@@ -305,7 +305,7 @@ export class ContainerManager {
     }
   }
 
-  async applyDiff(projectName, diff, options = {}) {
+  async applyPatch(projectName, patch, options = {}) {
     const containerName = `dockashell-${projectName}`;
     const timeoutMs = options.timeout || 30000;
     const startTime = Date.now();
@@ -320,40 +320,12 @@ export class ContainerManager {
         );
       }
 
-      // Create temporary file and write diff content to it
-      const tempFile = `/tmp/apply_diff_${Date.now()}.txt`;
-
-      const createExec = await container.exec({
-        Cmd: ['bash', '-c', `cat > ${tempFile}`],
+      // Apply the patch using the Python script
+      const exec = await container.exec({
+        Cmd: ['python3', '/usr/local/bin/apply_patch.py'],
         AttachStdout: true,
         AttachStderr: true,
         AttachStdin: true,
-        Tty: false,
-      });
-
-      const createStream = await createExec.start({
-        Detach: false,
-        Tty: false,
-        hijack: true,
-        stdin: true,
-      });
-
-      createStream.end(diff);
-
-      await new Promise((resolve, reject) => {
-        createStream.on('end', resolve);
-        createStream.on('error', reject);
-      });
-
-      // Apply the diff using the temporary file
-      const exec = await container.exec({
-        Cmd: [
-          'bash',
-          '-c',
-          `aider --apply ${tempFile} --yes --no-auto-commits && rm -f ${tempFile}`,
-        ],
-        AttachStdout: true,
-        AttachStderr: true,
         Tty: false,
       });
 
@@ -361,6 +333,7 @@ export class ContainerManager {
         Detach: false,
         Tty: false,
         hijack: true,
+        stdin: true,
       });
 
       const stdoutStream = new PassThrough();
@@ -370,6 +343,10 @@ export class ContainerManager {
       let output = '';
       let error = '';
       let timedOut = false;
+
+      // Send patch data to stdin
+      stream.write(patch);
+      stream.end();
 
       const result = await Promise.race([
         new Promise((resolve, reject) => {
@@ -410,8 +387,8 @@ export class ContainerManager {
 
       await this.logger.logToolExecution(
         projectName,
-        'apply_diff',
-        { diff },
+        'apply_patch',
+        { patch },
         {
           exitCode: result.exitCode,
           duration: `${duration}s`,
@@ -432,8 +409,8 @@ export class ContainerManager {
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
       await this.logger.logToolExecution(
         projectName,
-        'apply_diff',
-        { diff },
+        'apply_patch',
+        { patch },
         {
           exitCode: -1,
           duration: `${duration}s`,
