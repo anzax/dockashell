@@ -233,6 +233,50 @@ class DockashellServer {
       }
     );
 
+    // Write file tool
+    this.server.tool(
+      'write_file',
+      {
+        project_name: z.string().describe('Name of the project'),
+        path: z.string().describe('File path inside container'),
+        content: z.string().describe('File contents'),
+        overwrite: z.boolean().optional().describe('Overwrite existing file'),
+      },
+      async ({ project_name, path, content, overwrite = false }) => {
+        try {
+          if (!project_name || typeof project_name !== 'string') {
+            throw new Error('Project name must be a non-empty string');
+          }
+          if (!path || typeof path !== 'string') {
+            throw new Error('Path must be a non-empty string');
+          }
+
+          await this.projectManager.loadProject(project_name);
+          const result = await this.containerManager.writeFile(
+            project_name,
+            path,
+            content || '',
+            overwrite
+          );
+
+          let response = `# Write File: ${project_name}\n\n`;
+          response += `**Path:** ${path}\n`;
+          response += `**Exit Code:** ${result.exitCode}\n`;
+          response += `**Success:** ${result.success ? '✅' : '❌'}\n`;
+
+          if (result.stderr) {
+            response += `\n**Error Output:**\n\`\`\`\n${result.stderr}\n\`\`\``;
+          }
+
+          return { content: [{ type: 'text', text: response }] };
+        } catch (error) {
+          throw new Error(
+            `Failed to write file in project '${project_name}': ${error.message}`
+          );
+        }
+      }
+    );
+
     // Write trace note tool
     this.server.tool(
       'write_trace',
@@ -301,18 +345,28 @@ class DockashellServer {
                   ? 'COMMAND'
                   : entry.kind === 'apply_patch'
                     ? 'APPLY_PATCH'
-                    : (entry.noteType || entry.kind || 'UNKNOWN').toUpperCase();
+                    : entry.kind === 'write_file'
+                      ? 'WRITE_FILE'
+                      : (
+                          entry.noteType ||
+                          entry.kind ||
+                          'UNKNOWN'
+                        ).toUpperCase();
 
               if (
                 selected.includes('exit_code') &&
-                (entry.kind === 'command' || entry.kind === 'apply_patch') &&
+                (entry.kind === 'command' ||
+                  entry.kind === 'apply_patch' ||
+                  entry.kind === 'write_file') &&
                 entry.result?.exitCode !== undefined
               ) {
                 meta.push(`exit_code=${entry.result.exitCode}`);
               }
               if (
                 selected.includes('duration') &&
-                (entry.kind === 'command' || entry.kind === 'apply_patch') &&
+                (entry.kind === 'command' ||
+                  entry.kind === 'apply_patch' ||
+                  entry.kind === 'write_file') &&
                 entry.result?.duration
               ) {
                 meta.push(`duration=${entry.result.duration}`);
@@ -334,6 +388,8 @@ class DockashellServer {
                   }
                 } else if (entry.kind === 'apply_patch') {
                   lines.push(entry.diff);
+                } else if (entry.kind === 'write_file') {
+                  lines.push(entry.path);
                 } else {
                   lines.push(entry.text);
                 }
@@ -341,7 +397,9 @@ class DockashellServer {
 
               if (
                 selected.includes('output') &&
-                (entry.kind === 'command' || entry.kind === 'apply_patch') &&
+                (entry.kind === 'command' ||
+                  entry.kind === 'apply_patch' ||
+                  entry.kind === 'write_file') &&
                 entry.result?.output
               ) {
                 lines.push('');

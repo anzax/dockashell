@@ -422,6 +422,129 @@ export class ContainerManager {
     }
   }
 
+  async writeFile(
+    projectName,
+    filePath,
+    content,
+    overwrite = false,
+    options = {}
+  ) {
+    const containerName = `dockashell-${projectName}`;
+    const timeoutMs = options.timeout || 30000;
+    const startTime = Date.now();
+
+    try {
+      const container = this.docker.getContainer(containerName);
+      const data = await container.inspect();
+      if (!data.State.Running) {
+        throw new Error(
+          'Container is not running. Please start the project first.'
+        );
+      }
+
+      const script =
+        'mkdir -p "$(dirname "$FILE")" && ' +
+        '[ -f "$FILE" ] && [ "$OVERWRITE" != "true" ] && echo "File exists" >&2 && exit 1; ' +
+        'cat > "$FILE"';
+
+      const exec = await container.exec({
+        Cmd: ['bash', '-c', script],
+        AttachStdout: true,
+        AttachStderr: true,
+        AttachStdin: true,
+        Tty: false,
+        Env: [`FILE=${filePath}`, `OVERWRITE=${overwrite ? 'true' : 'false'}`],
+      });
+
+      const stream = await exec.start({
+        Detach: false,
+        Tty: false,
+        hijack: true,
+        stdin: true,
+      });
+
+      const stdoutStream = new PassThrough();
+      const stderrStream = new PassThrough();
+      container.modem.demuxStream(stream, stdoutStream, stderrStream);
+
+      let output = '';
+      let error = '';
+      let timedOut = false;
+
+      stream.write(content);
+      stream.end();
+
+      const result = await Promise.race([
+        new Promise((resolve, reject) => {
+          stdoutStream.on('data', (chunk) => {
+            output += chunk.toString();
+          });
+          stderrStream.on('data', (chunk) => {
+            error += chunk.toString();
+          });
+          stream.on('end', async () => {
+            try {
+              const inspect = await exec.inspect();
+              resolve({
+                stdout: output.trim(),
+                stderr: error.trim(),
+                exitCode: inspect.ExitCode,
+                timedOut,
+              });
+            } catch (inspectError) {
+              reject(inspectError);
+            }
+          });
+          stream.on('error', reject);
+        }),
+        new Promise((_, reject) => {
+          setTimeout(() => {
+            timedOut = true;
+            stream.destroy();
+            reject(new Error('Write file timed out'));
+          }, timeoutMs);
+        }),
+      ]);
+
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+
+      await this.logger.logToolExecution(
+        projectName,
+        'write_file',
+        { path: filePath, overwrite },
+        {
+          exitCode: result.exitCode,
+          duration: `${duration}s`,
+          timedOut: result.timedOut,
+          output: [result.stdout, result.stderr].filter(Boolean).join('\n'),
+        }
+      );
+
+      return {
+        success: result.exitCode === 0,
+        exitCode: result.exitCode,
+        stdout: result.stdout,
+        stderr: result.stderr,
+        timedOut: result.timedOut || false,
+        duration: `${duration}s`,
+      };
+    } catch (error) {
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      await this.logger.logToolExecution(
+        projectName,
+        'write_file',
+        { path: filePath, overwrite },
+        {
+          exitCode: -1,
+          duration: `${duration}s`,
+          timedOut: false,
+          output: error.message || '',
+        }
+      );
+      throw error;
+    }
+  }
+
   async getStatus(projectName) {
     const containerName = `dockashell-${projectName}`;
 

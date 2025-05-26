@@ -147,6 +147,13 @@ export class Logger {
                 diff: trace.patch,
                 result: trace.result,
               };
+            } else if (trace.tool === 'write_file') {
+              return {
+                timestamp: trace.timestamp,
+                kind: 'write_file',
+                path: trace.path,
+                result: trace.result,
+              };
             } else if (trace.tool === 'write_trace') {
               return {
                 timestamp: trace.timestamp,
@@ -173,6 +180,8 @@ export class Logger {
           entries = entries.filter((e) => e.kind === 'command');
         } else if (type === 'apply_patch') {
           entries = entries.filter((e) => e.kind === 'apply_patch');
+        } else if (type === 'write_file') {
+          entries = entries.filter((e) => e.kind === 'write_file');
         } else {
           entries = entries.filter(
             (e) => e.kind === type || e.noteType === type

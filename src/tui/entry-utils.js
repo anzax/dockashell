@@ -33,6 +33,7 @@ export const detectTraceType = (entry) => {
   if (!entry) return 'unknown';
   if (entry.kind === 'command' || entry.command) return 'command';
   if (entry.kind === 'apply_patch' || entry.diff) return 'apply_patch';
+  if (entry.kind === 'write_file') return 'write_file';
   if (entry.kind === 'note') return entry.noteType || 'note';
   if (entry.noteType) return entry.noteType;
   if (entry.type) return entry.type; // legacy notes
@@ -255,6 +256,39 @@ export const buildEntryLines = (
           lines.push({ type: 'output', text: line })
         );
       }
+    }
+  } else if (entry.kind === 'write_file') {
+    const result = entry.result || {};
+    const exitCode = result.exitCode !== undefined ? result.exitCode : 'N/A';
+    const duration = result.duration || 'N/A';
+
+    const typeColor = exitCode === 0 ? 'green' : 'red';
+    lines.push({
+      type: 'header',
+      icon: '📄',
+      timestamp: formatTimestamp(entry.timestamp),
+      typeText: `WRITE_FILE | Exit: ${exitCode} | ${duration}`,
+      typeColor,
+    });
+
+    const pathText = entry.path || '';
+    lines.push({
+      type: 'command',
+      text: truncateText(pathText, contentAvailableWidth),
+    });
+
+    if (showOutput && result.output && result.output.trim()) {
+      lines.push({
+        type: 'separator',
+        text: '─'.repeat(Math.min(contentAvailableWidth, 60)),
+      });
+
+      const outputLines = formatCommandOutput(
+        result.output.trim(),
+        contentAvailableWidth,
+        maxLines - lines.length
+      );
+      outputLines.forEach((line) => lines.push({ type: 'output', text: line }));
     }
   } else {
     // Unknown entry type

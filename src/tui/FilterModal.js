@@ -9,6 +9,7 @@ export const FilterModal = ({ onClose, onApply, currentFilters }) => {
     { key: 'summary', label: 'Summary', color: 'green' },
     { key: 'command', label: 'Command', color: 'white' },
     { key: 'apply_patch', label: 'Apply Patch', color: 'cyan' },
+    { key: 'write_file', label: 'Write File', color: 'magenta' },
   ];
 
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -19,6 +20,7 @@ export const FilterModal = ({ onClose, onApply, currentFilters }) => {
       summary: true,
       command: true,
       apply_patch: true,
+      write_file: true,
     }
   );
 

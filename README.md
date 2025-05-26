@@ -194,6 +194,10 @@ Executes a shell command in the project container.
 **Arguments:** `{"project_name": "string", "patch": "string"}`
 Applies patches using the [OpenAI format](https://cookbook.openai.com/examples/gpt4-1_prompting_guide#appendix-generating-and-applying-file-diffs) inside the project container with context-based matching. More reliable than line-number based diffs for iterative edits.
 
+### `write_file`
+**Arguments:** `{"project_name": "string", "path": "string", "content": "string", "overwrite?": "boolean"}`
+Creates or overwrites a file inside the container. Intermediate directories are created automatically. Set `overwrite` to `true` to replace existing files (defaults to `false`).
+
 ### `project_status`
 **Arguments:** `{"project_name": "string"}`
 Returns detailed status information about the project container.
