@@ -102,8 +102,6 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const [detailsViewIndex, setDetailsViewIndex] = useState(null);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
-  const autoScrollRef = useRef(true);
-  const detailsViewRef = useRef(null);
   const [filters, setFilters] = useState({
     user: true,
     agent: true,
@@ -111,6 +109,12 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     command: true,
     apply_patch: true,
   });
+  const autoScrollRef = useRef(true);
+  const detailsViewRef = useRef(null);
+  const selectedIndexRef = useRef(0);
+  const selectedTimestampRef = useRef(null);
+  const detailsTimestampRef = useRef(null);
+  const filtersRef = useRef(filters);
   const [buffer, setBuffer] = useState(null);
   const { stdout } = useStdout();
 
@@ -130,6 +134,23 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     const traceType = entry.traceType || 'unknown';
     return filters[traceType] !== false; // Show if filter is true or undefined
   });
+
+  useEffect(() => {
+    selectedIndexRef.current = selectedIndex;
+    selectedTimestampRef.current =
+      filteredEntries[selectedIndex]?.entry.timestamp || null;
+  }, [selectedIndex, filteredEntries]);
+
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
+
+  useEffect(() => {
+    if (detailsViewIndex !== null) {
+      detailsTimestampRef.current =
+        filteredEntries[detailsViewIndex]?.entry.timestamp || null;
+    }
+  }, [detailsViewIndex, filteredEntries]);
   const ensureVisible = useCallback(
     (index) => {
       if (filteredEntries.length === 0) return;
@@ -213,37 +234,61 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
         prepareEntry(e, maxLinesPerEntry, terminalWidth)
       );
 
-      setEntries(prepared);
-      if (prepared.length > 0) {
-        const lastIndex = prepared.length - 1;
+      const filtered = prepared.filter((entry) => {
+        const traceType = entry.traceType || 'unknown';
+        return filtersRef.current[traceType] !== false;
+      });
 
-        // Clamp selected index to avoid pointing past end
-        setSelectedIndex((idx) => Math.min(idx, lastIndex));
-        setScrollOffset((off) => Math.min(off, lastIndex));
+      const lastIndex = filtered.length - 1;
 
-        if (autoScrollRef.current && detailsViewRef.current === null) {
-          setSelectedIndex(lastIndex);
+      let newSelected = filtered.findIndex(
+        (e) => e.entry.timestamp === selectedTimestampRef.current
+      );
+      if (newSelected === -1) {
+        newSelected = Math.min(
+          selectedIndexRef.current,
+          Math.max(lastIndex, 0)
+        );
+      }
 
-          // Calculate scroll offset to show maximum entries while keeping selected visible
-          const availableHeight = terminalHeight - 3;
-          let totalHeight = 0;
-          let visibleCount = 0;
-
-          // Count how many entries we can fit starting from the selected entry
-          for (let i = lastIndex; i >= 0; i--) {
-            const entryHeight = getEntryHeight(prepared[i], i === lastIndex);
-            if (totalHeight + entryHeight <= availableHeight) {
-              totalHeight += entryHeight;
-              visibleCount++;
-            } else {
-              break;
-            }
-          }
-
-          // Set scroll offset to show the maximum number of entries
-          const newOffset = Math.max(0, lastIndex - visibleCount + 1);
-          setScrollOffset(newOffset);
+      let newDetailsIndex = null;
+      if (detailsViewRef.current !== null) {
+        newDetailsIndex = filtered.findIndex(
+          (e) => e.entry.timestamp === detailsTimestampRef.current
+        );
+        if (newDetailsIndex === -1) {
+          newDetailsIndex = Math.min(detailsViewRef.current, lastIndex);
         }
+      }
+
+      setEntries(prepared);
+
+      if (autoScrollRef.current && detailsViewRef.current === null) {
+        newSelected = lastIndex;
+
+        const availableHeight = terminalHeight - 3;
+        let totalHeight = 0;
+        let visibleCount = 0;
+
+        for (let i = lastIndex; i >= 0; i--) {
+          const entryHeight = getEntryHeight(filtered[i], i === lastIndex);
+          if (totalHeight + entryHeight <= availableHeight) {
+            totalHeight += entryHeight;
+            visibleCount++;
+          } else {
+            break;
+          }
+        }
+
+        const newOffset = Math.max(0, lastIndex - visibleCount + 1);
+        setScrollOffset(newOffset);
+      } else {
+        setScrollOffset((off) => Math.min(off, Math.max(lastIndex, 0)));
+      }
+
+      setSelectedIndex(Math.max(0, newSelected));
+      if (detailsViewRef.current !== null) {
+        setDetailsViewIndex(Math.max(0, newDetailsIndex));
       }
     };
 
