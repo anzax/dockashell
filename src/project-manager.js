@@ -29,10 +29,15 @@ export class ProjectManager {
     const globalConfigPath = path.join(this.configDir, 'config.json');
     if (!(await fs.pathExists(globalConfigPath))) {
       const defaultConfig = {
-        version: '1.0',
+        tui: {
+          display: {
+            max_entries: 100,
+          },
+        },
         logging: {
-          enabled: true,
-          directory: path.join(this.configDir, 'logs'),
+          traces: {
+            session_timeout: '4h',
+          },
         },
       };
       await fs.writeJSON(globalConfigPath, defaultConfig, { spaces: 2 });

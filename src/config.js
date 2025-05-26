@@ -5,15 +5,7 @@ import os from 'os';
 const defaultConfig = {
   tui: {
     display: {
-      max_lines_per_entry: 5,
       max_entries: 100,
-      max_visible_entries: 10,
-      show_icons: true,
-      theme: 'dark',
-    },
-    projects: {
-      default: null,
-      recent: [],
     },
   },
   logging: {
@@ -35,11 +27,6 @@ export async function loadConfig() {
     const cfg = await fs.readJSON(configPath);
     if (!cfg.tui) cfg.tui = { ...defaultConfig.tui };
     if (!cfg.tui.display) cfg.tui.display = { ...defaultConfig.tui.display };
-    // Ensure max_visible_entries exists
-    if (!cfg.tui.display.max_visible_entries) {
-      cfg.tui.display.max_visible_entries =
-        defaultConfig.tui.display.max_visible_entries;
-    }
     if (!cfg.logging) cfg.logging = { ...defaultConfig.logging };
     if (!cfg.logging.traces)
       cfg.logging.traces = { ...defaultConfig.logging.traces };
