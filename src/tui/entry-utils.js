@@ -271,11 +271,52 @@ export const buildEntryLines = (
       typeColor,
     });
 
+    // Show file path and metadata
     const pathText = entry.path || '';
+    const overwriteText = entry.overwrite ? ' (overwrite)' : '';
+    const sizeText =
+      entry.contentLength !== undefined
+        ? ` [${entry.contentLength} bytes]`
+        : '';
+    const pathLine = `${pathText}${overwriteText}${sizeText}`;
+
     lines.push({
       type: 'command',
-      text: truncateText(pathText, contentAvailableWidth),
+      text: truncateText(pathLine, contentAvailableWidth),
     });
+
+    // Show content preview (similar to apply_patch)
+    const content = entry.content || '';
+    if (content && !compact) {
+      lines.push({
+        type: 'separator',
+        text: '─'.repeat(Math.min(contentAvailableWidth, 60)),
+      });
+
+      const contentLines = formatMultilineText(
+        content,
+        contentAvailableWidth - 2,
+        20, // Limit to 20 lines for content preview
+        true
+      );
+      contentLines.forEach((line, index) => {
+        lines.push({
+          type: 'command',
+          text: index === 0 ? line : `  ${line}`,
+        });
+      });
+    } else if (content && compact) {
+      const contentLines = content.split('\n');
+      const firstLine = contentLines[0] || '';
+      const display =
+        contentLines.length > 1
+          ? `${firstLine} ... (${contentLines.length} lines)`
+          : firstLine;
+      lines.push({
+        type: 'command',
+        text: `  ${truncateText(display, contentAvailableWidth - 2)}`,
+      });
+    }
 
     if (showOutput && result.output && result.output.trim()) {
       lines.push({
