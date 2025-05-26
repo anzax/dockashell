@@ -21,21 +21,25 @@ const PatchedTraceBuffer = class extends OriginalTraceBuffer {
   async loadFromFiles() {
     const sessions = await mockReadTraces.listSessions(this.projectName);
     const allTraces = [];
-    
+
     // Load traces from all sessions in chronological order
     for (let i = 0; i < sessions.length; i++) {
       const id = sessions[i];
       try {
-        const traces = await mockReadTraces.readTraceEntries(this.projectName, Infinity, id);
+        const traces = await mockReadTraces.readTraceEntries(
+          this.projectName,
+          Infinity,
+          id
+        );
         allTraces.push(...traces);
       } catch {
         // ignore malformed or missing files
       }
     }
-    
+
     // Sort by timestamp to ensure proper chronological order across sessions
     allTraces.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-    
+
     // Keep only the most recent entries
     this.entries = allTraces.slice(-this.maxEntries);
   }
@@ -62,8 +66,13 @@ describe('TraceBuffer', () => {
   describe('loadFromFiles', () => {
     test('should load traces in chronological order across sessions', async () => {
       // Mock session data
-      mockListSessions = () => Promise.resolve(['2025-05-26T10-00Z', '2025-05-26T11-00Z', '2025-05-26T12-00Z']);
-      
+      mockListSessions = () =>
+        Promise.resolve([
+          '2025-05-26T10-00Z',
+          '2025-05-26T11-00Z',
+          '2025-05-26T12-00Z',
+        ]);
+
       let callCount = 0;
       mockReadTraceEntries = () => {
         const responses = [
@@ -78,7 +87,7 @@ describe('TraceBuffer', () => {
           [
             { timestamp: '2025-05-26T12:01:00Z', text: 'Session3-Trace1' },
             { timestamp: '2025-05-26T12:02:00Z', text: 'Session3-Trace2' },
-          ]
+          ],
         ];
         return Promise.resolve(responses[callCount++]);
       };
@@ -97,13 +106,17 @@ describe('TraceBuffer', () => {
 
       // Verify timestamps are in ascending order
       for (let i = 1; i < traces.length; i++) {
-        assert(new Date(traces[i].timestamp).getTime() >= new Date(traces[i-1].timestamp).getTime());
+        assert(
+          new Date(traces[i].timestamp).getTime() >=
+            new Date(traces[i - 1].timestamp).getTime()
+        );
       }
     });
 
     test('should handle out-of-order timestamps across sessions', async () => {
-      mockListSessions = () => Promise.resolve(['2025-05-26T10-00Z', '2025-05-26T11-00Z']);
-      
+      mockListSessions = () =>
+        Promise.resolve(['2025-05-26T10-00Z', '2025-05-26T11-00Z']);
+
       let callCount = 0;
       mockReadTraceEntries = () => {
         const responses = [
@@ -111,9 +124,7 @@ describe('TraceBuffer', () => {
             { timestamp: '2025-05-26T10:01:00Z', text: 'Session1-Early' },
             { timestamp: '2025-05-26T11:30:00Z', text: 'Session1-Late' },
           ],
-          [
-            { timestamp: '2025-05-26T11:15:00Z', text: 'Session2-Middle' },
-          ]
+          [{ timestamp: '2025-05-26T11:15:00Z', text: 'Session2-Middle' }],
         ];
         return Promise.resolve(responses[callCount++]);
       };
@@ -129,15 +140,16 @@ describe('TraceBuffer', () => {
 
     test('should respect maxEntries limit', async () => {
       const smallBuffer = new PatchedTraceBuffer(mockProjectName, 3);
-      
+
       mockListSessions = () => Promise.resolve(['2025-05-26T10-00Z']);
-      mockReadTraceEntries = () => Promise.resolve([
-        { timestamp: '2025-05-26T10:01:00Z', text: 'Trace1' },
-        { timestamp: '2025-05-26T10:02:00Z', text: 'Trace2' },
-        { timestamp: '2025-05-26T10:03:00Z', text: 'Trace3' },
-        { timestamp: '2025-05-26T10:04:00Z', text: 'Trace4' },
-        { timestamp: '2025-05-26T10:05:00Z', text: 'Trace5' },
-      ]);
+      mockReadTraceEntries = () =>
+        Promise.resolve([
+          { timestamp: '2025-05-26T10:01:00Z', text: 'Trace1' },
+          { timestamp: '2025-05-26T10:02:00Z', text: 'Trace2' },
+          { timestamp: '2025-05-26T10:03:00Z', text: 'Trace3' },
+          { timestamp: '2025-05-26T10:04:00Z', text: 'Trace4' },
+          { timestamp: '2025-05-26T10:05:00Z', text: 'Trace5' },
+        ]);
 
       await smallBuffer.loadFromFiles();
       const traces = smallBuffer.getTraces();
@@ -146,18 +158,18 @@ describe('TraceBuffer', () => {
       assert.strictEqual(traces[0].text, 'Trace3');
       assert.strictEqual(traces[1].text, 'Trace4');
       assert.strictEqual(traces[2].text, 'Trace5');
-      
+
       await smallBuffer.close();
     });
 
     test('should handle empty sessions gracefully', async () => {
       mockListSessions = () => Promise.resolve(['session1', 'session2']);
-      
+
       let callCount = 0;
       mockReadTraceEntries = () => {
         const responses = [
           [],
-          [{ timestamp: '2025-05-26T10:01:00Z', text: 'OnlyTrace' }]
+          [{ timestamp: '2025-05-26T10:01:00Z', text: 'OnlyTrace' }],
         ];
         return Promise.resolve(responses[callCount++]);
       };
@@ -171,11 +183,13 @@ describe('TraceBuffer', () => {
 
     test('should handle malformed session files', async () => {
       mockListSessions = () => Promise.resolve(['good-session', 'bad-session']);
-      
+
       let callCount = 0;
       mockReadTraceEntries = () => {
         if (callCount++ === 0) {
-          return Promise.resolve([{ timestamp: '2025-05-26T10:01:00Z', text: 'GoodTrace' }]);
+          return Promise.resolve([
+            { timestamp: '2025-05-26T10:01:00Z', text: 'GoodTrace' },
+          ]);
         } else {
           return Promise.reject(new Error('Malformed file'));
         }
@@ -192,11 +206,12 @@ describe('TraceBuffer', () => {
   describe('getTraces', () => {
     beforeEach(async () => {
       mockListSessions = () => Promise.resolve(['session1']);
-      mockReadTraceEntries = () => Promise.resolve([
-        { timestamp: '2025-05-26T10:01:00Z', text: 'Trace1' },
-        { timestamp: '2025-05-26T10:02:00Z', text: 'Trace2' },
-        { timestamp: '2025-05-26T10:03:00Z', text: 'Trace3' },
-      ]);
+      mockReadTraceEntries = () =>
+        Promise.resolve([
+          { timestamp: '2025-05-26T10:01:00Z', text: 'Trace1' },
+          { timestamp: '2025-05-26T10:02:00Z', text: 'Trace2' },
+          { timestamp: '2025-05-26T10:03:00Z', text: 'Trace3' },
+        ]);
       await buffer.loadFromFiles();
     });
 
@@ -216,11 +231,12 @@ describe('TraceBuffer', () => {
   describe('search', () => {
     beforeEach(async () => {
       mockListSessions = () => Promise.resolve(['session1']);
-      mockReadTraceEntries = () => Promise.resolve([
-        { timestamp: '2025-05-26T10:01:00Z', text: 'Hello World' },
-        { timestamp: '2025-05-26T10:02:00Z', text: 'Goodbye Moon' },
-        { timestamp: '2025-05-26T10:03:00Z', text: 'Hello Again' },
-      ]);
+      mockReadTraceEntries = () =>
+        Promise.resolve([
+          { timestamp: '2025-05-26T10:01:00Z', text: 'Hello World' },
+          { timestamp: '2025-05-26T10:02:00Z', text: 'Goodbye Moon' },
+          { timestamp: '2025-05-26T10:03:00Z', text: 'Hello Again' },
+        ]);
       await buffer.loadFromFiles();
     });
 

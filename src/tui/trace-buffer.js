@@ -17,7 +17,7 @@ export class TraceBuffer extends EventEmitter {
   async loadFromFiles() {
     const sessions = await listSessions(this.projectName);
     const allTraces = [];
-    
+
     // Load traces from all sessions in chronological order
     for (let i = 0; i < sessions.length; i++) {
       const id = sessions[i];
@@ -28,10 +28,10 @@ export class TraceBuffer extends EventEmitter {
         // ignore malformed or missing files
       }
     }
-    
+
     // Sort by timestamp to ensure proper chronological order across sessions
     allTraces.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-    
+
     // Keep only the most recent entries
     this.entries = allTraces.slice(-this.maxEntries);
   }
