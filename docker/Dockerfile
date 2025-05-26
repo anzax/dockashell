@@ -29,9 +29,9 @@ RUN apt-get update \
     # ----- Cleanup -------------------------------------------------------------
     && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Add apply_patch script
-COPY docker/apply_patch.py /usr/local/bin/apply_patch.py
-RUN chmod +x /usr/local/bin/apply_patch.py
+# Add apply_patch JavaScript tool
+COPY docker/apply-patch.js /usr/local/bin/apply_patch
+RUN chmod +x /usr/local/bin/apply_patch
 
 ###############################################################################
 # 2. Back to the non-root dev user that ships with devcontainers (UID 1000)
