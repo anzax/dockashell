@@ -1,30 +1,16 @@
 import fs from 'fs-extra';
 import path from 'path';
-import os from 'os';
 import { parseTraceLines } from '../trace-utils.js';
+import { getCurrentTraceFile, getSessionsDir } from './trace-paths.js';
 
 export function getTraceFile(projectName, session = 'current') {
-  const base = path.join(
-    os.homedir(),
-    '.dockashell',
-    'projects',
-    projectName,
-    'traces'
-  );
   return session === 'current'
-    ? path.join(base, 'current.jsonl')
-    : path.join(base, 'sessions', `${session}.jsonl`);
+    ? getCurrentTraceFile(projectName)
+    : path.join(getSessionsDir(projectName), `${session}.jsonl`);
 }
 
 export async function listSessions(projectName) {
-  const dir = path.join(
-    os.homedir(),
-    '.dockashell',
-    'projects',
-    projectName,
-    'traces',
-    'sessions'
-  );
+  const dir = getSessionsDir(projectName);
 
   if (!(await fs.pathExists(dir))) {
     return ['current'];

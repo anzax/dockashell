@@ -1,19 +1,17 @@
 import fs from 'fs-extra';
 import path from 'path';
-import os from 'os';
+import {
+  getProjectTraceDir,
+  getCurrentTraceFile,
+  getSessionsDir,
+} from './tui/trace-paths.js';
 
 export class TraceRecorder {
   constructor(projectName, sessionTimeoutMs = 4 * 60 * 60 * 1000) {
     this.projectName = projectName;
-    this.baseDir = path.join(
-      os.homedir(),
-      '.dockashell',
-      'projects',
-      projectName,
-      'traces'
-    );
-    this.currentFile = path.join(this.baseDir, 'current.jsonl');
-    this.sessionsDir = path.join(this.baseDir, 'sessions');
+    this.baseDir = getProjectTraceDir(projectName);
+    this.currentFile = getCurrentTraceFile(projectName);
+    this.sessionsDir = getSessionsDir(projectName);
     this.sessionId = this.generateSessionId();
     this.sessionStart = Date.now();
     this.sessionTimeoutMs = sessionTimeoutMs;
