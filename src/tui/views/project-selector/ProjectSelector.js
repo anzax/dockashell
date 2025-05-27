@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Text, useInput, useStdout } from 'ink';
+import { Box, Text, useInput } from 'ink';
+import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
@@ -94,8 +95,7 @@ const EmptyState = () =>
 
 export const ProjectSelector = ({ onSelect, onExit }) => {
   const [projects, setProjects] = useState([]);
-  const [terminalHeight, setTerminalHeight] = useState(20);
-  const { stdout } = useStdout();
+  const [, terminalHeight] = useStdoutDimensions();
 
   const {
     selectedIndex,
@@ -104,18 +104,6 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
     navigate,
     getActualIndex,
   } = useScrollableList(projects, terminalHeight);
-
-  // Terminal size tracking
-  useEffect(() => {
-    const updateSize = () => {
-      const height = stdout?.rows || process.stdout?.rows || 20;
-      setTerminalHeight(height);
-    };
-
-    updateSize();
-    process.stdout?.on('resize', updateSize);
-    return () => process.stdout?.off('resize', updateSize);
-  }, [stdout]);
 
   // Load projects
   useEffect(() => {

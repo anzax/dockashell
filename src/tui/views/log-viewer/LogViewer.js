@@ -1,18 +1,14 @@
 import React, { useEffect, useCallback } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { TraceBuffer } from '../../utils/trace-buffer.js';
-import {
-  prepareEntry,
-  DEFAULT_FILTERS,
-  findClosestTimestamp,
-} from '../../utils/entry-utils.js';
+import { prepareEntry, findClosestTimestamp } from '../../utils/entry-utils.js';
 import { TraceDetailsView } from '../trace-details/TraceDetailsView.js';
 import { FilterModal } from './FilterModal.js';
 import { LineRenderer } from './LineRenderer.js';
 import { useTraceBuffer } from '../../hooks/useTraceBuffer.js';
 import { useFilters } from '../../hooks/useFilters.js';
 import { useAutoScroll } from '../../hooks/useAutoScroll.js';
-import { useTerminalSize } from '../../hooks/useTerminalSize.js';
+import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import { useSelection } from '../../hooks/useSelection.js';
 
 const Entry = ({ item, selected }) =>
@@ -35,7 +31,7 @@ export const getEntryHeight = (entry, isSelected) =>
   (entry.height || 3) + (isSelected ? 2 : 0); // Height based on prepared entry
 
 export const LogViewer = ({ project, onBack, onExit, config }) => {
-  const { terminalHeight, terminalWidth } = useTerminalSize();
+  const [terminalWidth, terminalHeight] = useStdoutDimensions();
   const {
     filters,
     setFilters,
@@ -45,18 +41,9 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     setShowFilterModal,
     filtersRef,
   } = useFilters();
-  const {
-    entries,
-    setEntries,
-    buffer,
-    setBuffer,
-  } = useTraceBuffer();
-  const {
-    autoScroll,
-    setAutoScroll,
-    autoScrollRef,
-    updateAutoScrollState,
-  } = useAutoScroll();
+  const { entries, setEntries, buffer, setBuffer } = useTraceBuffer();
+  const { autoScroll, setAutoScroll, autoScrollRef, updateAutoScrollState } =
+    useAutoScroll();
   const {
     selectedIndex,
     setSelectedIndex,
@@ -93,7 +80,6 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     selectedTimestampRef.current =
       filteredEntries[selectedIndex]?.entry.timestamp || null;
   }, [selectedIndex, filteredEntries]);
-
 
   // Handle filter changes separately from trace buffer updates
   useEffect(() => {
@@ -252,7 +238,6 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       ensureVisible(index, filteredEntries, terminalHeight, getEntryHeight),
     [ensureVisible, filteredEntries, terminalHeight]
   );
-
 
   const calculateVisibleEntries = useCallback(() => {
     if (filteredEntries.length === 0) return { start: 0, end: 0 };

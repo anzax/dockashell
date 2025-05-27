@@ -12,13 +12,15 @@ export const useSelection = (entries = []) => {
 
   useEffect(() => {
     selectedIndexRef.current = selectedIndex;
-    selectedTimestampRef.current = entries[selectedIndex]?.entry.timestamp || null;
+    selectedTimestampRef.current =
+      entries[selectedIndex]?.entry.timestamp || null;
   }, [selectedIndex, entries]);
 
   useEffect(() => {
     detailsViewRef.current = detailsViewIndex;
     if (detailsViewIndex !== null) {
-      detailsTimestampRef.current = entries[detailsViewIndex]?.entry.timestamp || null;
+      detailsTimestampRef.current =
+        entries[detailsViewIndex]?.entry.timestamp || null;
     }
   }, [detailsViewIndex, entries]);
 

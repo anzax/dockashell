@@ -6,7 +6,7 @@ export const TRACE_TYPES = /** @type {const} */ ({
   AGENT: 'agent',
   SUMMARY: 'summary',
   NOTE: 'note',
-  UNKNOWN: 'unknown'
+  UNKNOWN: 'unknown',
 });
 
 export const TRACE_ICONS = /** @type {const} */ ({
@@ -17,7 +17,7 @@ export const TRACE_ICONS = /** @type {const} */ ({
   agent: '🤖',
   summary: '📝',
   note: '📋',
-  unknown: '❓'
+  unknown: '❓',
 });
 
 export const TRACE_COLORS = /** @type {const} */ ({
@@ -28,11 +28,11 @@ export const TRACE_COLORS = /** @type {const} */ ({
   apply_patch: 'cyan',
   write_file: 'magenta',
   note: 'white',
-  unknown: 'gray'
+  unknown: 'gray',
 });
 
 export const UI_DIMENSIONS = /** @type {const} */ ({
   HEADER_HEIGHT: 4,
   MIN_CONTENT_WIDTH: 40,
-  MARGIN: 10
+  MARGIN: 10,
 });

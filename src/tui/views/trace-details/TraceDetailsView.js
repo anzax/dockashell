@@ -20,10 +20,7 @@ export const TraceDetailsView = ({
       React.createElement(Text, { wrap: 'truncate-end' }, 'No trace selected')
     );
   }
-  const availableHeight = Math.max(
-    1,
-    height - LAYOUT.HEADER_HEIGHT
-  ); // Header, help, borders only
+  const availableHeight = Math.max(1, height - LAYOUT.HEADER_HEIGHT); // Header, help, borders only
   const maxOffset = Math.max(
     0,
     currentTrace.fullLines.length - availableHeight

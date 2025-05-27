@@ -12,5 +12,5 @@ export const LAYOUT = {
   /** Fallback terminal height when detection fails */
   DEFAULT_TERMINAL_HEIGHT: 24,
   /** Fallback terminal width when detection fails */
-  DEFAULT_TERMINAL_WIDTH: 80
+  DEFAULT_TERMINAL_WIDTH: 80,
 };
