@@ -42,8 +42,6 @@ async function createExampleProjects() {
     working_dir: '/workspace',
     shell: '/bin/bash',
     security: {
-      restricted_mode: false,
-      blocked_commands: ['rm -rf /', 'sudo rm -rf', 'mkfs'],
       max_execution_time: 300,
     },
   };
@@ -81,8 +79,6 @@ async function createExampleProjects() {
     working_dir: '/workspace',
     shell: '/bin/bash',
     security: {
-      restricted_mode: false,
-      blocked_commands: ['rm -rf /', 'sudo passwd'],
       max_execution_time: 600,
     },
   };
@@ -121,8 +117,6 @@ async function createExampleProjects() {
     working_dir: '/workspace',
     shell: '/bin/bash',
     security: {
-      restricted_mode: false,
-      blocked_commands: [],
       max_execution_time: 300,
     },
   };

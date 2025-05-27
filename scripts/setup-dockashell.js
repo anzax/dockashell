@@ -61,8 +61,6 @@ async function setupDockashell() {
     working_dir: '/workspace',
     shell: '/bin/bash',
     security: {
-      restricted_mode: false,
-      blocked_commands: [],
       max_execution_time: 300,
     },
   };
@@ -96,8 +94,6 @@ async function setupDockashell() {
     working_dir: '/workspace',
     shell: '/bin/bash',
     security: {
-      restricted_mode: false,
-      blocked_commands: [],
       max_execution_time: 300,
     },
   };

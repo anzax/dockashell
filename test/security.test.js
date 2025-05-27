@@ -16,7 +16,7 @@ describe('SecurityManager', () => {
   test('should validate safe commands with project config', () => {
     const projectConfig = {
       name: 'test-project',
-      security: { restricted_mode: false },
+      security: {},
     };
     const safeCommands = [
       'ls -la',
@@ -27,54 +27,6 @@ describe('SecurityManager', () => {
     ];
 
     safeCommands.forEach((cmd) => {
-      assert.doesNotThrow(() =>
-        securityManager.validateCommand(cmd, projectConfig)
-      );
-    });
-  });
-
-  test('should block dangerous commands in restricted mode', () => {
-    const projectConfig = {
-      name: 'test-project',
-      security: {
-        restricted_mode: true,
-        blocked_commands: [
-          'rm -rf /',
-          'sudo rm -rf',
-          'dd if=/dev/zero',
-          'format c:',
-          'del /f /s /q',
-        ],
-      },
-    };
-    const dangerousCommands = [
-      'rm -rf /',
-      'sudo rm -rf *',
-      'dd if=/dev/zero of=/dev/sda',
-      'format c:',
-      'del /f /s /q c:\\*',
-    ];
-
-    dangerousCommands.forEach((cmd) => {
-      assert.throws(
-        () => securityManager.validateCommand(cmd, projectConfig),
-        /Command blocked by security policy/
-      );
-    });
-  });
-
-  test('should allow dangerous commands in non-restricted mode', () => {
-    const projectConfig = {
-      name: 'test-project',
-      security: { restricted_mode: false },
-    };
-    const commands = [
-      'rm -rf /tmp/somefile',
-      'sudo apt update',
-      'dd if=input.txt of=output.txt',
-    ];
-
-    commands.forEach((cmd) => {
       assert.doesNotThrow(() =>
         securityManager.validateCommand(cmd, projectConfig)
       );
@@ -127,5 +79,12 @@ describe('SecurityManager', () => {
     assert.doesNotThrow(() =>
       securityManager.validateCommand('echo hello', projectConfig)
     );
+  });
+
+  test('should return default security settings', () => {
+    const defaults = securityManager.getDefaultSecuritySettings();
+    assert.deepStrictEqual(defaults, {
+      max_execution_time: 300,
+    });
   });
 });

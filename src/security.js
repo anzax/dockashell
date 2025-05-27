@@ -1,14 +1,5 @@
 export class SecurityManager {
-  constructor() {
-    this.DEFAULT_BLOCKED_COMMANDS = [
-      'rm -rf /',
-      ':(){ :|:& };:', // fork bomb
-      'sudo rm -rf',
-      'mkfs',
-      'dd if=/dev/zero',
-      'sudo passwd',
-    ];
-  }
+  constructor() {}
 
   validateCommand(command, projectConfig) {
     if (!command || typeof command !== 'string' || command.trim() === '') {
@@ -19,57 +10,9 @@ export class SecurityManager {
       throw new Error('Invalid project configuration');
     }
 
-    // If restricted mode is enabled, apply security checks
-    if (projectConfig.security?.restricted_mode) {
-      const blockedCommands = Array.isArray(
-        projectConfig.security.blocked_commands
-      )
-        ? projectConfig.security.blocked_commands
-        : this.DEFAULT_BLOCKED_COMMANDS;
-
-      if (this.isBlocked(command, blockedCommands)) {
-        throw new Error(`Command blocked by security policy: ${command}`);
-      }
-    }
+    // Command validation can be extended if needed
 
     return true;
-  }
-
-  isBlocked(command, blockedCommands) {
-    if (!Array.isArray(blockedCommands)) {
-      return false;
-    }
-
-    const normalizedCommand = command.trim();
-
-    return blockedCommands.some((blocked) => {
-      if (!blocked || typeof blocked !== 'string') {
-        return false;
-      }
-
-      const normalizedBlocked = blocked.toLowerCase();
-
-      // Exact match
-      if (normalizedCommand === normalizedBlocked) {
-        return true;
-      }
-
-      // Check if command starts with blocked pattern
-      if (normalizedCommand.startsWith(normalizedBlocked)) {
-        return true;
-      }
-
-      // Check for pattern within command (with word boundaries)
-      try {
-        const regex = new RegExp(
-          `\\b${normalizedBlocked.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`
-        );
-        return regex.test(normalizedCommand);
-      } catch {
-        // If regex fails, fall back to simple string matching
-        return normalizedCommand.includes(normalizedBlocked);
-      }
-    });
   }
 
   getMaxExecutionTime(projectConfig) {
@@ -91,4 +34,9 @@ export class SecurityManager {
    * Get default security settings
    * @returns {Object} Default security configuration
    */
+  getDefaultSecuritySettings() {
+    return {
+      max_execution_time: 300,
+    };
+  }
 }
