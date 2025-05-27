@@ -319,17 +319,15 @@ const LogViewerInner = ({ project, onBack, onExit, config }) => {
     setBuffer(buf);
 
     const update = () => {
-      const raw = buf.getTraces();
-      const prepared = raw.map((e) => prepareEntry(e, null, terminalWidth));
+      const allRaw = buf.getTraces();
+      const preparedAll = allRaw.map((e) => prepareEntry(e, null, terminalWidth));
 
-      const filtered = prepared.filter((entry) => {
-        const traceType = entry.traceType || 'unknown';
-        return filtersRef.current[traceType] !== false;
-      });
+      const filteredRaw = buf.getTraces({ filters: filtersRef.current });
+      const filtered = filteredRaw.map((e) => prepareEntry(e, null, terminalWidth));
 
       entriesRef.current.clear();
-      prepared.forEach((e) => entriesRef.current.push(e));
-      pendingRef.current += prepared.length;
+      preparedAll.forEach((e) => entriesRef.current.push(e));
+      pendingRef.current += preparedAll.length;
       if (pendingRef.current >= flushThreshold) {
         pendingRef.current = 0;
         setRenderTick((t) => t + 1);

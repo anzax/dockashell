@@ -2,13 +2,14 @@ import EventEmitter from 'events';
 import chokidar from 'chokidar';
 import { listSessions, readTraceEntries } from './read-traces.js';
 import { getCurrentTraceFile } from './trace-paths.js';
+import { RingBuffer } from './ring-buffer.js';
 
 export class TraceBuffer extends EventEmitter {
   constructor(projectName, maxEntries = 100) {
     super();
     this.projectName = projectName;
     this.maxEntries = maxEntries;
-    this.entries = [];
+    this.buffer = new RingBuffer(maxEntries);
     this.watcher = null;
   }
 
@@ -30,8 +31,9 @@ export class TraceBuffer extends EventEmitter {
     // Sort by timestamp to ensure proper chronological order across sessions
     allTraces.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-    // Keep only the most recent entries
-    this.entries = allTraces.slice(-this.maxEntries);
+    const slice = allTraces.slice(-this.maxEntries);
+    this.buffer.clear();
+    slice.forEach((t) => this.buffer.push(t));
   }
 
   async refresh() {
@@ -39,15 +41,34 @@ export class TraceBuffer extends EventEmitter {
     this.emit('update');
   }
 
-  getTraces(limit) {
-    return limit ? this.entries.slice(-limit) : this.entries.slice();
+  getTraces(options) {
+    if (typeof options === 'number') {
+      return this.buffer.toArray().slice(-options);
+    }
+    const { limit, filters, search } = options || {};
+    let traces = this.buffer.toArray();
+
+    if (filters) {
+      traces = traces.filter((entry) => {
+        const type =
+          entry.kind || entry.noteType || entry.type || 'unknown';
+        if (filters[type] === undefined) return true;
+        return filters[type];
+      });
+    }
+
+    if (search) {
+      const q = search.toLowerCase();
+      traces = traces.filter((e) =>
+        JSON.stringify(e).toLowerCase().includes(q)
+      );
+    }
+
+    return limit ? traces.slice(-limit) : traces;
   }
 
   search(query) {
-    const q = query.toLowerCase();
-    return this.entries.filter((e) =>
-      JSON.stringify(e).toLowerCase().includes(q)
-    );
+    return this.getTraces({ search: query });
   }
 
   onUpdate(callback) {

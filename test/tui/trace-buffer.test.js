@@ -41,7 +41,8 @@ const PatchedTraceBuffer = class extends OriginalTraceBuffer {
     allTraces.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
     // Keep only the most recent entries
-    this.entries = allTraces.slice(-this.maxEntries);
+    this.buffer.clear();
+    allTraces.slice(-this.maxEntries).forEach((t) => this.buffer.push(t));
   }
 };
 
