@@ -4,6 +4,7 @@ import {
   formatCommandOutput,
 } from './line-formatter.js';
 import { TextLayout } from './text-layout.js';
+import { TRACE_ICONS, TRACE_COLORS } from '../../constants/ui.js';
 
 export const formatTimestamp = (timestamp) => {
   if (!timestamp) return 'No timestamp';
@@ -42,33 +43,7 @@ export const detectTraceType = (entry) => {
 };
 
 // Icon mapping for all supported trace types
-export const TRACE_ICONS = {
-  command: '💻',
-  apply_patch: '🩹',
-  write_file: '📄',
-  user: '👤',
-  agent: '🤖',
-  summary: '📝',
-  note: '📋',
-  unknown: '❓',
-};
-
-// Color mapping for note types
-export const NOTE_COLORS = {
-  user: 'blue',
-  agent: 'yellow',
-  summary: 'green',
-  note: 'white',
-};
-
-export const TRACE_TYPE_COLORS = {
-  user: 'blue',
-  agent: 'yellow',
-  summary: 'green',
-  command: 'white',
-  apply_patch: 'cyan',
-  write_file: 'magenta',
-};
+// Icon and color mappings moved to constants
 
 export const DEFAULT_FILTERS = {
   user: true,
@@ -117,9 +92,9 @@ export const getTraceColor = (type, exitCode) => {
   if (['command', 'apply_patch', 'write_file'].includes(type)) {
     return exitCode !== undefined && exitCode !== 0
       ? 'red'
-      : TRACE_TYPE_COLORS[type] || 'white';
+      : TRACE_COLORS[type] || 'white';
   }
-  if (TRACE_TYPE_COLORS[type]) return TRACE_TYPE_COLORS[type];
+  if (TRACE_COLORS[type]) return TRACE_COLORS[type];
   return type === 'unknown' ? 'gray' : 'white';
 };
 
