@@ -1,19 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
-
-const defaultConfig = {
-  tui: {
-    display: {
-      max_entries: 100,
-    },
-  },
-  logging: {
-    traces: {
-      session_timeout: '4h',
-    },
-  },
-};
+import { defaultConfig } from './default-config.js';
 
 export async function loadConfig() {
   const configDir = path.join(os.homedir(), '.dockashell');
