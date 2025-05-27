@@ -393,7 +393,7 @@ class DockashellServer {
                     lines.push(entry.command);
                   }
                 } else if (entry.kind === 'apply_patch') {
-                  lines.push(entry.diff);
+                  lines.push(entry.patch);
                 } else if (entry.kind === 'write_file') {
                   // Show file path with metadata
                   const pathText = entry.path || '';
