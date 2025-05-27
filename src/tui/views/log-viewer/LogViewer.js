@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Box, Text, useInput, useStdout } from 'ink';
 import { TraceBuffer } from '../../utils/trace-buffer.js';
+import { RingBuffer } from '../../utils/ring-buffer.js';
 import {
   prepareEntry,
   DEFAULT_FILTERS,
@@ -9,6 +10,7 @@ import {
 import { TraceDetailsView } from '../trace-details/TraceDetailsView.js';
 import { FilterModal } from './FilterModal.js';
 import { LineRenderer } from './LineRenderer.js';
+import { LogStoreProvider, useLogStore } from './LogStore.js';
 
 const Entry = ({ item, selected }) =>
   React.createElement(
@@ -29,8 +31,13 @@ const Entry = ({ item, selected }) =>
 export const getEntryHeight = (entry, isSelected) =>
   (entry.height || 3) + (isSelected ? 2 : 0); // Height based on prepared entry
 
-export const LogViewer = ({ project, onBack, onExit, config }) => {
-  const [entries, setEntries] = useState([]);
+const LogViewerInner = ({ project, onBack, onExit, config }) => {
+  const entriesRef = useRef(
+    new RingBuffer(config?.display?.max_entries || 100)
+  );
+  const [_renderTick, setRenderTick] = useState(0);
+  const pendingRef = useRef(0);
+  const flushThreshold = 50;
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [scrollOffset, setScrollOffset] = useState(0);
   const [terminalHeight, setTerminalHeight] = useState(20);
@@ -38,7 +45,8 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const [detailsViewIndex, setDetailsViewIndex] = useState(null);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [storeState, dispatch] = useLogStore();
+  const { filters } = storeState;
   const [lastFilterState, setLastFilterState] = useState(DEFAULT_FILTERS);
   const [selectionBeforeFilter, setSelectionBeforeFilter] = useState(null);
   const autoScrollRef = useRef(true);
@@ -49,6 +57,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const filtersRef = useRef(filters);
   const [buffer, setBuffer] = useState(null);
   const { stdout } = useStdout();
+  const entries = entriesRef.current.toArray();
 
   // Keep refs synced with state for callbacks
   useEffect(() => {
@@ -318,7 +327,13 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
         return filtersRef.current[traceType] !== false;
       });
 
-      setEntries(prepared);
+      entriesRef.current.clear();
+      prepared.forEach((e) => entriesRef.current.push(e));
+      pendingRef.current += prepared.length;
+      if (pendingRef.current >= flushThreshold) {
+        pendingRef.current = 0;
+        setRenderTick((t) => t + 1);
+      }
 
       // Handle details view restoration
       let newDetailsIndex = null;
@@ -469,7 +484,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
         currentFilters: filters,
         onClose: () => setShowFilterModal(false),
         onApply: (newFilters) => {
-          setFilters(newFilters);
+          dispatch({ type: 'setFilters', filters: newFilters });
           setShowFilterModal(false);
           setSelectedIndex(0); // Reset selection after filtering
           setScrollOffset(0);
@@ -520,3 +535,10 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     )
   );
 };
+
+export const LogViewer = (props) =>
+  React.createElement(
+    LogStoreProvider,
+    null,
+    React.createElement(LogViewerInner, props)
+  );
