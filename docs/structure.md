@@ -5,11 +5,9 @@
 ```
 dockashell/
 ├── src/                          # Core implementation
-│   ├── mcp-server.js            # Main MCP server entry point
-│   ├── container-manager.js     # Docker container operations
-│   ├── project-manager.js       # Project configuration handling
-│   ├── security.js              # Command validation & security
-│   ├── logger.js                # Command logging functionality
+│   ├── mcp/                     # MCP server entry point
+│   ├── core/                    # Container & project management
+│   ├── utils/                   # Shared utilities
 │   └── tui/                     # Terminal user interface components
 ├── test/                         # Test suite
 │   ├── *.test.js               # Unit tests (Node.js test runner)
@@ -27,11 +25,11 @@ dockashell/
 
 ### Core Implementation (`src/`)
 
-- **mcp-server.js**: Main entry point, MCP protocol handling
-- **container-manager.js**: Docker API integration, container lifecycle
-- **project-manager.js**: Configuration loading, devcontainer support
-- **security.js**: Command validation, security policies
-- **logger.js**: Command logging and audit trails
+- **mcp/mcp-server.js**: Main entry point, MCP protocol handling
+- **core/container-manager.js**: Docker API integration, container lifecycle
+- **core/project-manager.js**: Configuration loading, devcontainer support
+- **core/security.js**: Command validation, security policies
+- **utils/logger.js**: Command logging and audit trails
 
 ### Testing (`test/`)
 

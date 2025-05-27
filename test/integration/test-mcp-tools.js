@@ -5,7 +5,7 @@ import { spawn } from 'child_process';
 
 function runMCPCommand(toolName, args = {}) {
   return new Promise((resolve, reject) => {
-    const process = spawn('node', ['./src/mcp-server.js'], {
+    const process = spawn('node', ['./src/mcp/mcp-server.js'], {
       stdio: ['pipe', 'pipe', 'pipe'],
     });
 

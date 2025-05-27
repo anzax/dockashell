@@ -9,7 +9,7 @@ codebase and enabled by default.
 - **Path**: `~/.dockashell/logs/system.log`
 - **Format**: human readable text with log levels
 - **Rotation**: handled externally (overwritten on each run)
-- Logged via `SystemLogger` in `src/system-logger.js`
+- Logged via `SystemLogger` in `src/utils/system-logger.js`
 
 System logs contain operational messages and error details that help developers
 debug DockaShell itself.
@@ -22,8 +22,8 @@ debug DockaShell itself.
   four hours (configurable via `logging.traces.session_timeout`). Sessions
   persist across restarts within this window so the `current.jsonl` file remains
   active.
-- Managed by `TraceRecorder` in `src/trace-recorder.js`
-- Accessed through the `Logger` facade (`src/logger.js`)
+- Managed by `TraceRecorder` in `src/utils/trace-recorder.js`
+- Accessed through the `Logger` facade (`src/utils/logger.js`)
 
 Trace entries capture tool activity and notes. Each includes:
 

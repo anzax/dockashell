@@ -15,7 +15,7 @@ development environment.
 
 ### Modified Files
 
-- `src/project-manager.js` - Updated to use default image
+- `src/core/project-manager.js` - Updated to use default image
   (`dockashell/default-dev:latest`)
 - `scripts/setup/create-examples.js` - Simplified example projects using default
   image
