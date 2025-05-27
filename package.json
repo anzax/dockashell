@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "description": "AI agent secure Docker environments for project work",
   "type": "module",
-  "main": "src/mcp-server.js",
+  "main": "src/mcp/mcp-server.js",
   "bin": {
-    "dockashell": "./src/mcp-server.js",
-    "dockashell-tui": "./src/tui-launcher.js"
+    "dockashell": "./src/mcp/mcp-server.js",
+    "dockashell-tui": "./src/tui/tui-launcher.js"
   },
   "scripts": {
-    "start": "node src/mcp-server.js",
+    "start": "node src/mcp/mcp-server.js",
     "test": "node --test test/*.test.js",
     "test:integration": "node test/integration/test-*.js",
     "lint": "eslint .",
@@ -21,7 +21,7 @@
     "setup-examples": "node scripts/setup/create-examples.js",
     "build-image": "node scripts/image/build-default-image.js",
     "rebuild-image": "node scripts/image/build-default-image.js --rebuild",
-    "dev": "node src/tui-launcher.js"
+    "dev": "node src/tui/tui-launcher.js"
   },
   "dependencies": {
     "@inkjs/ui": "^2.0.0",

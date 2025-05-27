@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { ContainerManager } from '../../src/container-manager.js';
-import { ProjectManager } from '../../src/project-manager.js';
+import { ContainerManager } from '../../src/core/container-manager.js';
+import { ProjectManager } from '../../src/core/project-manager.js';
 
 async function testTimeout() {
   console.log('Testing timeout functionality...');

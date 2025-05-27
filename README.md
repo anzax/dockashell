@@ -316,7 +316,7 @@ Add to your MCP client configuration:
   "mcpServers": {
     "dockashell": {
       "command": "node",
-      "args": ["path/to/dockashell/src/mcp-server.js"]
+      "args": ["path/to/dockashell/src/mcp/mcp-server.js"]
     }
   }
 }

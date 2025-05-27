@@ -1,7 +1,7 @@
 import Docker from 'dockerode';
 import os from 'os';
 import { PassThrough } from 'stream';
-import { Logger } from './logger.js';
+import { Logger } from '../utils/logger.js';
 
 export class ContainerManager {
   constructor(projectManager) {

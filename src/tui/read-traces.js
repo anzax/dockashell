@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { parseTraceLines } from '../trace-utils.js';
+import { parseTraceLines } from '../utils/trace-utils.js';
 import { getCurrentTraceFile, getSessionsDir } from './trace-paths.js';
 
 export function getTraceFile(projectName, session = 'current') {
