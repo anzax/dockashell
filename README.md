@@ -7,13 +7,13 @@ DockaShell provides isolated, persistent Docker containers for AI agents to safe
 ## ✨ Features
 
 - **🔒 Project Isolation**: Each project runs in its own Docker container
-- **🚀 Persistent State**: Containers maintain state across command executions
-- **🌐 Port Mapping**: Easy web development with automatic port forwarding
+- **💾 Persistent State**: Containers maintain state across command executions
+- **🌐 Port Mapping**: Easy web development with port forwarding
 - **📁 Project Directory Mounting**: Seamless file access between host and container
-- **🛡️ Security Controls**: Execution timeouts for commands
+- **🛡️ Container Security**: Isolated, non-privileged execution with timeouts
 - **📊 Command Logging**: Full audit trail of all executed commands
 - **🔧 MCP Integration**: Standard Model Context Protocol interface
-- **🐳 Default Development Image**: Pre-built Ubuntu 24.04 LTS with Node.js 20 LTS, Python 3, and essential CLI tools
+- **🐳 Default Development Image**: Pre-built Python 3.12 + Node.js 20 LTS development environment
 
 ---
 
@@ -46,32 +46,31 @@ npm run setup-examples
 
 ## 🐳 Default Development Image
 
-DockaShell includes a comprehensive default development image (`dockashell/default-dev:latest`) based on:
+DockaShell includes a comprehensive default development image (`dockashell/default-dev:latest`) with:
 
-- **Ubuntu 24.04 LTS (Noble Numbat)** - Long-term support until 2029
+- **Python 3.12** development environment base (Microsoft DevContainer)
 - **Node.js 20 LTS** - Active LTS support
-- **Python 3** with pip and venv
-- **Essential CLI Tools**: patch, diff, grep, sed, gawk, rg, cat, head, tail, find, tree, zip, unzip, curl, wget, nano, vim, git, jq
-
-- **Package Managers**: npm, pnpm, pip3
-- **Non-root developer user** with sudo access
+- **Essential CLI Tools**: ripgrep, jq, git-lfs, build-essential, curl
+- **Package Managers**: npm, yarn, pnpm (via corepack), pip
+- **apply_patch JavaScript tool** for file editing
+- **Non-root user** (vscode, UID 1000) with workspace access
 
 ### Benefits of the Default Image
 
 - **Consistency**: Every project gets the same comprehensive environment
-- **Simplicity**: Project configs focus on project-specific needs (ports, mounts, environment)
+- **Simplicity**: Project configs focus on project-specific needs (ports, mounts, env vars)
 - **Performance**: Base image is cached and reused across all projects
-- **Zero Configuration**: Works out-of-the-box for most development workflows
+- **Zero Configuration**: Python, Node.js, and essential tools pre-installed
 
 ### Using Custom Images
 
-You can still specify custom Docker images in your project configuration when needed:
+You can override the default image for specific project requirements:
 
 ```json
 {
   "name": "legacy-project",
   "image": "node:16-bullseye",
-  "description": "Project requiring specific Node.js version"
+  "description": "Legacy project requiring Node.js 16"
 }
 ```
 
@@ -232,13 +231,38 @@ read_traces("project", {type: "command", fields: ["timestamp", "type", "content"
 read_traces("project", {search: "error"})
 ```
 
-## 🛡️ Security Features
+## 🛡️ Security Model
 
-- **Command Blocking**: Configure dangerous commands to reject
-- **Execution Timeouts**: Prevent runaway processes
-- **Container Isolation**: Each project is completely isolated
-- **Non-privileged Execution**: Containers run without root access
-- **Audit Logging**: All commands logged with timestamps
+DockaShell provides security through **container isolation** rather than application-level command filtering:
+
+### Container-Based Security
+- **Process Isolation**: Each project runs in its own Docker container
+- **Filesystem Isolation**: Container filesystem separate from host system
+- **Non-privileged Execution**: Containers run as non-root user (vscode, UID 1000)
+- **Network Isolation**: Controlled network access via Docker networking
+- **Resource Limits**: Memory and CPU constraints via Docker
+
+### Execution Controls
+- **Timeout Protection**: Commands automatically terminated after configured time limit
+- **Audit Trail**: All commands logged with timestamps and exit codes
+- **Session Management**: Persistent containers maintain state but can be stopped/restarted
+
+### Configuration
+```json
+{
+  "security": {
+    "max_execution_time": 300  // 5 minutes default
+  }
+}
+```
+
+### Security Philosophy
+DockaShell relies on Docker's proven container isolation rather than maintaining command blocklists. This approach:
+- **Simplifies configuration** - No complex rule management
+- **Reduces maintenance** - No need to update command patterns
+- **Improves reliability** - Container boundaries are well-tested
+- **Enables flexibility** - AI agents can use any legitimate tools
+
 
 ## 📊 Logging
 
