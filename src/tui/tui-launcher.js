@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { render } from 'ink';
 import { Command } from 'commander';
-import { ProjectSelector } from './tui/ProjectSelector.js';
-import { LogViewer } from './tui/LogViewer.js';
-import { loadConfig } from './config.js';
+import { ProjectSelector } from './ProjectSelector.js';
+import { LogViewer } from './LogViewer.js';
+import { loadConfig } from '../utils/config.js';
 
 const program = new Command();
 program

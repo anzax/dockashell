@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert';
-import { parseTraceLine, parseTraceLines } from '../src/trace-utils.js';
+import { parseTraceLine, parseTraceLines } from '../src/utils/trace-utils.js';
 
 describe('trace-utils', () => {
   test('parseTraceLine handles known tools', () => {

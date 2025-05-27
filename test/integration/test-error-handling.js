@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { DockashellServer } from '../../src/mcp-server.js';
+import { DockashellServer } from '../../src/mcp/mcp-server.js';
 
 // Test error handling for each tool
 async function testErrorHandling() {

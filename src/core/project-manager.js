@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
-import { defaultConfig } from './default-config.js';
+import { defaultConfig } from '../utils/default-config.js';
 
 export class ProjectManager {
   constructor() {

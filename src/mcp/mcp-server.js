@@ -3,10 +3,10 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
-import { ProjectManager } from './project-manager.js';
-import { ContainerManager } from './container-manager.js';
-import { SecurityManager } from './security.js';
-import { Logger } from './logger.js';
+import { ProjectManager } from '../core/project-manager.js';
+import { ContainerManager } from '../core/container-manager.js';
+import { SecurityManager } from '../core/security.js';
+import { Logger } from '../utils/logger.js';
 
 class DockashellServer {
   constructor() {

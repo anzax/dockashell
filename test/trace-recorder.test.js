@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
-import { TraceRecorder } from '../src/trace-recorder.js';
+import { TraceRecorder } from '../src/utils/trace-recorder.js';
 
 describe('TraceRecorder', () => {
   let tmpHome;
