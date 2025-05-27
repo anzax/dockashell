@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Box, Text, useInput, useStdout } from 'ink';
-import { TraceBuffer } from './trace-buffer.js';
+import { TraceBuffer } from '../../utils/trace-buffer.js';
 import {
   prepareEntry,
   DEFAULT_FILTERS,
   findClosestTimestamp,
-} from './entry-utils.js';
-import { TraceDetailsView } from './TraceDetailsView.js';
+} from '../../utils/entry-utils.js';
+import { TraceDetailsView } from '../trace-details/TraceDetailsView.js';
 import { FilterModal } from './FilterModal.js';
 import { LineRenderer } from './LineRenderer.js';
 

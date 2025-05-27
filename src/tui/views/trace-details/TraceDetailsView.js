@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
-import { LineRenderer } from './LineRenderer.js';
+import { LineRenderer } from '../log-viewer/LineRenderer.js';
 
 export const TraceDetailsView = ({
   traces,

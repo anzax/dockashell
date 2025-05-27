@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
-import { DEFAULT_FILTERS } from './entry-utils.js';
+import { DEFAULT_FILTERS } from '../../utils/entry-utils.js';
 
 export const FilterModal = ({ onClose, onApply, currentFilters }) => {
   // Available trace types
