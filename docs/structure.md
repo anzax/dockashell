@@ -26,6 +26,7 @@ dockashell/
 ## Key Files
 
 ### Core Implementation (`src/`)
+
 - **mcp-server.js**: Main entry point, MCP protocol handling
 - **container-manager.js**: Docker API integration, container lifecycle
 - **project-manager.js**: Configuration loading, devcontainer support
@@ -33,10 +34,12 @@ dockashell/
 - **logger.js**: Command logging and audit trails
 
 ### Testing (`test/`)
+
 - **\*.test.js**: Unit tests using Node.js built-in test runner
 - **integration/**: Integration tests for MCP tools and error handling
 
 ### Utilities (`utils/`)
+
 - **claude_desktop_config_example.json**: Example MCP configuration
 
 ## Development Workflow
@@ -47,4 +50,5 @@ dockashell/
 4. **Setup**: Use utilities from `utils/` for configuration
 5. **Build**: Use scripts from `scripts/` for image management
 
-This structure maintains separation of concerns while keeping the project accessible and maintainable.
+This structure maintains separation of concerns while keeping the project
+accessible and maintainable.
