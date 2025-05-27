@@ -3,6 +3,7 @@ import {
   truncateText,
   formatCommandOutput,
 } from './line-formatter.js';
+import { TextLayout } from './text-layout.js';
 
 export const formatTimestamp = (timestamp) => {
   if (!timestamp) return 'No timestamp';
@@ -136,16 +137,16 @@ export const createHeaderLine = (entry, traceType, typeText) => ({
 });
 
 // Helper to append formatted output lines if present
-export const appendOutputLines = (lines, output, contentWidth, maxLines) => {
+export const appendOutputLines = (lines, output, layout, maxLines) => {
   if (!output || !output.trim()) return;
   lines.push({
     type: 'separator',
-    text: '─'.repeat(Math.min(contentWidth, 60)),
+    text: layout.createSeparator(),
   });
 
   const outputLines = formatCommandOutput(
     output.trim(),
-    contentWidth,
+    layout.contentWidth,
     maxLines - lines.length
   );
   outputLines.forEach((line) => lines.push({ type: 'output', text: line }));
@@ -161,7 +162,8 @@ export const buildEntryLines = (
   const lines = [];
 
   // Calculate available width for content
-  const contentAvailableWidth = Math.max(40, terminalWidth - 10); // Leave some margin
+  const layout = new TextLayout(terminalWidth);
+  const contentAvailableWidth = layout.contentWidth; // Leave some margin
 
   // Always use 2 lines for list view (compact mode)
   const _effectiveMaxLines = compact ? 2 : maxLines;
@@ -261,12 +263,7 @@ export const buildEntryLines = (
           });
         }
         if (showOutput) {
-          appendOutputLines(
-            lines,
-            result.output,
-            contentAvailableWidth,
-            maxLines
-          );
+          appendOutputLines(lines, result.output, layout, maxLines);
         }
       }
       break;
@@ -310,12 +307,7 @@ export const buildEntryLines = (
           });
         });
         if (showOutput) {
-          appendOutputLines(
-            lines,
-            result.output,
-            contentAvailableWidth,
-            maxLines
-          );
+          appendOutputLines(lines, result.output, layout, maxLines);
         }
       }
       break;
@@ -350,7 +342,7 @@ export const buildEntryLines = (
       if (content && !compact) {
         lines.push({
           type: 'separator',
-          text: '─'.repeat(Math.min(contentAvailableWidth, 60)),
+          text: layout.createSeparator(),
         });
         const contentLines = formatMultilineText(
           content,
@@ -380,12 +372,7 @@ export const buildEntryLines = (
       }
 
       if (showOutput) {
-        appendOutputLines(
-          lines,
-          result.output,
-          contentAvailableWidth,
-          maxLines
-        );
+        appendOutputLines(lines, result.output, layout, maxLines);
       }
       break;
     }

@@ -2,6 +2,10 @@
  * Line formatting utilities for consistent text rendering
  */
 
+import { ELLIPSIS_LENGTH } from './text-layout.js';
+
+const ELLIPSIS = '.'.repeat(ELLIPSIS_LENGTH);
+
 /**
  * Wrap text to fit within a specified width
  * @param {string} text - Text to wrap
@@ -106,10 +110,11 @@ export const formatMultilineText = (
   // Add truncation indicator if needed
   if (lines.length === maxLines && lines.length < inputLines.length) {
     const lastLine = lines[lines.length - 1];
-    if (lastLine.length > width - 3) {
-      lines[lines.length - 1] = lastLine.substring(0, width - 3) + '...';
+    const cutoff = width - ELLIPSIS_LENGTH;
+    if (lastLine.length > cutoff) {
+      lines[lines.length - 1] = lastLine.substring(0, cutoff) + ELLIPSIS;
     } else {
-      lines[lines.length - 1] = lastLine + '...';
+      lines[lines.length - 1] = lastLine + ELLIPSIS;
     }
   }
 
@@ -124,11 +129,11 @@ export const formatMultilineText = (
  */
 export const truncateText = (text, width) => {
   if (!text) return '';
-  if (width <= 3) return '...';
+  if (width <= ELLIPSIS_LENGTH) return ELLIPSIS;
   if (text.length < width) return text;
 
   // Ensure we have room for ellipsis
-  return text.substring(0, Math.max(0, width - 3)) + '...';
+  return text.substring(0, Math.max(0, width - ELLIPSIS_LENGTH)) + ELLIPSIS;
 };
 
 /**
