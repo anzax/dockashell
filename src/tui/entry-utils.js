@@ -56,17 +56,69 @@ export const TRACE_ICONS = {
 export const NOTE_COLORS = {
   user: 'blue',
   agent: 'yellow',
-  summary: 'magenta',
+  summary: 'green',
   note: 'white',
+};
+
+export const TRACE_TYPE_COLORS = {
+  user: 'blue',
+  agent: 'yellow',
+  summary: 'green',
+  command: 'white',
+  apply_patch: 'cyan',
+  write_file: 'magenta',
+};
+
+export const DEFAULT_FILTERS = {
+  user: true,
+  agent: true,
+  summary: true,
+  command: true,
+  apply_patch: true,
+  write_file: true,
+};
+
+/**
+ * Find the entry with the closest timestamp to the target
+ * @param {Array} entries - Array of prepared entries
+ * @param {string|null} targetTimestamp - Target timestamp to match
+ * @returns {number} Index of closest entry, or -1 if no entries
+ */
+export const findClosestTimestamp = (entries, targetTimestamp) => {
+  if (!entries || entries.length === 0) return -1;
+  if (!targetTimestamp) return -1;
+
+  const target = new Date(targetTimestamp).getTime();
+  if (isNaN(target)) return -1;
+
+  let closestIndex = 0;
+  let closestDiff = Math.abs(
+    new Date(entries[0].entry.timestamp).getTime() - target
+  );
+
+  for (let i = 1; i < entries.length; i++) {
+    const entryTime = new Date(entries[i].entry.timestamp).getTime();
+    if (isNaN(entryTime)) continue;
+
+    const diff = Math.abs(entryTime - target);
+    if (diff < closestDiff) {
+      closestDiff = diff;
+      closestIndex = i;
+    }
+  }
+
+  return closestIndex;
 };
 
 export const getTraceIcon = (type) => TRACE_ICONS[type] || TRACE_ICONS.unknown;
 
 export const getTraceColor = (type, exitCode) => {
   if (['command', 'apply_patch', 'write_file'].includes(type)) {
-    return exitCode === 0 ? 'green' : 'red';
+    return exitCode !== undefined && exitCode !== 0
+      ? 'red'
+      : TRACE_TYPE_COLORS[type] || 'white';
   }
-  if (NOTE_COLORS[type]) return NOTE_COLORS[type];
+  if (TRACE_TYPE_COLORS[type]) return TRACE_TYPE_COLORS[type];
   return type === 'unknown' ? 'gray' : 'white';
 };
 
@@ -115,6 +167,7 @@ export const buildEntryLines = (
   const _effectiveMaxLines = compact ? 2 : maxLines;
 
   const traceType = detectTraceType(entry);
+  const traceColor = getTraceColor(traceType, entry.result?.exitCode);
 
   switch (traceType) {
     case 'user':
@@ -129,6 +182,7 @@ export const buildEntryLines = (
           lines.push({
             type: 'content',
             text: truncateText(firstLine, contentAvailableWidth),
+            color: traceColor,
           });
         } else {
           const formattedLines = formatMultilineText(
@@ -137,7 +191,7 @@ export const buildEntryLines = (
             _effectiveMaxLines - 1
           );
           formattedLines.forEach((line) =>
-            lines.push({ type: 'content', text: line })
+            lines.push({ type: 'content', text: line, color: traceColor })
           );
         }
       }
@@ -168,7 +222,11 @@ export const buildEntryLines = (
           displayCommand,
           contentAvailableWidth - prefixWidth
         );
-        lines.push({ type: 'command', text: `$ ${truncated}` });
+        lines.push({
+          type: 'command',
+          text: `$ ${truncated}`,
+          color: traceColor,
+        });
       } else {
         const commandLines = command.split('\n');
         if (commandLines.length === 1) {
@@ -183,16 +241,22 @@ export const buildEntryLines = (
               lines.push({
                 type: 'command',
                 text: index === 0 ? `$ ${line}` : `  ${line}`,
+                color: traceColor,
               });
             });
           } else {
-            lines.push({ type: 'command', text: `$ ${command}` });
+            lines.push({
+              type: 'command',
+              text: `$ ${command}`,
+              color: traceColor,
+            });
           }
         } else {
           commandLines.forEach((line, index) => {
             lines.push({
               type: 'command',
               text: index === 0 ? `$ ${line}` : `  ${line}`,
+              color: traceColor,
             });
           });
         }
@@ -229,6 +293,7 @@ export const buildEntryLines = (
         lines.push({
           type: 'command',
           text: truncateText(display, contentAvailableWidth),
+          color: traceColor,
         });
       } else {
         const patchLines = formatMultilineText(
@@ -241,6 +306,7 @@ export const buildEntryLines = (
           lines.push({
             type: 'command',
             text: index === 0 ? line : `  ${line}`,
+            color: traceColor,
           });
         });
         if (showOutput) {
@@ -277,6 +343,7 @@ export const buildEntryLines = (
       lines.push({
         type: 'command',
         text: truncateText(pathLine, contentAvailableWidth),
+        color: traceColor,
       });
 
       const content = entry.content || '';
@@ -295,6 +362,7 @@ export const buildEntryLines = (
           lines.push({
             type: 'command',
             text: index === 0 ? line : `  ${line}`,
+            color: traceColor,
           });
         });
       } else if (content && compact) {
@@ -307,6 +375,7 @@ export const buildEntryLines = (
         lines.push({
           type: 'command',
           text: `  ${truncateText(display, contentAvailableWidth - 2)}`,
+          color: traceColor,
         });
       }
 
@@ -329,6 +398,7 @@ export const buildEntryLines = (
         lines.push({
           type: 'content',
           text: truncateText(firstLine, contentAvailableWidth),
+          color: traceColor,
         });
       } else {
         const jsonLines = formatMultilineText(
@@ -337,7 +407,7 @@ export const buildEntryLines = (
           maxLines - 1
         );
         jsonLines.forEach((line) =>
-          lines.push({ type: 'content', text: line })
+          lines.push({ type: 'content', text: line, color: traceColor })
         );
       }
     }
@@ -360,7 +430,7 @@ export const prepareEntry = (entry, maxLines, terminalWidth = 80) => {
     isDetailView: true,
   });
 
-  // Height is always 3 for list view (2 lines + 1 margin)
+  // Stable height for list view (2 content lines + 1 margin)
   const height = 3;
   const traceType = detectTraceType(entry);
 

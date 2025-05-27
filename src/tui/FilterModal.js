@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
+import { DEFAULT_FILTERS } from './entry-utils.js';
 
 export const FilterModal = ({ onClose, onApply, currentFilters }) => {
   // Available trace types
@@ -13,16 +14,7 @@ export const FilterModal = ({ onClose, onApply, currentFilters }) => {
   ];
 
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [filters, setFilters] = useState(
-    currentFilters || {
-      user: true,
-      agent: true,
-      summary: true,
-      command: true,
-      apply_patch: true,
-      write_file: true,
-    }
-  );
+  const [filters, setFilters] = useState(currentFilters || DEFAULT_FILTERS);
 
   useInput((input, key) => {
     if (key.upArrow && selectedIndex > 0) {

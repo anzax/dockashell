@@ -18,7 +18,7 @@ export const LineRenderer = ({ line, selected = false, isModal = false }) => {
       Text,
       {
         bold: selected,
-        color: isModal ? 'white' : 'gray',
+        color: isModal ? 'white' : line.color || 'gray',
         wrap: 'truncate-end',
       },
       line.text
@@ -60,7 +60,7 @@ export const LineRenderer = ({ line, selected = false, isModal = false }) => {
 
   return React.createElement(
     Text,
-    { color: isModal ? 'white' : 'gray', wrap: 'truncate-end' },
+    { color: isModal ? 'white' : line.color || 'gray', wrap: 'truncate-end' },
     line.text
   );
 };

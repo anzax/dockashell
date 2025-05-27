@@ -12,6 +12,13 @@ export const TraceDetailsView = ({
   const [scrollOffset, setScrollOffset] = useState(0);
 
   const currentTrace = traces[currentIndex];
+  if (!currentTrace) {
+    return React.createElement(
+      Box,
+      { flexDirection: 'column', height },
+      React.createElement(Text, { wrap: 'truncate-end' }, 'No trace selected')
+    );
+  }
   const availableHeight = Math.max(1, height - 4); // Header, help, borders only
   const maxOffset = Math.max(
     0,
