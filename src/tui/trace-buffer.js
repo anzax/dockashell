@@ -1,8 +1,7 @@
 import EventEmitter from 'events';
 import chokidar from 'chokidar';
-import path from 'path';
-import os from 'os';
 import { listSessions, readTraceEntries, getTraceFile } from './read-traces.js';
+import { getSessionsDir } from './trace-paths.js';
 
 export class TraceBuffer extends EventEmitter {
   constructor(projectName, maxEntries = 100) {
@@ -63,14 +62,7 @@ export class TraceBuffer extends EventEmitter {
   }
 
   async watch() {
-    const sessionsDir = path.join(
-      os.homedir(),
-      '.dockashell',
-      'projects',
-      this.projectName,
-      'traces',
-      'sessions'
-    );
+    const sessionsDir = getSessionsDir(this.projectName);
     const currentFile = getTraceFile(this.projectName, 'current');
 
     this.sessionWatcher = chokidar.watch(sessionsDir, { ignoreInitial: true });
