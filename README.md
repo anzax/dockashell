@@ -1,24 +1,44 @@
 # DockaShell v0.1
 
-> AI agent secure Docker environments for project work
+> **DockaShell** is an open-source MCP server that gives every project its own
+> isolated Docker container — complete with file access, shell execution, and
+> full action traceability.
 
-DockaShell provides isolated, persistent Docker containers for AI agents to safely execute code and build projects. Each project gets its own container with configurable security, port mappings, and volume mounts.
+- **MCP tools for file access & shell execution:** Use any compatible client —
+  _Claude Desktop_, _Zed_, _Cursor IDE_, _VS Code_, and more — to interact with
+  your dedicated project container.
+- **Dedicated, persistent containers per project:** Each project runs in
+  its own container, giving AI agents and assistants full control _inside_, with
+  zero risk to your host.
+- **Comprehensive action tracking:** Every file edit, shell command, and agent
+  action is logged and fully traceable.
+- **Built-in TUI for observability:** Inspect agent behavior, command traces,
+  and file changes in real time — with filters and search.
+
+Perfect for agentic development, Vibe Coding, AI assistant workflows, and safe,
+auditable experimentation.
+
+---
+
+## Experimental technology disclaimer
+
+DockaShell is an experimental project under active development. It is not yet
+stable, may contain bugs, incomplete features, or undergo breaking changes.
+
+---
 
 ## ✨ Features
 
 - **🔒 Project Isolation**: Each project runs in its own Docker container
 - **💾 Persistent State**: Containers maintain state across command executions
 - **🌐 Port Mapping**: Easy web development with port forwarding
-- **📁 Project Directory Mounting**: Seamless file access between host and container
+- **📁 Project Directory Mounting**: Seamless file access between host and
+  container
 - **🛡️ Container Security**: Isolated, non-privileged execution with timeouts
 - **📊 Command Logging**: Full audit trail of all executed commands
 - **🔧 MCP Integration**: Standard Model Context Protocol interface
-- **🐳 Default Development Image**: Pre-built Python 3.12 + Node.js 20 LTS development environment
-
----
-
-## Experimental technology disclaimer
-DockaShell is an experimental project under active development. It is not yet stable, may contain bugs, incomplete features, or undergo breaking changes.
+- **🐳 Default Development Image**: Pre-built Python 3.12 + Node.js 20 LTS
+  development environment
 
 ---
 
@@ -46,7 +66,8 @@ npm run setup-examples
 
 ## 🐳 Default Development Image
 
-DockaShell includes a comprehensive default development image (`dockashell/default-dev:latest`) with:
+DockaShell includes a comprehensive default development image
+(`dockashell/default-dev:latest`) with:
 
 - **Python 3.12** development environment base (Microsoft DevContainer)
 - **Node.js 20 LTS** - Active LTS support
@@ -58,7 +79,8 @@ DockaShell includes a comprehensive default development image (`dockashell/defau
 ### Benefits of the Default Image
 
 - **Consistency**: Every project gets the same comprehensive environment
-- **Simplicity**: Project configs focus on project-specific needs (ports, mounts, env vars)
+- **Simplicity**: Project configs focus on project-specific needs (ports,
+  mounts, env vars)
 - **Performance**: Base image is cached and reused across all projects
 - **Zero Configuration**: Python, Node.js, and essential tools pre-installed
 
@@ -90,34 +112,35 @@ Here's how an AI agent would typically use DockaShell:
 
 ```javascript
 // 1. List available projects
-list_projects()
+list_projects();
 
 // 2. Start a web development project
-start_project({"project_name": "web-app"})
+start_project({ project_name: 'web-app' });
 
 // 3. Initialize a new Node.js project
 run_command({
-  "project_name": "web-app",
-  "command": "npm init -y"
-})
+  project_name: 'web-app',
+  command: 'npm init -y',
+});
 
 // 4. Install dependencies
 run_command({
-  "project_name": "web-app",
-  "command": "npm install express"
-})
+  project_name: 'web-app',
+  command: 'npm install express',
+});
 
 // 5. Create a simple server
 run_command({
-  "project_name": "web-app",
-  "command": "echo 'const express = require(\"express\"); const app = express(); app.get(\"/\", (req, res) => res.send(\"Hello World!\")); app.listen(3000);' > app.js"
-})
+  project_name: 'web-app',
+  command:
+    'echo \'const express = require("express"); const app = express(); app.get("/", (req, res) => res.send("Hello World!")); app.listen(3000);\' > app.js',
+});
 
 // 6. Start the server
 run_command({
-  "project_name": "web-app",
-  "command": "node app.js"
-})
+  project_name: 'web-app',
+  command: 'node app.js',
+});
 
 // Server is now running at http://localhost:3000
 ```
@@ -154,119 +177,153 @@ Projects are configured in `~/.dockashell/projects/{project-name}/config.json`:
 }
 ```
 
-Note: The `image` field is optional - if omitted, projects will use the default `dockashell/default-dev:latest` image.
+Note: The `image` field is optional - if omitted, projects will use the default
+`dockashell/default-dev:latest` image.
 
 ### Configuration Options
 
-| Field | Description | Default |
-|-------|-------------|---------|
-| `name` | Project identifier | (required) |
-| `description` | Human-readable description | "" |
-| `image` | Docker image to use | "dockashell/default-dev:latest" |
-| `mounts` | File system mounts | [] |
-| `ports` | Port mappings | [] |
-| `environment` | Environment variables | {} |
-| `working_dir` | Container working directory | "/workspace" |
-| `shell` | Default shell | "/bin/bash" |
-| `security.max_execution_time` | Command timeout (seconds) | 300 |
+| Field                         | Description                 | Default                         |
+| ----------------------------- | --------------------------- | ------------------------------- |
+| `name`                        | Project identifier          | (required)                      |
+| `description`                 | Human-readable description  | ""                              |
+| `image`                       | Docker image to use         | "dockashell/default-dev:latest" |
+| `mounts`                      | File system mounts          | []                              |
+| `ports`                       | Port mappings               | []                              |
+| `environment`                 | Environment variables       | {}                              |
+| `working_dir`                 | Container working directory | "/workspace"                    |
+| `shell`                       | Default shell               | "/bin/bash"                     |
+| `security.max_execution_time` | Command timeout (seconds)   | 300                             |
 
 ## 🔧 MCP Tools
 
 DockaShell exposes several MCP tools:
 
 ### `list_projects`
+
 Lists all configured projects with their status.
 
 ### `start_project`
-**Arguments:** `{"project_name": "string"}`
-Starts a Docker container for the specified project.
+
+**Arguments:** `{"project_name": "string"}` Starts a Docker container for the
+specified project.
 
 ### `run_command`
-**Arguments:** `{"project_name": "string", "command": "string"}`
-Executes a shell command in the project container.
+
+**Arguments:** `{"project_name": "string", "command": "string"}` Executes a
+shell command in the project container.
 
 ### `apply_patch`
-**Arguments:** `{"project_name": "string", "patch": "string"}`
-Applies patches using the [OpenAI format](https://cookbook.openai.com/examples/gpt4-1_prompting_guide#appendix-generating-and-applying-file-diffs) inside the project container with context-based matching. More reliable than line-number based diffs for iterative edits.
+
+**Arguments:** `{"project_name": "string", "patch": "string"}` Applies patches
+using the
+[OpenAI format](https://cookbook.openai.com/examples/gpt4-1_prompting_guide#appendix-generating-and-applying-file-diffs)
+inside the project container with context-based matching. More reliable than
+line-number based diffs for iterative edits.
 
 ### `write_file`
-**Arguments:** `{"project_name": "string", "path": "string", "content": "string", "overwrite?": "boolean"}`
-Creates or overwrites a file inside the container. Intermediate directories are created automatically. Set `overwrite` to `true` to replace existing files (defaults to `false`).
+
+**Arguments:**
+`{"project_name": "string", "path": "string", "content": "string", "overwrite?": "boolean"}`
+Creates or overwrites a file inside the container. Intermediate directories are
+created automatically. Set `overwrite` to `true` to replace existing files
+(defaults to `false`).
 
 ### `project_status`
-**Arguments:** `{"project_name": "string"}`
-Returns detailed status information about the project container.
+
+**Arguments:** `{"project_name": "string"}` Returns detailed status information
+about the project container.
 
 ### `stop_project`
-**Arguments:** `{"project_name": "string"}`
-Stops the project container.
+
+**Arguments:** `{"project_name": "string"}` Stops the project container.
 
 ### `write_trace`
-**Arguments:** `{"project_name": "string", "type": "user|summary|agent", "text": "string"}`
+
+**Arguments:**
+`{"project_name": "string", "type": "user|summary|agent", "text": "string"}`
 Writes an arbitrary note to the project trace log.
 
 ### `read_traces`
-**Arguments:** `{"project_name": "string", "type?": "string", "search?": "string", "skip?": "number", "limit?": "number", "fields?": "string[]"}`
+
+**Arguments:**
+`{"project_name": "string", "type?": "string", "search?": "string", "skip?": "number", "limit?": "number", "fields?": "string[]"}`
 Returns formatted trace entries with optional filtering and field selection.
 
 **Field Options:**
+
 - `timestamp`, `type`, `content` - Always included for context
 - `exit_code`, `duration` - Command execution metadata (commands only)
-- `output` - Command output preview, truncated to 200 chars for display (commands only)
+- `output` - Command output preview, truncated to 200 chars for display
+  (commands only)
 
 **Type Filtering:**
+
 - `"command"` - Shell command executions only
 - `"note"` - All note types (user, agent, summary)
 - `"user"`, `"agent"`, `"summary"` - Specific note types
 
 **Usage Examples:**
+
 ```javascript
 // Recent activity overview
-read_traces("project", {limit: 10})
+read_traces('project', { limit: 10 });
 
 // Debug failed commands with output
-read_traces("project", {type: "command", fields: ["timestamp", "type", "content", "exit_code", "output"]})
+read_traces('project', {
+  type: 'command',
+  fields: ['timestamp', 'type', 'content', 'exit_code', 'output'],
+});
 
 // Search across commands and output
-read_traces("project", {search: "error"})
+read_traces('project', { search: 'error' });
 ```
 
 ## 🛡️ Security Model
 
-DockaShell provides security through **container isolation** rather than application-level command filtering:
+DockaShell provides security through **container isolation** rather than
+application-level command filtering:
 
 ### Container-Based Security
+
 - **Process Isolation**: Each project runs in its own Docker container
 - **Filesystem Isolation**: Container filesystem separate from host system
-- **Non-privileged Execution**: Containers run as non-root user (vscode, UID 1000)
+- **Non-privileged Execution**: Containers run as non-root user (vscode,
+  UID 1000)
 - **Network Isolation**: Controlled network access via Docker networking
 - **Resource Limits**: Memory and CPU constraints via Docker
 
 ### Execution Controls
-- **Timeout Protection**: Commands automatically terminated after configured time limit
+
+- **Timeout Protection**: Commands automatically terminated after configured
+  time limit
 - **Audit Trail**: All commands logged with timestamps and exit codes
-- **Session Management**: Persistent containers maintain state but can be stopped/restarted
+- **Session Management**: Persistent containers maintain state but can be
+  stopped/restarted
 
 ### Configuration
+
 ```json
 {
   "security": {
-    "max_execution_time": 300  // 5 minutes default
+    "max_execution_time": 300 // 5 minutes default
   }
 }
 ```
 
 ### Security Philosophy
-DockaShell relies on Docker's proven container isolation rather than maintaining command blocklists. This approach:
+
+DockaShell relies on Docker's proven container isolation rather than maintaining
+command blocklists. This approach:
+
 - **Simplifies configuration** - No complex rule management
 - **Reduces maintenance** - No need to update command patterns
 - **Improves reliability** - Container boundaries are well-tested
 - **Enables flexibility** - AI agents can use any legitimate tools
 
-
 ## 📊 Logging
 
-Agent traces are stored in `~/.dockashell/projects/{project-name}/traces/current.jsonl`:
+Agent traces are stored in
+`~/.dockashell/projects/{project-name}/traces/current.jsonl`:
 
 ```
 {"id":"tr_abc123","tool":"start_project","trace_type":"execution","project_name":"web-app","result":{"success":true}}
@@ -329,16 +386,19 @@ Or if installed globally:
 
 ## 🖥️ Terminal User Interface (TUI)
 
-DockaShell includes a Terminal User Interface for viewing agent activity and project traces.
+DockaShell includes a Terminal User Interface for viewing agent activity and
+project traces.
 
 ### Usage
 
 **Interactive project selector:**
+
 ```bash
 dockashell-tui
 ```
 
 **Direct project access:**
+
 ```bash
 dockashell-tui myproject
 ```
@@ -349,16 +409,19 @@ dockashell-tui myproject
 - **Activity Sorting**: Projects sorted by most recent activity
 - **Trace Viewing**: Navigate through agent logs with keyboard
 - **Entry Types**: Displays user inputs, agent reasoning, and command results
-- **Configurable**: Customizable display settings via `~/.dockashell/config.json`
+- **Configurable**: Customizable display settings via
+  `~/.dockashell/config.json`
 
 ### Navigation
 
 **Project Selector:**
+
 - `↑↓` Navigate projects
 - `Enter` Select project
 - `q` Quit
 
 **Trace Viewer:**
+
 - `↑↓` Navigate entries
 - `b` Back to project selector
 - `q` Quit
@@ -377,7 +440,8 @@ TUI settings in `~/.dockashell/config.json`:
 }
 ```
 
-The TUI provides immediate visibility into what agents are working on without interrupting their progress.
+The TUI provides immediate visibility into what agents are working on without
+interrupting their progress.
 
 ---
 
