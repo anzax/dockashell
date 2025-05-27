@@ -4,71 +4,7 @@ import { TraceBuffer } from './trace-buffer.js';
 import { prepareEntry } from './entry-utils.js';
 import { TraceDetailsView } from './TraceDetailsView.js';
 import { FilterModal } from './FilterModal.js';
-
-const renderLines = (lines, selected) =>
-  lines.map((line, idx) => {
-    if (line.type === 'header') {
-      // Use single Text component to avoid layout overlap issues
-      const headerText = `${line.icon} ${line.timestamp} [${line.typeText}]`;
-      return React.createElement(
-        Text,
-        {
-          key: idx,
-          bold: selected,
-          color: line.typeColor,
-          wrap: 'truncate-end',
-        },
-        headerText
-      );
-    }
-    if (line.type === 'command') {
-      return React.createElement(
-        Text,
-        {
-          key: idx,
-          bold: selected,
-          color: 'gray',
-          wrap: 'truncate-end',
-        },
-        line.text
-      );
-    }
-    if (line.type === 'separator') {
-      return React.createElement(
-        Text,
-        { key: idx, dimColor: true, wrap: 'truncate-end' },
-        line.text
-      );
-    }
-    if (line.type === 'status') {
-      return React.createElement(
-        Box,
-        { key: idx },
-        React.createElement(
-          Text,
-          { color: line.color, wrap: 'truncate-end' },
-          line.text
-        ),
-        React.createElement(
-          Text,
-          { dimColor: true, wrap: 'truncate-end' },
-          line.extra
-        )
-      );
-    }
-    if (line.type === 'output') {
-      return React.createElement(
-        Text,
-        { key: idx, color: 'gray', wrap: 'truncate-end' },
-        '  ' + line.text
-      );
-    }
-    return React.createElement(
-      Text,
-      { key: idx, color: 'gray', wrap: 'truncate-end' },
-      line.text
-    );
-  });
+import { LineRenderer } from './LineRenderer.js';
 
 const Entry = ({ item, selected }) =>
   React.createElement(
@@ -81,7 +17,9 @@ const Entry = ({ item, selected }) =>
       paddingRight: 1,
       marginBottom: 1,
     },
-    ...renderLines(item.lines, selected)
+    ...item.lines.map((line, idx) =>
+      React.createElement(LineRenderer, { key: idx, line, selected })
+    )
   );
 
 export const getEntryHeight = (entry, isSelected) => 3 + (isSelected ? 2 : 0); // Always 3 lines (2 content + 1 margin) + 2 for border if selected
