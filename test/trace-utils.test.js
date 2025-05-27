@@ -35,9 +35,19 @@ describe('trace-utils', () => {
 
   test('parseTraceLines filters malformed input', () => {
     const lines = [
-      JSON.stringify({ timestamp: 1, tool: 'write_trace', type: 'user', text: 'hi' }),
+      JSON.stringify({
+        timestamp: 1,
+        tool: 'write_trace',
+        type: 'user',
+        text: 'hi',
+      }),
       'not-json',
-      JSON.stringify({ timestamp: 2, tool: 'write_file', path: 'f', overwrite: true }),
+      JSON.stringify({
+        timestamp: 2,
+        tool: 'write_file',
+        path: 'f',
+        overwrite: true,
+      }),
     ];
     const parsed = parseTraceLines(lines);
     assert.strictEqual(parsed.length, 2);

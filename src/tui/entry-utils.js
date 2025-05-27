@@ -32,7 +32,7 @@ export const formatLines = (text, maxLines = Infinity) => {
 export const detectTraceType = (entry) => {
   if (!entry) return 'unknown';
   if (entry.kind === 'command' || entry.command) return 'command';
-  if (entry.kind === 'apply_patch' || entry.diff) return 'apply_patch';
+  if (entry.kind === 'apply_patch' || entry.patch) return 'apply_patch';
   if (entry.kind === 'write_file') return 'write_file';
   if (entry.kind === 'note') return entry.noteType || 'note';
   if (entry.noteType) return entry.noteType;
