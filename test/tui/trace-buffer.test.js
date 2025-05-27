@@ -1,6 +1,6 @@
 import { test, describe, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert';
-import { TraceBuffer } from '../src/tui/trace-buffer.js';
+import { TraceBuffer } from '../../src/tui/trace-buffer.js';
 
 // Create a simple manual mock for testing
 let mockListSessions = null;
@@ -8,7 +8,7 @@ let mockReadTraceEntries = null;
 let mockGetTraceFile = null;
 
 // Override the import to use our mocks
-const _originalImport = await import('../src/tui/read-traces.js');
+const _originalImport = await import('../../src/tui/read-traces.js');
 const mockReadTraces = {
   listSessions: (...args) => mockListSessions(...args),
   readTraceEntries: (...args) => mockReadTraceEntries(...args),
