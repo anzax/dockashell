@@ -1,79 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
-
-const renderLines = (lines, offset = 0, isModal = true) =>
-  lines.map((line, idx) => {
-    // Use offset + idx to get the actual position in the full array for stable React keys
-    const stableKey = offset + idx;
-    if (line.type === 'header') {
-      // Use single Text component to avoid layout overlap issues
-      const headerText = `${line.icon} ${line.timestamp} [${line.typeText}]`;
-      return React.createElement(
-        Text,
-        {
-          key: stableKey,
-          color: line.typeColor,
-          wrap: 'truncate-end',
-        },
-        headerText
-      );
-    }
-    if (line.type === 'command') {
-      return React.createElement(
-        Text,
-        {
-          key: stableKey,
-          bold: false,
-          color: isModal ? 'white' : 'gray',
-          wrap: 'truncate-end',
-        },
-        line.text
-      );
-    }
-    if (line.type === 'separator') {
-      return React.createElement(
-        Text,
-        { key: stableKey, dimColor: true, wrap: 'truncate-end' },
-        line.text
-      );
-    }
-    if (line.type === 'status') {
-      return React.createElement(
-        Box,
-        { key: stableKey },
-        React.createElement(
-          Text,
-          { color: line.color, wrap: 'truncate-end' },
-          line.text
-        ),
-        React.createElement(
-          Text,
-          { dimColor: !isModal, wrap: 'truncate-end' },
-          line.extra
-        )
-      );
-    }
-    if (line.type === 'output') {
-      return React.createElement(
-        Text,
-        {
-          key: stableKey,
-          color: isModal ? 'white' : 'gray',
-          wrap: 'truncate-end',
-        },
-        '  ' + line.text
-      );
-    }
-    return React.createElement(
-      Text,
-      {
-        key: stableKey,
-        color: isModal ? 'white' : 'gray',
-        wrap: 'truncate-end',
-      },
-      line.text
-    );
-  });
+import { LineRenderer } from './LineRenderer.js';
 
 export const TraceDetailsView = ({
   traces,
@@ -156,7 +83,13 @@ export const TraceDetailsView = ({
         paddingRight: 1,
         marginY: 1,
       },
-      ...renderLines(visibleLines, scrollOffset, true)
+      ...visibleLines.map((line, idx) =>
+        React.createElement(LineRenderer, {
+          key: scrollOffset + idx,
+          line,
+          isModal: true,
+        })
+      )
     ),
 
     React.createElement(
