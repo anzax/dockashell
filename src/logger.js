@@ -4,6 +4,7 @@ import os from 'os';
 import { systemLogger } from './system-logger.js';
 import { TraceRecorder } from './trace-recorder.js';
 import { loadConfig } from './config.js';
+import { parseTraceLines } from './trace-utils.js';
 
 const parseDuration = (value) => {
   if (typeof value === 'number') return value;
@@ -129,48 +130,7 @@ export class Logger {
       const lines = (await fs.readFile(tracesFile, 'utf8'))
         .split('\n')
         .filter(Boolean);
-      let entries = lines
-        .map((l) => {
-          try {
-            const trace = JSON.parse(l);
-            if (trace.tool === 'run_command') {
-              return {
-                timestamp: trace.timestamp,
-                kind: 'command',
-                command: trace.command,
-                result: trace.result,
-              };
-            } else if (trace.tool === 'apply_patch') {
-              return {
-                timestamp: trace.timestamp,
-                kind: 'apply_patch',
-                diff: trace.patch,
-                result: trace.result,
-              };
-            } else if (trace.tool === 'write_file') {
-              return {
-                timestamp: trace.timestamp,
-                kind: 'write_file',
-                path: trace.path,
-                content: trace.content,
-                overwrite: trace.overwrite,
-                contentLength: trace.contentLength,
-                result: trace.result,
-              };
-            } else if (trace.tool === 'write_trace') {
-              return {
-                timestamp: trace.timestamp,
-                kind: 'note',
-                noteType: trace.type,
-                text: trace.text,
-              };
-            }
-            return { timestamp: trace.timestamp, ...trace };
-          } catch {
-            return null;
-          }
-        })
-        .filter(Boolean);
+      let entries = parseTraceLines(lines);
 
       if (type) {
         if (type === 'note') {
