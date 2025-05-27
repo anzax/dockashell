@@ -31,7 +31,5 @@ examples/
 # Docker image templates (might have special formatting)
 scripts/image/templates/
 
-# Documentation that should preserve formatting
-docs/
-*.md
-README.md
+# Preserve formatting for specific docs if needed
+# docs/legacy/

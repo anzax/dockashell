@@ -19,7 +19,19 @@ export default {
   arrowParens: 'always',
 
   // Prose wrapping (for markdown)
-  proseWrap: 'preserve',
+  proseWrap: 'always',
+
+  // Markdown-specific settings
+  overrides: [
+    {
+      files: '*.md',
+      options: {
+        printWidth: 80,
+        proseWrap: 'always',
+        tabWidth: 2,
+      },
+    },
+  ],
 
   // Embedded languages
   embeddedLanguageFormatting: 'auto',

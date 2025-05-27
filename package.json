@@ -15,6 +15,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
+    "format:md": "prettier --write '**/*.md'",
+    "format:check": "prettier --check .",
     "setup-config": "node scripts/setup-dockashell.js",
     "setup-examples": "node scripts/setup/create-examples.js",
     "build-image": "node scripts/image/build-default-image.js",

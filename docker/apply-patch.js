@@ -702,7 +702,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   process.stdin.on('data', (chunk) => (patchText += chunk));
   process.stdin.on('end', () => {
     if (!patchText) {
-       
       console.error('Please pass patch text through stdin');
       process.exit(1);
     }
@@ -713,10 +712,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         write_file,
         remove_file
       );
-       
+
       console.log(result);
     } catch (err) {
-       
       console.error(err instanceof Error ? err.message : String(err));
       process.exit(1);
     }
