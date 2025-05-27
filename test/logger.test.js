@@ -94,7 +94,7 @@ describe('Logger', () => {
       limit: 5,
     });
     assert.strictEqual(entries.length, 1);
-    assert.ok(entries[0].diff.startsWith('diff --git'));
+    assert.ok(entries[0].patch.startsWith('diff --git'));
     assert.strictEqual(entries[0].result.exitCode, 1);
   });
 
