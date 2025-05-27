@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
+import { LAYOUT } from '../../../constants/layout.js';
 import { LineRenderer } from '../log-viewer/LineRenderer.js';
 
 export const TraceDetailsView = ({
@@ -19,7 +20,10 @@ export const TraceDetailsView = ({
       React.createElement(Text, { wrap: 'truncate-end' }, 'No trace selected')
     );
   }
-  const availableHeight = Math.max(1, height - 4); // Header, help, borders only
+  const availableHeight = Math.max(
+    1,
+    height - LAYOUT.HEADER_HEIGHT
+  ); // Header, help, borders only
   const maxOffset = Math.max(
     0,
     currentTrace.fullLines.length - availableHeight

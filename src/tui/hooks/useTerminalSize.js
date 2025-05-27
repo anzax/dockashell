@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useStdout } from 'ink';
+import { LAYOUT } from '../../constants/layout.js';
 
 export const useTerminalSize = () => {
   const { stdout } = useStdout();
@@ -13,7 +14,7 @@ export const useTerminalSize = () => {
       } else if (process.stdout?.rows) {
         setTerminalHeight(process.stdout.rows);
       } else {
-        setTerminalHeight(24);
+        setTerminalHeight(LAYOUT.DEFAULT_TERMINAL_HEIGHT);
       }
 
       if (stdout?.columns) {
@@ -21,7 +22,7 @@ export const useTerminalSize = () => {
       } else if (process.stdout?.columns) {
         setTerminalWidth(process.stdout.columns);
       } else {
-        setTerminalWidth(80);
+        setTerminalWidth(LAYOUT.DEFAULT_TERMINAL_WIDTH);
       }
     };
 

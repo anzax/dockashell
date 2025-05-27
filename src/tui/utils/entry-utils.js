@@ -4,7 +4,8 @@ import {
   formatCommandOutput,
 } from './line-formatter.js';
 import { TextLayout } from './text-layout.js';
-import { TRACE_ICONS, TRACE_COLORS } from '../../constants/ui.js';
+import { TRACE_ICONS, TRACE_COLORS, TRACE_TYPES } from '../../constants/ui.js';
+import { LAYOUT } from '../../constants/layout.js';
 
 export const formatTimestamp = (timestamp) => {
   if (!timestamp) return 'No timestamp';
@@ -31,15 +32,24 @@ export const formatLines = (text, maxLines = Infinity) => {
 };
 
 // Helper to determine the high level trace type
+const TRACE_TYPE_DETECTORS = {
+  command: (e) => e.kind === 'command' || e.command,
+  apply_patch: (e) => e.kind === 'apply_patch' || e.patch,
+  write_file: (e) => e.kind === 'write_file',
+  user: (e) => e.noteType === 'user',
+  agent: (e) => e.noteType === 'agent',
+  summary: (e) => e.noteType === 'summary',
+};
+
 export const detectTraceType = (entry) => {
-  if (!entry) return 'unknown';
-  if (entry.kind === 'command' || entry.command) return 'command';
-  if (entry.kind === 'apply_patch' || entry.patch) return 'apply_patch';
-  if (entry.kind === 'write_file') return 'write_file';
-  if (entry.kind === 'note') return entry.noteType || 'note';
+  if (!entry) return TRACE_TYPES.UNKNOWN;
+  for (const [type, detector] of Object.entries(TRACE_TYPE_DETECTORS)) {
+    if (detector(entry)) return type;
+  }
+  if (entry.kind === 'note') return entry.noteType || TRACE_TYPES.NOTE;
   if (entry.noteType) return entry.noteType;
   if (entry.type) return entry.type; // legacy notes
-  return 'unknown';
+  return TRACE_TYPES.UNKNOWN;
 };
 
 // Icon mapping for all supported trace types
@@ -130,7 +140,7 @@ export const appendOutputLines = (lines, output, layout, maxLines) => {
 export const buildEntryLines = (
   entry,
   maxLines = Infinity,
-  terminalWidth = 80,
+  terminalWidth = LAYOUT.DEFAULT_TERMINAL_WIDTH,
   options = {}
 ) => {
   const { showOutput = true, compact = false, _isDetailView = false } = options;
@@ -378,7 +388,11 @@ export const buildEntryLines = (
   return lines;
 };
 
-export const prepareEntry = (entry, maxLines, terminalWidth = 80) => {
+export const prepareEntry = (
+  entry,
+  maxLines,
+  terminalWidth = LAYOUT.DEFAULT_TERMINAL_WIDTH
+) => {
   // List view: always 2 lines, compact mode
   const lines = buildEntryLines(entry, 2, terminalWidth, {
     showOutput: false,

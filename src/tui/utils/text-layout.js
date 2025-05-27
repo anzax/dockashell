@@ -1,6 +1,8 @@
-export const ELLIPSIS_LENGTH = 3;
-export const DEFAULT_MAX_SEPARATOR_WIDTH = 60;
-export const MIN_CONTENT_WIDTH = 40;
+import { LAYOUT } from '../../constants/layout.js';
+
+export const ELLIPSIS_LENGTH = LAYOUT.ELLIPSIS_LENGTH;
+export const DEFAULT_MAX_SEPARATOR_WIDTH = LAYOUT.MAX_SEPARATOR_WIDTH;
+export const MIN_CONTENT_WIDTH = LAYOUT.MIN_TERMINAL_WIDTH;
 
 export class TextLayout {
   constructor(terminalWidth) {
