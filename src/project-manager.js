@@ -66,21 +66,7 @@ export class ProjectManager {
   }
 
   async loadProject(projectName) {
-    if (
-      !projectName ||
-      typeof projectName !== 'string' ||
-      projectName.trim() === ''
-    ) {
-      throw new Error('Project name must be a non-empty string');
-    }
-
-    // Sanitize project name to prevent path traversal
-    const sanitizedName = projectName.replace(/[^a-zA-Z0-9_-]/g, '');
-    if (sanitizedName !== projectName) {
-      throw new Error(
-        `Invalid project name '${projectName}'. Only alphanumeric characters, hyphens, and underscores are allowed.`
-      );
-    }
+    this.validateProjectName(projectName);
 
     const projectPath = path.join(this.projectsDir, projectName);
     const configPath = path.join(projectPath, 'config.json');
