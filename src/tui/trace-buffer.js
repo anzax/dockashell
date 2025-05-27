@@ -2,7 +2,7 @@ import EventEmitter from 'events';
 import chokidar from 'chokidar';
 import path from 'path';
 import os from 'os';
-import { listSessions, readTraceEntries, getTraceFile } from './read-traces.js';
+import { listSessions, readTraceEntries } from './read-traces.js';
 
 export class TraceBuffer extends EventEmitter {
   constructor(projectName, maxEntries = 100) {
@@ -10,8 +10,7 @@ export class TraceBuffer extends EventEmitter {
     this.projectName = projectName;
     this.maxEntries = maxEntries;
     this.entries = [];
-    this.fileWatcher = null;
-    this.sessionWatcher = null;
+    this.watcher = null;
   }
 
   async loadFromFiles() {
@@ -63,27 +62,21 @@ export class TraceBuffer extends EventEmitter {
   }
 
   async watch() {
-    const sessionsDir = path.join(
+    const traceDir = path.join(
       os.homedir(),
       '.dockashell',
       'projects',
       this.projectName,
-      'traces',
-      'sessions'
+      'traces'
     );
-    const currentFile = getTraceFile(this.projectName, 'current');
 
-    this.sessionWatcher = chokidar.watch(sessionsDir, { ignoreInitial: true });
-    this.sessionWatcher.on('add', () => this.refresh());
-    this.sessionWatcher.on('unlink', () => this.refresh());
-
-    this.fileWatcher = chokidar.watch(currentFile, { ignoreInitial: true });
-    this.fileWatcher.on('add', () => this.refresh());
-    this.fileWatcher.on('change', () => this.refresh());
+    this.watcher = chokidar.watch(traceDir, { ignoreInitial: true });
+    this.watcher.on('add', () => this.refresh());
+    this.watcher.on('change', () => this.refresh());
+    this.watcher.on('unlink', () => this.refresh());
   }
 
   async close() {
-    if (this.fileWatcher) await this.fileWatcher.close().catch(() => {});
-    if (this.sessionWatcher) await this.sessionWatcher.close().catch(() => {});
+    if (this.watcher) await this.watcher.close().catch(() => {});
   }
 }
