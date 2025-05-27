@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import chokidar from 'chokidar';
-import { listSessions, readTraceEntries, getTraceFile } from './read-traces.js';
-import { getSessionsDir } from './trace-paths.js';
+import { listSessions, readTraceEntries } from './read-traces.js';
+import { getCurrentTraceFile } from './trace-paths.js';
 
 export class TraceBuffer extends EventEmitter {
   constructor(projectName, maxEntries = 100) {
@@ -9,8 +9,7 @@ export class TraceBuffer extends EventEmitter {
     this.projectName = projectName;
     this.maxEntries = maxEntries;
     this.entries = [];
-    this.fileWatcher = null;
-    this.sessionWatcher = null;
+    this.watcher = null;
   }
 
   async loadFromFiles() {
@@ -62,20 +61,42 @@ export class TraceBuffer extends EventEmitter {
   }
 
   async watch() {
-    const sessionsDir = getSessionsDir(this.projectName);
-    const currentFile = getTraceFile(this.projectName, 'current');
+    // Only watch current.jsonl for optimal performance
+    // 99% of trace updates are to this file during active sessions
+    const currentFile = getCurrentTraceFile(this.projectName);
 
-    this.sessionWatcher = chokidar.watch(sessionsDir, { ignoreInitial: true });
-    this.sessionWatcher.on('add', () => this.refresh());
-    this.sessionWatcher.on('unlink', () => this.refresh());
+    this.watcher = chokidar.watch(currentFile, {
+      ignoreInitial: true,
+      // Optimize for file watching
+      usePolling: false,
+      alwaysStat: false,
+    });
 
-    this.fileWatcher = chokidar.watch(currentFile, { ignoreInitial: true });
-    this.fileWatcher.on('add', () => this.refresh());
-    this.fileWatcher.on('change', () => this.refresh());
+    // Handle real-time trace updates
+    this.watcher.on('change', () => this.refresh());
+    this.watcher.on('add', () => this.refresh());
+
+    // Handle session rotation: when current.jsonl is moved to sessions/
+    // this creates a new empty current.jsonl and archives the old one
+    this.watcher.on('unlink', () => {
+      // File was moved during session rotation - refresh to load new session data
+      setTimeout(() => this.refresh(), 100); // Small delay for filesystem consistency
+    });
   }
 
   async close() {
-    if (this.fileWatcher) await this.fileWatcher.close().catch(() => {});
-    if (this.sessionWatcher) await this.sessionWatcher.close().catch(() => {});
+    if (this.watcher) {
+      await this.watcher.close().catch(() => {});
+      this.watcher = null;
+    }
+  }
+
+  /**
+   * Manual refresh for historical session data
+   * Use when you need to reload archived sessions (rare operation)
+   */
+  async refreshSessions() {
+    await this.loadFromFiles();
+    this.emit('update');
   }
 }
