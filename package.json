@@ -10,7 +10,7 @@
   },
   "scripts": {
     "start": "node src/mcp/mcp-server.js",
-    "test": "node --test test/*.test.js",
+    "test": "node --test test/**/*.test.js",
     "test:integration": "node test/integration/test-*.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

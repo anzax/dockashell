@@ -1,6 +1,6 @@
 import { test, describe, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert';
-import { ProjectManager } from '../src/core/project-manager.js';
+import { ProjectManager } from '../../src/core/project-manager.js';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
