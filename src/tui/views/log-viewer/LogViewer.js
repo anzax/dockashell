@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { Box, Text, useInput, useStdout } from 'ink';
+import React, { useEffect, useCallback } from 'react';
+import { Box, Text, useInput } from 'ink';
 import { TraceBuffer } from '../../utils/trace-buffer.js';
 import {
   prepareEntry,
@@ -9,6 +9,11 @@ import {
 import { TraceDetailsView } from '../trace-details/TraceDetailsView.js';
 import { FilterModal } from './FilterModal.js';
 import { LineRenderer } from './LineRenderer.js';
+import { useTraceBuffer } from '../../hooks/useTraceBuffer.js';
+import { useFilters } from '../../hooks/useFilters.js';
+import { useAutoScroll } from '../../hooks/useAutoScroll.js';
+import { useTerminalSize } from '../../hooks/useTerminalSize.js';
+import { useSelection } from '../../hooks/useSelection.js';
 
 const Entry = ({ item, selected }) =>
   React.createElement(
@@ -30,25 +35,43 @@ export const getEntryHeight = (entry, isSelected) =>
   (entry.height || 3) + (isSelected ? 2 : 0); // Height based on prepared entry
 
 export const LogViewer = ({ project, onBack, onExit, config }) => {
-  const [entries, setEntries] = useState([]);
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [scrollOffset, setScrollOffset] = useState(0);
-  const [terminalHeight, setTerminalHeight] = useState(20);
-  const [terminalWidth, setTerminalWidth] = useState(80);
-  const [detailsViewIndex, setDetailsViewIndex] = useState(null);
-  const [showFilterModal, setShowFilterModal] = useState(false);
-  const [autoScroll, setAutoScroll] = useState(true);
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [lastFilterState, setLastFilterState] = useState(DEFAULT_FILTERS);
-  const [selectionBeforeFilter, setSelectionBeforeFilter] = useState(null);
-  const autoScrollRef = useRef(true);
-  const detailsViewRef = useRef(null);
-  const selectedIndexRef = useRef(0);
-  const selectedTimestampRef = useRef(null);
-  const detailsTimestampRef = useRef(null);
-  const filtersRef = useRef(filters);
-  const [buffer, setBuffer] = useState(null);
-  const { stdout } = useStdout();
+  const { terminalHeight, terminalWidth } = useTerminalSize();
+  const {
+    filters,
+    setFilters,
+    lastFilterState,
+    setLastFilterState,
+    showFilterModal,
+    setShowFilterModal,
+    filtersRef,
+  } = useFilters();
+  const {
+    entries,
+    setEntries,
+    buffer,
+    setBuffer,
+  } = useTraceBuffer();
+  const {
+    autoScroll,
+    setAutoScroll,
+    autoScrollRef,
+    updateAutoScrollState,
+  } = useAutoScroll();
+  const {
+    selectedIndex,
+    setSelectedIndex,
+    selectedIndexRef,
+    selectedTimestampRef,
+    scrollOffset,
+    setScrollOffset,
+    detailsViewIndex,
+    setDetailsViewIndex,
+    detailsViewRef,
+    detailsTimestampRef,
+    selectionBeforeFilter,
+    setSelectionBeforeFilter,
+    ensureVisible,
+  } = useSelection(entries);
 
   // Keep refs synced with state for callbacks
   useEffect(() => {
@@ -71,9 +94,6 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       filteredEntries[selectedIndex]?.entry.timestamp || null;
   }, [selectedIndex, filteredEntries]);
 
-  useEffect(() => {
-    filtersRef.current = filters;
-  }, [filters]);
 
   // Handle filter changes separately from trace buffer updates
   useEffect(() => {
@@ -227,63 +247,12 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
         filteredEntries[detailsViewIndex]?.entry.timestamp || null;
     }
   }, [detailsViewIndex, filteredEntries]);
-  const ensureVisible = useCallback(
-    (index) => {
-      if (filteredEntries.length === 0) return;
-      let offset = scrollOffset;
-      if (index < offset) {
-        offset = index;
-      } else {
-        const availableHeight = terminalHeight - 3;
-        let height = 0;
-        for (let i = index; i >= offset; i--) {
-          height += getEntryHeight(filteredEntries[i], i === index);
-          if (height > availableHeight) {
-            offset = i + 1;
-            break;
-          }
-        }
-      }
-      offset = Math.min(Math.max(offset, 0), filteredEntries.length - 1);
-      setScrollOffset(offset);
-    },
-    [filteredEntries, scrollOffset, terminalHeight]
+  const ensureVisibleWrapper = useCallback(
+    (index) =>
+      ensureVisible(index, filteredEntries, terminalHeight, getEntryHeight),
+    [ensureVisible, filteredEntries, terminalHeight]
   );
 
-  const updateAutoScrollState = (idx) => {
-    const threshold = 5;
-    if (filteredEntries.length - idx > threshold) {
-      setAutoScroll(false);
-    } else if (idx >= filteredEntries.length - 1) {
-      setAutoScroll(true);
-    }
-  };
-
-  // Handle terminal resize
-  useEffect(() => {
-    const updateTerminalSize = () => {
-      // Provide fallbacks for undefined terminal dimensions
-      if (stdout?.rows) {
-        setTerminalHeight(stdout.rows);
-      } else if (process.stdout?.rows) {
-        setTerminalHeight(process.stdout.rows);
-      } else {
-        setTerminalHeight(24); // Fallback height
-      }
-
-      if (stdout?.columns) {
-        setTerminalWidth(stdout.columns);
-      } else if (process.stdout?.columns) {
-        setTerminalWidth(process.stdout.columns);
-      } else {
-        setTerminalWidth(80); // Fallback width
-      }
-    };
-
-    updateTerminalSize();
-    process.stdout.on('resize', updateTerminalSize);
-    return () => process.stdout.off('resize', updateTerminalSize);
-  }, [stdout]);
 
   const calculateVisibleEntries = useCallback(() => {
     if (filteredEntries.length === 0) return { start: 0, end: 0 };
@@ -399,12 +368,12 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     } else if (key.downArrow && selectedIndex < filteredEntries.length - 1) {
       const idx = selectedIndex + 1;
       setSelectedIndex(idx);
-      ensureVisible(idx);
+      ensureVisibleWrapper(idx);
       updateAutoScrollState(idx);
     } else if (key.upArrow && selectedIndex > 0) {
       const idx = selectedIndex - 1;
       setSelectedIndex(idx);
-      ensureVisible(idx);
+      ensureVisibleWrapper(idx);
       updateAutoScrollState(idx);
     } else if (key.pageDown) {
       const idx = Math.min(
@@ -412,21 +381,21 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
         selectedIndex + pageSize
       );
       setSelectedIndex(idx);
-      ensureVisible(idx);
+      ensureVisibleWrapper(idx);
       updateAutoScrollState(idx);
     } else if (key.pageUp) {
       const idx = Math.max(0, selectedIndex - pageSize);
       setSelectedIndex(idx);
-      ensureVisible(idx);
+      ensureVisibleWrapper(idx);
       updateAutoScrollState(idx);
     } else if (input === 'g') {
       setSelectedIndex(0);
-      ensureVisible(0);
+      ensureVisibleWrapper(0);
       updateAutoScrollState(0);
     } else if (input === 'G') {
       const idx = filteredEntries.length - 1;
       setSelectedIndex(idx);
-      ensureVisible(idx);
+      ensureVisibleWrapper(idx);
       updateAutoScrollState(idx);
     } else if (input === 'a') {
       setAutoScroll((s) => !s);
