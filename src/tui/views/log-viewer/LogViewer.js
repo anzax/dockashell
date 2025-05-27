@@ -10,6 +10,7 @@ import { useFilters } from '../../hooks/useFilters.js';
 import { useAutoScroll } from '../../hooks/useAutoScroll.js';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import { useSelection } from '../../hooks/useSelection.js';
+import { LoadingSpinner } from '../../components/LoadingSpinner.js';
 
 const Entry = ({ item, selected }) =>
   React.createElement(
@@ -41,7 +42,8 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     setShowFilterModal,
     filtersRef,
   } = useFilters();
-  const { entries, setEntries, buffer, setBuffer } = useTraceBuffer();
+  const { entries, setEntries, buffer, setBuffer, loading, setLoading } =
+    useTraceBuffer();
   const { autoScroll, setAutoScroll, autoScrollRef, updateAutoScrollState } =
     useAutoScroll();
   const {
@@ -262,6 +264,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   useEffect(() => {
     const buf = new TraceBuffer(project, config?.display?.max_entries || 100);
     setBuffer(buf);
+    setLoading(true);
 
     const update = () => {
       const raw = buf.getTraces();
@@ -273,6 +276,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       });
 
       setEntries(prepared);
+      setLoading(false);
 
       // Handle details view restoration
       let newDetailsIndex = null;
@@ -408,6 +412,19 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     ? ` (${visibleStart + 1}-${visibleEnd} of ${filteredEntries.length}${filterIndicator})`
     : filterIndicator;
   const autoIndicator = ` [a] Auto:${autoScroll ? 'ON' : 'OFF'}`;
+
+  if (loading) {
+    return React.createElement(
+      Box,
+      {
+        flexDirection: 'column',
+        height: terminalHeight,
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      React.createElement(LoadingSpinner, { type: 'arc' })
+    );
+  }
 
   // Show filter modal if requested
   if (showFilterModal) {
