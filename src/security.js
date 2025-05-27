@@ -91,4 +91,12 @@ export class SecurityManager {
    * Get default security settings
    * @returns {Object} Default security configuration
    */
+  getDefaultSecuritySettings() {
+    return {
+      restricted_mode: false,
+      blocked_commands: [],
+      max_execution_time: 300,
+    };
+  }
 }
+

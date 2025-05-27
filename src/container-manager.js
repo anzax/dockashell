@@ -209,56 +209,57 @@ export class ContainerManager {
 
       let timedOut = false;
 
-      const result = await Promise.race([
-        new Promise((resolve, reject) => {
-          stdoutStream.on('data', (chunk) => {
-            output += chunk.toString();
-          });
+      const execPromise = new Promise((resolve, reject) => {
+        stdoutStream.on('data', (chunk) => {
+          output += chunk.toString();
+        });
 
-          stderrStream.on('data', (chunk) => {
-            error += chunk.toString();
-          });
+        stderrStream.on('data', (chunk) => {
+          error += chunk.toString();
+        });
 
-          stream.on('end', async () => {
-            try {
-              const inspect = await exec.inspect();
-              resolve({
-                stdout: output.trim(),
-                stderr: error.trim(),
-                exitCode: inspect.ExitCode,
-                timedOut,
+        stream.on('end', async () => {
+          try {
+            const inspect = await exec.inspect();
+            resolve({
+              stdout: output.trim(),
+              stderr: error.trim(),
+              exitCode: inspect.ExitCode,
+              timedOut,
+            });
+          } catch (inspectError) {
+            reject(inspectError);
+          }
+        });
+
+        stream.on('error', reject);
+      });
+
+      let result;
+      try {
+        result = await this.withTimeout(execPromise, timeoutMs, 'Command');
+      } catch (err) {
+        if (err.message.includes('timed out')) {
+          timedOut = true;
+          try {
+            const info = await exec.inspect();
+            if (info.Pid) {
+              const killer = await container.exec({
+                Cmd: ['kill', '-TERM', info.Pid.toString()],
+                AttachStdout: false,
+                AttachStderr: false,
+                Tty: false,
               });
-            } catch (inspectError) {
-              reject(inspectError);
+              await killer.start({ Detach: true, Tty: false });
             }
-          });
-
-          stream.on('error', reject);
-        }),
-        new Promise((_, reject) => {
-          setTimeout(() => {
-            timedOut = true;
-            (async () => {
-              try {
-                const info = await exec.inspect();
-                if (info.Pid) {
-                  const killer = await container.exec({
-                    Cmd: ['kill', '-TERM', info.Pid.toString()],
-                    AttachStdout: false,
-                    AttachStderr: false,
-                    Tty: false,
-                  });
-                  await killer.start({ Detach: true, Tty: false });
-                }
-              } catch {
-                // Ignore errors when killing container
-              }
-              stream.destroy();
-              reject(new Error('Command timed out'));
-            })();
-          }, timeoutMs);
-        }),
-      ]);
+          } catch {
+            // Ignore errors when killing container
+          }
+          stream.destroy();
+          throw new Error('Command timed out');
+        }
+        throw err;
+      }
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
@@ -348,40 +349,43 @@ export class ContainerManager {
       stream.write(patch);
       stream.end();
 
-      const result = await Promise.race([
-        new Promise((resolve, reject) => {
-          stdoutStream.on('data', (chunk) => {
-            output += chunk.toString();
-          });
+      const execPromise = new Promise((resolve, reject) => {
+        stdoutStream.on('data', (chunk) => {
+          output += chunk.toString();
+        });
 
-          stderrStream.on('data', (chunk) => {
-            error += chunk.toString();
-          });
+        stderrStream.on('data', (chunk) => {
+          error += chunk.toString();
+        });
 
-          stream.on('end', async () => {
-            try {
-              const inspect = await exec.inspect();
-              resolve({
-                stdout: output.trim(),
-                stderr: error.trim(),
-                exitCode: inspect.ExitCode,
-                timedOut,
-              });
-            } catch (inspectError) {
-              reject(inspectError);
-            }
-          });
+        stream.on('end', async () => {
+          try {
+            const inspect = await exec.inspect();
+            resolve({
+              stdout: output.trim(),
+              stderr: error.trim(),
+              exitCode: inspect.ExitCode,
+              timedOut,
+            });
+          } catch (inspectError) {
+            reject(inspectError);
+          }
+        });
 
-          stream.on('error', reject);
-        }),
-        new Promise((_, reject) => {
-          setTimeout(() => {
-            timedOut = true;
-            stream.destroy();
-            reject(new Error('Patch apply timed out'));
-          }, timeoutMs);
-        }),
-      ]);
+        stream.on('error', reject);
+      });
+
+      let result;
+      try {
+        result = await this.withTimeout(execPromise, timeoutMs, 'Patch apply');
+      } catch (err) {
+        if (err.message.includes('timed out')) {
+          timedOut = true;
+          stream.destroy();
+          throw new Error('Patch apply timed out');
+        }
+        throw err;
+      }
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
@@ -480,37 +484,40 @@ export class ContainerManager {
       stream.write(content);
       stream.end();
 
-      const result = await Promise.race([
-        new Promise((resolve, reject) => {
-          stdoutStream.on('data', (chunk) => {
-            output += chunk.toString();
-          });
-          stderrStream.on('data', (chunk) => {
-            error += chunk.toString();
-          });
-          stream.on('end', async () => {
-            try {
-              const inspect = await exec.inspect();
-              resolve({
-                stdout: output.trim(),
-                stderr: error.trim(),
-                exitCode: inspect.ExitCode,
-                timedOut,
-              });
-            } catch (inspectError) {
-              reject(inspectError);
-            }
-          });
-          stream.on('error', reject);
-        }),
-        new Promise((_, reject) => {
-          setTimeout(() => {
-            timedOut = true;
-            stream.destroy();
-            reject(new Error('Write file timed out'));
-          }, timeoutMs);
-        }),
-      ]);
+      const execPromise = new Promise((resolve, reject) => {
+        stdoutStream.on('data', (chunk) => {
+          output += chunk.toString();
+        });
+        stderrStream.on('data', (chunk) => {
+          error += chunk.toString();
+        });
+        stream.on('end', async () => {
+          try {
+            const inspect = await exec.inspect();
+            resolve({
+              stdout: output.trim(),
+              stderr: error.trim(),
+              exitCode: inspect.ExitCode,
+              timedOut,
+            });
+          } catch (inspectError) {
+            reject(inspectError);
+          }
+        });
+        stream.on('error', reject);
+      });
+
+      let result;
+      try {
+        result = await this.withTimeout(execPromise, timeoutMs, 'Write file');
+      } catch (err) {
+        if (err.message.includes('timed out')) {
+          timedOut = true;
+          stream.destroy();
+          throw new Error('Write file timed out');
+        }
+        throw err;
+      }
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 

@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
+import { parseTraceLines } from '../trace-utils.js';
 
 export function getTraceFile(projectName, session = 'current') {
   const base = path.join(
@@ -58,50 +59,6 @@ export async function readTraceEntries(
     .filter(Boolean);
 
   const slice = lines.slice(-maxEntries);
-  const entries = [];
-  for (const line of slice) {
-    try {
-      const trace = JSON.parse(line);
-      let entry;
-      if (trace.tool === 'run_command') {
-        entry = {
-          timestamp: trace.timestamp,
-          kind: 'command',
-          command: trace.command,
-          result: trace.result,
-        };
-      } else if (trace.tool === 'apply_patch') {
-        entry = {
-          timestamp: trace.timestamp,
-          kind: 'apply_patch',
-          patch: trace.patch,
-          result: trace.result,
-        };
-      } else if (trace.tool === 'write_file') {
-        entry = {
-          timestamp: trace.timestamp,
-          kind: 'write_file',
-          path: trace.path,
-          content: trace.content,
-          overwrite: trace.overwrite,
-          contentLength: trace.contentLength,
-          result: trace.result,
-        };
-      } else if (trace.tool === 'write_trace') {
-        entry = {
-          timestamp: trace.timestamp,
-          kind: 'note',
-          noteType: trace.type,
-          text: trace.text,
-        };
-      } else {
-        entry = { timestamp: trace.timestamp, ...trace };
-      }
-      entries.push(entry);
-    } catch {
-      // ignore malformed lines
-    }
-  }
-
-  return entries;
+  return parseTraceLines(slice);
 }
+

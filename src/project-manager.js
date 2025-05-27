@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
+import { defaultConfig } from './default-config.js';
 
 export class ProjectManager {
   constructor() {
@@ -28,18 +29,6 @@ export class ProjectManager {
     // Create global config if it doesn't exist
     const globalConfigPath = path.join(this.configDir, 'config.json');
     if (!(await fs.pathExists(globalConfigPath))) {
-      const defaultConfig = {
-        tui: {
-          display: {
-            max_entries: 100,
-          },
-        },
-        logging: {
-          traces: {
-            session_timeout: '4h',
-          },
-        },
-      };
       await fs.writeJSON(globalConfigPath, defaultConfig, { spaces: 2 });
     }
   }
@@ -77,21 +66,7 @@ export class ProjectManager {
   }
 
   async loadProject(projectName) {
-    if (
-      !projectName ||
-      typeof projectName !== 'string' ||
-      projectName.trim() === ''
-    ) {
-      throw new Error('Project name must be a non-empty string');
-    }
-
-    // Sanitize project name to prevent path traversal
-    const sanitizedName = projectName.replace(/[^a-zA-Z0-9_-]/g, '');
-    if (sanitizedName !== projectName) {
-      throw new Error(
-        `Invalid project name '${projectName}'. Only alphanumeric characters, hyphens, and underscores are allowed.`
-      );
-    }
+    this.validateProjectName(projectName);
 
     const projectPath = path.join(this.projectsDir, projectName);
     const configPath = path.join(projectPath, 'config.json');
@@ -232,7 +207,7 @@ export class ProjectManager {
     }
     if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
       throw new Error(
-        'Project name can only contain letters, numbers, hyphens, and underscores'
+        'Invalid project name. Only letters, numbers, hyphens, and underscores are allowed.'
       );
     }
     if (name.length > 64) {
