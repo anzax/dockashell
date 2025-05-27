@@ -10,7 +10,7 @@ DockaShell provides isolated, persistent Docker containers for AI agents to safe
 - **🚀 Persistent State**: Containers maintain state across command executions
 - **🌐 Port Mapping**: Easy web development with automatic port forwarding
 - **📁 Project Directory Mounting**: Seamless file access between host and container
-- **🛡️ Security Controls**: Configurable command blocking and timeouts
+- **🛡️ Security Controls**: Execution timeouts for commands
 - **📊 Command Logging**: Full audit trail of all executed commands
 - **🔧 MCP Integration**: Standard Model Context Protocol interface
 - **🐳 Default Development Image**: Pre-built Ubuntu 24.04 LTS with Node.js 20 LTS, Python 3, and essential CLI tools
@@ -150,8 +150,6 @@ Projects are configured in `~/.dockashell/projects/{project-name}/config.json`:
   "working_dir": "/workspace",
   "shell": "/bin/bash",
   "security": {
-    "restricted_mode": false,
-    "blocked_commands": ["rm -rf /", "sudo rm -rf"],
     "max_execution_time": 300
   }
 }
@@ -171,8 +169,6 @@ Note: The `image` field is optional - if omitted, projects will use the default 
 | `environment` | Environment variables | {} |
 | `working_dir` | Container working directory | "/workspace" |
 | `shell` | Default shell | "/bin/bash" |
-| `security.restricted_mode` | Enable security restrictions | false |
-| `security.blocked_commands` | Commands to block | [] |
 | `security.max_execution_time` | Command timeout (seconds) | 300 |
 
 ## 🔧 MCP Tools
@@ -243,15 +239,6 @@ read_traces("project", {search: "error"})
 - **Container Isolation**: Each project is completely isolated
 - **Non-privileged Execution**: Containers run without root access
 - **Audit Logging**: All commands logged with timestamps
-
-### Default Blocked Commands
-
-When `restricted_mode` is enabled:
-- `rm -rf /` - Recursive delete of root
-- `:(){ :|:& };:` - Fork bomb
-- `sudo rm -rf` - Privileged delete
-- `mkfs` - Format filesystem
-- `dd if=/dev/zero` - Zero out devices
 
 ## 📊 Logging
 

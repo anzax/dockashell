@@ -48,28 +48,7 @@ async function testErrorHandling() {
     console.log(`  ✅ Null config: ${error.message}`);
   }
 
-  // Test security with restricted mode
-  console.log('\n3. Testing security restrictions:');
-  const restrictedConfig = {
-    security: {
-      restricted_mode: true,
-      blocked_commands: ['rm -rf /'],
-    },
-  };
-
-  try {
-    server.securityManager.validateCommand('rm -rf /', restrictedConfig);
-    console.log('  ❌ Blocked command should fail');
-  } catch (error) {
-    console.log(`  ✅ Blocked command: ${error.message}`);
-  }
-
-  try {
-    server.securityManager.validateCommand('ls -la', restrictedConfig);
-    console.log('  ✅ Safe command passed validation');
-  } catch (error) {
-    console.log(`  ❌ Safe command failed: ${error.message}`);
-  }
+  // Security checks removed; containers are isolated
 
   // Test container operations timeout handling
   console.log('\n4. Testing container operations:');

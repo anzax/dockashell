@@ -78,8 +78,6 @@ describe('ProjectManager', () => {
     assert.strictEqual(loadedConfig.shell, '/bin/bash');
 
     // Verify security defaults
-    assert.strictEqual(loadedConfig.security.restricted_mode, false);
-    assert.ok(Array.isArray(loadedConfig.security.blocked_commands));
     assert.strictEqual(loadedConfig.security.max_execution_time, 300);
   });
 

@@ -111,10 +111,6 @@ export class ProjectManager {
         working_dir: config.working_dir || '/workspace',
         shell: config.shell || '/bin/bash',
         security: {
-          restricted_mode: config.security?.restricted_mode || false,
-          blocked_commands: Array.isArray(config.security?.blocked_commands)
-            ? config.security.blocked_commands
-            : [],
           max_execution_time:
             typeof config.security?.max_execution_time === 'number'
               ? config.security.max_execution_time
