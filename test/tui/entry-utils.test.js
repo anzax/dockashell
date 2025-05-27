@@ -5,7 +5,7 @@ import {
   formatTimestamp,
   prepareEntry,
   detectTraceType,
-} from '../../src/tui/entry-utils.js';
+} from '../../src/tui/utils/entry-utils.js';
 
 const sampleCommand = {
   kind: 'command',

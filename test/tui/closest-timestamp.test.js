@@ -1,6 +1,6 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert';
-import { findClosestTimestamp } from '../../src/tui/entry-utils.js';
+import { findClosestTimestamp } from '../../src/tui/utils/entry-utils.js';
 
 describe('findClosestTimestamp', () => {
   test('finds exact timestamp match', () => {
