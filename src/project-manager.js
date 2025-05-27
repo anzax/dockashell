@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
+import { defaultConfig } from './default-config.js';
 
 export class ProjectManager {
   constructor() {
@@ -28,18 +29,6 @@ export class ProjectManager {
     // Create global config if it doesn't exist
     const globalConfigPath = path.join(this.configDir, 'config.json');
     if (!(await fs.pathExists(globalConfigPath))) {
-      const defaultConfig = {
-        tui: {
-          display: {
-            max_entries: 100,
-          },
-        },
-        logging: {
-          traces: {
-            session_timeout: '4h',
-          },
-        },
-      };
       await fs.writeJSON(globalConfigPath, defaultConfig, { spaces: 2 });
     }
   }
