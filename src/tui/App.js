@@ -4,6 +4,7 @@ import { LogViewer } from './views/LogViewer.js';
 import { TraceDetailsView } from './views/TraceDetailsView.js';
 import { TraceTypesFilterView } from './views/TraceTypesFilterView.js';
 import { loadConfig } from '../utils/config.js';
+import { DEFAULT_FILTERS } from './ui-utils/entry-utils.js';
 
 const defaultTuiConfig = {
   display: {
@@ -14,7 +15,10 @@ const defaultTuiConfig = {
 export const App = ({ projectArg }) => {
   const [project, setProject] = useState(projectArg || null);
   const [config, setConfig] = useState({ tui: defaultTuiConfig });
-  const [filterState, setFilterState] = useState(null);
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollOffset, setScrollOffset] = useState(0);
+  const [filterOpen, setFilterOpen] = useState(false);
   const [detailsState, setDetailsState] = useState(null);
 
   useEffect(() => {
@@ -32,13 +36,13 @@ export const App = ({ projectArg }) => {
     });
   }
 
-  if (filterState) {
+  if (filterOpen) {
     return React.createElement(TraceTypesFilterView, {
-      currentFilters: filterState.currentFilters,
-      onBack: () => setFilterState(null),
+      currentFilters: filters,
+      onBack: () => setFilterOpen(false),
       onApply: (newFilters) => {
-        filterState.onApply(newFilters);
-        setFilterState(null);
+        setFilters(newFilters);
+        setFilterOpen(false);
       },
     });
   }
@@ -49,8 +53,8 @@ export const App = ({ projectArg }) => {
       currentIndex: detailsState.currentIndex,
       onClose: () => setDetailsState(null),
       onNavigate: (idx) => {
-        detailsState.onNavigate(idx);
         setDetailsState((prev) => ({ ...prev, currentIndex: idx }));
+        setSelectedIndex(idx);
       },
     });
   }
@@ -58,11 +62,15 @@ export const App = ({ projectArg }) => {
   return React.createElement(LogViewer, {
     project,
     config: config.tui || defaultTuiConfig,
+    filters,
+    selectedIndex,
+    setSelectedIndex,
+    scrollOffset,
+    setScrollOffset,
     onBack: () => setProject(null),
     onExit: () => process.exit(0),
-    onOpenDetails: ({ traces, currentIndex, onNavigate }) =>
-      setDetailsState({ traces, currentIndex, onNavigate }),
-    onOpenFilter: ({ currentFilters, onApply }) =>
-      setFilterState({ currentFilters, onApply }),
+    onOpenDetails: ({ traces, currentIndex }) =>
+      setDetailsState({ traces, currentIndex }),
+    onOpenFilter: () => setFilterOpen(true),
   });
 };
