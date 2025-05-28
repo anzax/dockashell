@@ -5,7 +5,7 @@ import { AppContainer } from '../AppContainer.js';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import { buildEntryLines } from '../../ui-utils/entry-utils.js';
 import { SHORTCUTS, buildFooter } from '../../constants/index.js';
-import { isExitKey } from '../../ui-utils/input-utils.js';
+import { isExitKey } from '../../ui-utils/text-utils.js';
 
 export const TraceDetailsView = ({
   traces,

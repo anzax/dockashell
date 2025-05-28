@@ -5,7 +5,7 @@ import {
   MIN_CONTENT_WIDTH,
   DEFAULT_MAX_SEPARATOR_WIDTH,
   ELLIPSIS_LENGTH,
-} from '../../src/tui/ui-utils/text-layout.js';
+} from '../../src/tui/ui-utils/text-utils.js';
 
 describe('TextLayout', () => {
   test('content width uses minimum for very narrow terminals', () => {
