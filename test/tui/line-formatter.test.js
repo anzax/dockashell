@@ -5,7 +5,7 @@ import {
   formatMultilineText,
   truncateText,
   formatCommandOutput,
-} from '../../src/tui/utils/line-formatter.js';
+} from '../../src/tui/ui-utils/line-formatter.js';
 
 describe('wrapText', () => {
   test('wraps long text to specified width', () => {

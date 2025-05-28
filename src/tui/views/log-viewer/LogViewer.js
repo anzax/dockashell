@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { Box, Text, useInput } from 'ink';
-import { TraceBuffer } from '../../utils/trace-buffer.js';
-import { prepareEntry } from '../../utils/entry-utils.js';
+import { TraceBuffer } from '../../ui-utils/trace-buffer.js';
+import { prepareEntry } from '../../ui-utils/entry-utils.js';
 import { TraceDetailsView } from '../trace-details/TraceDetailsView.js';
 import { TraceTypesFilterView } from '../trace-types-filter/TraceTypesFilterView.js';
 import { AppContainer } from '../AppContainer.js';
@@ -11,7 +11,7 @@ import { useFilters } from '../../hooks/useFilters.js';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import { useSelection } from '../../hooks/useSelection.js';
 import { SHORTCUTS, buildFooter } from '../../constants/shortcuts.js';
-import { isEnterKey } from '../../utils/input-utils.js';
+import { isEnterKey } from '../../ui-utils/input-utils.js';
 
 const Entry = ({ item, selected }) =>
   React.createElement(

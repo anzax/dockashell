@@ -1,5 +1,5 @@
-import { formatTimestamp } from '../utils/entry-utils.js';
-import { TextLayout } from '../utils/text-layout.js';
+import { formatTimestamp } from '../ui-utils/entry-utils.js';
+import { TextLayout } from '../ui-utils/text-layout.js';
 
 import { TRACE_ICONS } from '../constants/ui.js';
 

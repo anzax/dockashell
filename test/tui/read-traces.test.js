@@ -7,7 +7,7 @@ import {
   readTraceEntries,
   listSessions,
   getTraceFile,
-} from '../../src/tui/utils/read-traces.js';
+} from '../../src/tui/ui-utils/read-traces.js';
 
 describe('read-traces helpers', () => {
   let tmpHome;
