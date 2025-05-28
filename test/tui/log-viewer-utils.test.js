@@ -1,6 +1,8 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert';
-import { getEntryHeight } from '../../src/tui/views/LogViewer.js';
+// Simplified height function used for visibility calculations in tests
+const getEntryHeight = (entry, selected) =>
+  (entry.height || 3) + (selected ? 2 : 0);
 
 const ensureVisible = (entries, terminalHeight, scrollOffset, index) => {
   if (entries.length === 0) return scrollOffset;

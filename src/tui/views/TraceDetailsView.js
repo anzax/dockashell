@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
-import { LineRenderer } from '../components/LineRenderer.js';
 import { AppContainer } from '../components/AppContainer.js';
 import { useStdoutDimensions } from '../hooks/useStdoutDimensions.js';
-import { buildEntryLines } from '../ui-utils/entry-utils.js';
+import { buildEntryLines } from '../components/TraceItemPreview.js';
 import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
 import { isExitKey } from '../ui-utils/text-utils.js';
 
@@ -123,11 +122,17 @@ export const TraceDetailsView = ({
         borderStyle: 'single',
       },
       ...visibleLines.map((line, idx) =>
-        React.createElement(LineRenderer, {
-          key: scrollOffset + idx,
-          line,
-          isModal: true,
-        })
+        React.createElement(
+          Text,
+          {
+            key: scrollOffset + idx,
+            color: line.dimOnModal ? 'white' : line.color || 'white',
+            dimColor: line.dim || false,
+            bold: line.bold || false,
+            wrap: 'truncate-end',
+          },
+          line.icon ? `${line.icon} ${line.text}` : line.text
+        )
       )
     ),
   });

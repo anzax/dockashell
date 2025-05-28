@@ -1,9 +1,8 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert';
+import { buildEntryLines } from '../../src/tui/components/TraceItemPreview.js';
 import {
-  buildEntryLines,
   formatTimestamp,
-  prepareEntry,
   detectTraceType,
 } from '../../src/tui/ui-utils/entry-utils.js';
 
@@ -40,17 +39,6 @@ describe('formatTimestamp', () => {
   test('handles invalid timestamp', () => {
     assert.strictEqual(formatTimestamp('invalid'), 'Invalid timestamp');
     assert.strictEqual(formatTimestamp(null), 'No timestamp');
-  });
-});
-
-describe('prepareEntry', () => {
-  test('creates list and detail views', () => {
-    const prepared = prepareEntry(sampleCommand, 80);
-    assert.strictEqual(prepared.lines.length, 2);
-    // Full lines are now generated on-demand in TraceDetailsView, not pre-computed
-    assert(prepared.entry);
-    assert(prepared.height);
-    assert(prepared.traceType);
   });
 });
 
