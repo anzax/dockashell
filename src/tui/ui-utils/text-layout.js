@@ -1,4 +1,4 @@
-import { LAYOUT } from '../constants/layout.js';
+import { LAYOUT } from '../constants/index.js';
 
 export const ELLIPSIS_LENGTH = LAYOUT.ELLIPSIS_LENGTH;
 export const DEFAULT_MAX_SEPARATOR_WIDTH = LAYOUT.MAX_SEPARATOR_WIDTH;

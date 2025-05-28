@@ -1,7 +1,7 @@
 import { formatTimestamp } from '../ui-utils/entry-utils.js';
 import { TextLayout } from '../ui-utils/text-layout.js';
 import { sanitizeText } from '../ui-utils/line-formatter.js';
-import { TRACE_ICONS, TRACE_COLORS } from '../constants/ui.js';
+import { TRACE_ICONS, TRACE_COLORS } from '../constants/index.js';
 
 /**
  * Factory function to create note decorators with different configurations
