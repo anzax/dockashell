@@ -55,7 +55,11 @@ export const TraceTypesFilterView = ({ onBack, onApply, currentFilters }) => {
   });
 
   return React.createElement(AppContainer, {
-    header: React.createElement(Text, { bold: true }, 'DockaShell TUI - Filter Trace Types'),
+    header: React.createElement(
+      Text,
+      { bold: true },
+      'DockaShell TUI - Filter Trace Types'
+    ),
     footer: React.createElement(
       Text,
       { dimColor: true },

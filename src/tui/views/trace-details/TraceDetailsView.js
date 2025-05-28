@@ -4,7 +4,12 @@ import { LineRenderer } from '../log-viewer/LineRenderer.js';
 import { AppContainer } from '../AppContainer.js';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 
-export const TraceDetailsView = ({ traces, currentIndex, onClose, onNavigate }) => {
+export const TraceDetailsView = ({
+  traces,
+  currentIndex,
+  onClose,
+  onNavigate,
+}) => {
   const [scrollOffset, setScrollOffset] = useState(0);
   const [, height] = useStdoutDimensions();
 
@@ -12,7 +17,11 @@ export const TraceDetailsView = ({ traces, currentIndex, onClose, onNavigate }) 
   if (!currentTrace) {
     return React.createElement(AppContainer, {
       header: React.createElement(Text, { bold: true }, 'Trace Details'),
-      footer: React.createElement(Text, { dimColor: true }, '[Enter/Esc/q] Back'),
+      footer: React.createElement(
+        Text,
+        { dimColor: true },
+        '[Enter/Esc/q] Back'
+      ),
       children: React.createElement(
         Box,
         { flexGrow: 1, justifyContent: 'center', alignItems: 'center' },

@@ -6,31 +6,6 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 
-const EmptyState = () =>
-  React.createElement(AppContainer, {
-    header: React.createElement(Text, { bold: true }, 'DockaShell TUI - No Projects Found'),
-    footer: React.createElement(Text, { dimColor: true }, '[q] Quit'),
-    children: React.createElement(
-      Box,
-      {
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexGrow: 1,
-      },
-      React.createElement(
-        Text,
-        null,
-        '🚫 No traces found in ~/.dockashell/projects'
-      ),
-      React.createElement(
-        Text,
-        null,
-        'Use DockaShell to create a project first.'
-      )
-    ),
-  });
-
 export const ProjectSelector = ({ onSelect, onExit }) => {
   const [projects, setProjects] = useState([]);
 
@@ -75,32 +50,46 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
     loadProjects();
   }, []);
 
-  if (projects.length === 0) {
-    return React.createElement(EmptyState);
-  }
-
-  const options = projects.map((p) => ({
-    label:
-      p.name +
-      (p.last ? ` - ${new Date(p.last).toLocaleString()}` : ' - no traces yet'),
-    value: p.name,
-  }));
+  const options =
+    projects.length > 0
+      ? projects.map((p) => ({
+          label:
+            p.name +
+            (p.last
+              ? ` - ${new Date(p.last).toLocaleString()}`
+              : ' - no traces yet'),
+          value: p.name,
+        }))
+      : [];
 
   return React.createElement(AppContainer, {
     header: React.createElement(
       Text,
       { bold: true },
-      'DockaShell TUI - Select Project'
+      projects.length > 0
+        ? 'DockaShell TUI - Select Project'
+        : 'DockaShell TUI - No Projects Found'
     ),
-    footer: React.createElement(
-      Text,
-      { dimColor: true },
-      '[↑↓] Navigate  [Enter] Select  [1-9] Quick Select  [q] Quit'
-    ),
+    footer: React.createElement(Text, { dimColor: true }, '[q] Quit'),
     children: React.createElement(
       Box,
       { flexDirection: 'column', flexGrow: 1, width: '100%' },
-      React.createElement(Select, { options, onChange: onSelect })
+      projects.length > 0
+        ? React.createElement(Select, { options, onChange: onSelect })
+        : React.createElement(
+            Box,
+            { flexDirection: 'column' },
+            React.createElement(
+              Text,
+              null,
+              '🚫 No traces found in ~/.dockashell/projects'
+            ),
+            React.createElement(
+              Text,
+              null,
+              'Use DockaShell to create a project first.'
+            )
+          )
     ),
   });
 };
