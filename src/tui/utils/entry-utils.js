@@ -2,6 +2,7 @@ import {
   formatMultilineText,
   truncateText,
   formatCommandOutput,
+  sanitizeText,
 } from './line-formatter.js';
 import { TextLayout } from './text-layout.js';
 import { TRACE_ICONS, TRACE_COLORS, TRACE_TYPES } from '../../constants/ui.js';
@@ -163,7 +164,7 @@ export const buildEntryLines = (
     case 'note': {
       lines.push(createHeaderLine(entry, traceType, traceType.toUpperCase()));
       if (entry.text) {
-        const text = entry.text.trim();
+        const text = sanitizeText(entry.text).trim();
         if (compact) {
           const firstLine = text.split('\n')[0];
           lines.push({
@@ -196,7 +197,7 @@ export const buildEntryLines = (
         )
       );
 
-      const command = entry.command || '';
+      const command = sanitizeText(entry.command || '');
       if (compact) {
         let displayCommand = command;
         if (command.includes('\n')) {
@@ -264,7 +265,7 @@ export const buildEntryLines = (
           `APPLY_PATCH | Exit: ${exitCode} | ${duration}`
         )
       );
-      const patch = entry.patch || '';
+      const patch = sanitizeText(entry.patch || '');
       if (compact) {
         const patchLines = patch.split('\n');
         const first = patchLines[0];
@@ -323,7 +324,7 @@ export const buildEntryLines = (
         color: traceColor,
       });
 
-      const content = entry.content || '';
+      const content = sanitizeText(entry.content || '');
       if (content && !compact) {
         lines.push({
           type: 'separator',

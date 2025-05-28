@@ -99,10 +99,7 @@ export const TraceDetailsView = ({
       {
         flexDirection: 'column',
         flexGrow: 1,
-        borderStyle: 'double',
-        paddingLeft: 1,
-        paddingRight: 1,
-        marginY: 1,
+        borderStyle: 'single',
       },
       ...visibleLines.map((line, idx) =>
         React.createElement(LineRenderer, {

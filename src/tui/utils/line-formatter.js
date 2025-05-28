@@ -6,6 +6,36 @@ import { ELLIPSIS_LENGTH } from './text-layout.js';
 
 const ELLIPSIS = '.'.repeat(ELLIPSIS_LENGTH);
 
+// Regex patterns for text sanitization
+// eslint-disable-next-line no-control-regex
+const ANSI_ESCAPE_PATTERN = /\x1b\[[0-9;]*m/g;
+// eslint-disable-next-line no-control-regex
+const CONTROL_CHARS_PATTERN = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g;
+const CHECKMARK_EMOJI_PATTERN = /✅/g;
+const CROSSMARK_EMOJI_PATTERN = /❌/g;
+
+/**
+ * Sanitize text to prevent terminal rendering issues
+ * @param {string} text - Text to sanitize
+ * @returns {string} Sanitized text safe for terminal display
+ */
+export const sanitizeText = (text) => {
+  if (!text) return '';
+
+  return (
+    text
+      // Replace tabs with 2 spaces for consistent display
+      .replace(/\t/g, '  ')
+      // Remove ANSI escape sequences
+      .replace(ANSI_ESCAPE_PATTERN, '')
+      // Replace other control characters (except newline) with spaces
+      .replace(CONTROL_CHARS_PATTERN, ' ')
+      // Replace problematic emojis that cause terminal rendering issues
+      .replace(CHECKMARK_EMOJI_PATTERN, '[✓]') // Checkmark emoji -> bracketed check
+      .replace(CROSSMARK_EMOJI_PATTERN, '[✗]')
+  ); // Cross mark emoji -> bracketed X
+};
+
 /**
  * Wrap text to fit within a specified width
  * @param {string} text - Text to wrap
@@ -83,10 +113,13 @@ export const formatMultilineText = (
 ) => {
   if (!text) return [];
 
+  // Sanitize text to prevent terminal rendering issues
+  const sanitizedText = sanitizeText(text);
+
   const lines = [];
   const inputLines = preserveLineBreaks
-    ? text.split('\n')
-    : [text.replace(/\n/g, ' ')];
+    ? sanitizedText.split('\n')
+    : [sanitizedText.replace(/\n/g, ' ')];
 
   for (const line of inputLines) {
     if (lines.length >= maxLines) break;
@@ -146,8 +179,11 @@ export const truncateText = (text, width) => {
 export const formatCommandOutput = (output, width, maxLines = Infinity) => {
   if (!output || !output.trim()) return [];
 
+  // Sanitize output to prevent terminal rendering issues
+  const sanitizedOutput = sanitizeText(output);
+
   // Split by line breaks and format each line
-  const lines = output.split('\n');
+  const lines = sanitizedOutput.split('\n');
   const formatted = [];
 
   for (const line of lines) {
