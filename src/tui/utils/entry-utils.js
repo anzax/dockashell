@@ -1,4 +1,3 @@
-import {} from './line-formatter.js';
 import { getDecorator } from '../event-decorators/index.js';
 import { TextLayout } from './text-layout.js';
 import { TRACE_ICONS, TRACE_COLORS, TRACE_TYPES } from '../constants/ui.js';
@@ -19,14 +18,6 @@ export const formatTimestamp = (timestamp) => {
 };
 
 // Kept for backwards compatibility
-export const formatLines = (text, maxLines = Infinity) => {
-  if (!text) return [];
-  const lines = text.split('\n');
-  return [
-    ...lines.slice(0, maxLines),
-    ...(lines.length > maxLines ? ['...'] : []),
-  ];
-};
 
 // Helper to determine the high level trace type
 const TRACE_TYPE_DETECTORS = {
