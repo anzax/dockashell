@@ -8,7 +8,6 @@ export const useSelection = (entries = []) => {
   const detailsViewRef = useRef(null);
   const selectedTimestampRef = useRef(null);
   const detailsTimestampRef = useRef(null);
-  const [selectionBeforeFilter, setSelectionBeforeFilter] = useState(null);
 
   useEffect(() => {
     selectedIndexRef.current = selectedIndex;
@@ -58,8 +57,6 @@ export const useSelection = (entries = []) => {
     setDetailsViewIndex,
     detailsViewRef,
     detailsTimestampRef,
-    selectionBeforeFilter,
-    setSelectionBeforeFilter,
     ensureVisible,
   };
 };

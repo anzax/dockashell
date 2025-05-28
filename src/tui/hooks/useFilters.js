@@ -3,7 +3,6 @@ import { DEFAULT_FILTERS } from '../utils/entry-utils.js';
 
 export const useFilters = () => {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [lastFilterState, setLastFilterState] = useState(DEFAULT_FILTERS);
   const [showFilterView, setShowFilterView] = useState(false);
   const filtersRef = useRef(filters);
 
@@ -14,8 +13,6 @@ export const useFilters = () => {
   return {
     filters,
     setFilters,
-    lastFilterState,
-    setLastFilterState,
     showFilterView,
     setShowFilterView,
     filtersRef,
