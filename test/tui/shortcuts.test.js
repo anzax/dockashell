@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert';
-import { SHORTCUTS, buildFooter } from '../../src/tui/constants/index.js';
+import { SHORTCUTS, buildFooter } from '../../src/tui/ui-utils/constants.js';
 
 describe('buildFooter', () => {
   test('joins shortcuts with double spaces', () => {

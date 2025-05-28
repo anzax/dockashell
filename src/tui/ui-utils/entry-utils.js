@@ -1,6 +1,6 @@
 import { getDecorator } from '../event-decorators/index.js';
 import { TextLayout } from './text-utils.js';
-import { TRACE_TYPES, LAYOUT } from '../constants/index.js';
+import { TRACE_TYPES, LAYOUT } from './constants.js';
 
 export const formatTimestamp = (timestamp) => {
   if (!timestamp) return 'No timestamp';

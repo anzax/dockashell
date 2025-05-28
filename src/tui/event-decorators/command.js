@@ -1,7 +1,7 @@
 import { formatTimestamp } from '../ui-utils/entry-utils.js';
 import { TextLayout, sanitizeText } from '../ui-utils/text-utils.js';
 
-import { TRACE_ICONS } from '../constants/index.js';
+import { TRACE_ICONS } from '../ui-utils/constants.js';
 
 /** @type {import('./index.js').EventDecorator} */
 export const command = {

@@ -4,7 +4,7 @@ import { MultiSelect } from '@inkjs/ui';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import { AppContainer } from '../AppContainer.js';
 import { DEFAULT_FILTERS } from '../../ui-utils/entry-utils.js';
-import { SHORTCUTS, buildFooter } from '../../constants/index.js';
+import { SHORTCUTS, buildFooter } from '../../ui-utils/constants.js';
 import { isBackKey } from '../../ui-utils/text-utils.js';
 
 /**

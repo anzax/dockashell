@@ -1,7 +1,7 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert';
 import { getDecorator } from '../../src/tui/event-decorators/index.js';
-import { TRACE_ICONS, TRACE_COLORS } from '../../src/tui/constants/index.js';
+import { TRACE_ICONS, TRACE_COLORS } from '../../src/tui/ui-utils/constants.js';
 import { formatTimestamp } from '../../src/tui/ui-utils/entry-utils.js';
 
 const timestamp = '2024-01-01T00:00:00Z';
