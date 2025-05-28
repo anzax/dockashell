@@ -5,7 +5,7 @@
 /**
  * @typedef {Object} EventDecorator
  * @property {string} kind
- * @property {(entry: any, width: number) => RenderLine} headerLine
+ * @property {(entry: any) => RenderLine} headerLine
  * @property {(entry: any, width: number) => RenderLine} contentCompact
  * @property {(entry: any, width: number) => RenderLine[]} contentFull
  */
@@ -13,7 +13,9 @@
 import { command } from './command.js';
 import { applyPatch } from './applyPatch.js';
 import { writeFile } from './writeFile.js';
-import { note } from './note.js';
+import { user } from './user.js';
+import { agent } from './agent.js';
+import { summary } from './summary.js';
 import { unknown } from './unknown.js';
 
 /** @type {Map<string, EventDecorator>} */
@@ -21,7 +23,9 @@ const decorators = new Map([
   [command.kind, command],
   [applyPatch.kind, applyPatch],
   [writeFile.kind, writeFile],
-  [note.kind, note],
+  [user.kind, user],
+  [agent.kind, agent],
+  [summary.kind, summary],
   [unknown.kind, unknown],
 ]);
 

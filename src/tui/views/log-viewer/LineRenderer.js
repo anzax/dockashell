@@ -1,66 +1,32 @@
 import React from 'react';
-import { Box, Text } from 'ink';
+import { Text } from 'ink';
 
 export const LineRenderer = ({ line, selected = false, isModal = false }) => {
   if (!line) return null;
 
-  if (line.type === 'header') {
-    const headerText = `${line.icon} ${line.timestamp} [${line.typeText}]`;
-    return React.createElement(
-      Text,
-      { bold: selected, color: line.typeColor, wrap: 'truncate-end' },
-      headerText
-    );
+  // Determine color: respect line.color, with modal overrides
+  let color = line.color || 'white';
+  if (isModal && line.dimOnModal) {
+    color = 'white';
   }
 
-  if (line.type === 'command') {
-    return React.createElement(
-      Text,
-      {
-        bold: selected,
-        color: isModal ? 'white' : line.color || 'gray',
-        wrap: 'truncate-end',
-      },
-      line.text
-    );
-  }
+  // Determine if dimmed
+  const dimColor = line.dim || false;
 
-  if (line.type === 'separator') {
-    return React.createElement(
-      Text,
-      { dimColor: true, wrap: 'truncate-end' },
-      line.text
-    );
-  }
+  // Determine if bold (headers are bold, selected items can be bold)
+  const bold = line.bold || (selected && !dimColor);
 
-  if (line.type === 'status') {
-    return React.createElement(
-      Box,
-      null,
-      React.createElement(
-        Text,
-        { color: line.color, wrap: 'truncate-end' },
-        line.text
-      ),
-      React.createElement(
-        Text,
-        { dimColor: isModal ? false : true, wrap: 'truncate-end' },
-        line.extra
-      )
-    );
-  }
-
-  if (line.type === 'output') {
-    return React.createElement(
-      Text,
-      { color: isModal ? 'white' : 'gray', wrap: 'truncate-end' },
-      '  ' + line.text
-    );
-  }
+  // Render the text with icon if present
+  const displayText = line.icon ? `${line.icon} ${line.text}` : line.text;
 
   return React.createElement(
     Text,
-    { color: isModal ? 'white' : line.color || 'gray', wrap: 'truncate-end' },
-    line.text
+    {
+      color,
+      dimColor,
+      bold,
+      wrap: 'truncate-end',
+    },
+    displayText
   );
 };
