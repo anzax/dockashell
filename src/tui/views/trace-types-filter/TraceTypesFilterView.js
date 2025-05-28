@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { useInput, Box, Text } from 'ink';
+import { useInput, Text } from 'ink';
 import { MultiSelect } from '@inkjs/ui';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
+import { AppContainer } from '../AppContainer.js';
 import { DEFAULT_FILTERS } from '../../utils/entry-utils.js';
 
 /**
- * FilterModal using ink-ui MultiSelect with proper container width
+ * Full screen trace type filter view using ink-ui MultiSelect.
  */
-export const FilterModal = ({ onClose, onApply, currentFilters }) => {
+export const TraceTypesFilterView = ({ onBack, onApply, currentFilters }) => {
   const [, terminalHeight] = useStdoutDimensions();
 
   const traceTypes = [
@@ -49,43 +50,24 @@ export const FilterModal = ({ onClose, onApply, currentFilters }) => {
 
   useInput((input, key) => {
     if (key.escape || input === 'q') {
-      onClose();
+      onBack();
     }
   });
 
-  return React.createElement(
-    Box,
-    {
-      flexDirection: 'column',
-      height: terminalHeight,
-      width: '100%',
-      paddingX: 2,
-      paddingY: 1,
-    },
-    React.createElement(
+  return React.createElement(AppContainer, {
+    header: React.createElement(Text, { bold: true }, 'DockaShell TUI - Filter Trace Types'),
+    footer: React.createElement(
       Text,
-      { bold: true, marginBottom: 2 },
-      'DockaShell TUI - Filter Trace Types'
+      { dimColor: true },
+      '[↑↓] Navigate  [Space] Toggle  [Enter] Apply  [Esc/q] Back'
     ),
-    React.createElement(
-      Box,
-      {
-        flexGrow: 1,
-        flexDirection: 'column',
-        width: '100%',
-      },
-      React.createElement(MultiSelect, {
-        options: traceTypes,
-        defaultValue: selectedValues,
-        onChange: setSelectedValues,
-        onSubmit: handleSubmit,
-        visibleOptionCount: 10,
-      })
-    ),
-    React.createElement(
-      Text,
-      { dimColor: true, marginTop: 2 },
-      '[↑↓] Navigate  [Space] Toggle  [Enter] Apply  [Esc/q] Cancel'
-    )
-  );
+    children: React.createElement(MultiSelect, {
+      options: traceTypes,
+      defaultValue: selectedValues,
+      onChange: setSelectedValues,
+      onSubmit: handleSubmit,
+      visibleOptionCount: 10,
+      height: terminalHeight - 4,
+    }),
+  });
 };

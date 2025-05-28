@@ -1,43 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { Select } from '@inkjs/ui';
-import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
+import { AppContainer } from '../AppContainer.js';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 
-const EmptyState = ({ height }) =>
-  React.createElement(
-    Box,
-    {
-      flexDirection: 'column',
-      height,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingX: 2,
-    },
-    React.createElement(
-      Text,
-      { bold: true },
-      'DockaShell TUI - No Projects Found'
+const EmptyState = () =>
+  React.createElement(AppContainer, {
+    header: React.createElement(Text, { bold: true }, 'DockaShell TUI - No Projects Found'),
+    footer: React.createElement(Text, { dimColor: true }, '[q] Quit'),
+    children: React.createElement(
+      Box,
+      {
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexGrow: 1,
+      },
+      React.createElement(
+        Text,
+        null,
+        '🚫 No traces found in ~/.dockashell/projects'
+      ),
+      React.createElement(
+        Text,
+        null,
+        'Use DockaShell to create a project first.'
+      )
     ),
-    React.createElement(
-      Text,
-      null,
-      '🚫 No traces found in ~/.dockashell/projects'
-    ),
-    React.createElement(
-      Text,
-      null,
-      'Use DockaShell to create a project first.'
-    ),
-    React.createElement(Text, null, ''),
-    React.createElement(Text, { dimColor: true }, '[q] Quit')
-  );
+  });
 
 export const ProjectSelector = ({ onSelect, onExit }) => {
   const [projects, setProjects] = useState([]);
-  const [, terminalHeight] = useStdoutDimensions();
 
   useInput((input) => {
     if (input === 'q') {
@@ -81,7 +76,7 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
   }, []);
 
   if (projects.length === 0) {
-    return React.createElement(EmptyState, { height: terminalHeight });
+    return React.createElement(EmptyState);
   }
 
   const options = projects.map((p) => ({
@@ -91,36 +86,21 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
     value: p.name,
   }));
 
-  return React.createElement(
-    Box,
-    {
-      flexDirection: 'column',
-      height: terminalHeight,
-      width: '100%', // Force full width
-      paddingX: 2,
-      paddingY: 1,
-    },
-    React.createElement(
+  return React.createElement(AppContainer, {
+    header: React.createElement(
       Text,
-      { bold: true, marginBottom: 2 },
+      { bold: true },
       'DockaShell TUI - Select Project'
     ),
-    React.createElement(
-      Box,
-      {
-        flexGrow: 1,
-        flexDirection: 'column',
-        width: '100%', // Force full width on content area
-      },
-      React.createElement(Select, {
-        options,
-        onChange: onSelect,
-      })
-    ),
-    React.createElement(
+    footer: React.createElement(
       Text,
-      { dimColor: true, marginTop: 2 },
+      { dimColor: true },
       '[↑↓] Navigate  [Enter] Select  [1-9] Quick Select  [q] Quit'
-    )
-  );
+    ),
+    children: React.createElement(
+      Box,
+      { flexDirection: 'column', flexGrow: 1, width: '100%' },
+      React.createElement(Select, { options, onChange: onSelect })
+    ),
+  });
 };
