@@ -4,6 +4,7 @@ import { LineRenderer } from '../log-viewer/LineRenderer.js';
 import { AppContainer } from '../AppContainer.js';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import { buildEntryLines } from '../../utils/entry-utils.js';
+import { SHORTCUTS, buildFooter } from '../../constants/shortcuts.js';
 
 export const TraceDetailsView = ({
   traces,
@@ -21,7 +22,7 @@ export const TraceDetailsView = ({
       footer: React.createElement(
         Text,
         { dimColor: true },
-        '[Enter/Esc/q] Back'
+        buildFooter(SHORTCUTS.EXIT)
       ),
       children: React.createElement(
         Box,
@@ -105,11 +106,13 @@ export const TraceDetailsView = ({
     footer: React.createElement(
       Text,
       { dimColor: true, wrap: 'truncate-end' },
-      (scrollable
-        ? '[↑↓] Line  [PgUp/PgDn Ctrl+U/D] Page  [g/G] Top/Bottom  '
-        : '') +
-        (hasPrev || hasNext ? '[←/→] Navigate  ' : '') +
-        '[Enter/Esc/q] Back'
+      buildFooter(
+        SHORTCUTS.LINE,
+        SHORTCUTS.PAGE,
+        SHORTCUTS.TOP_BOTTOM,
+        SHORTCUTS.PREV_NEXT,
+        SHORTCUTS.EXIT
+      )
     ),
     children: React.createElement(
       Box,

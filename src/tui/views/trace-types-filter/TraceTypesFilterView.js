@@ -4,6 +4,7 @@ import { MultiSelect } from '@inkjs/ui';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import { AppContainer } from '../AppContainer.js';
 import { DEFAULT_FILTERS } from '../../utils/entry-utils.js';
+import { SHORTCUTS, buildFooter } from '../../constants/shortcuts.js';
 
 /**
  * Full screen trace type filter view using ink-ui MultiSelect.
@@ -63,7 +64,12 @@ export const TraceTypesFilterView = ({ onBack, onApply, currentFilters }) => {
     footer: React.createElement(
       Text,
       { dimColor: true },
-      '[↑↓] Navigate  [Space] Toggle  [Enter] Apply  [Esc/q] Back'
+      buildFooter(
+        SHORTCUTS.NAVIGATE,
+        SHORTCUTS.TOGGLE,
+        SHORTCUTS.APPLY,
+        SHORTCUTS.EXIT
+      )
     ),
     children: React.createElement(MultiSelect, {
       options: traceTypes,

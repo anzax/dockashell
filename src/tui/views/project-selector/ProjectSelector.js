@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { Select } from '@inkjs/ui';
 import { AppContainer } from '../AppContainer.js';
+import { SHORTCUTS, buildFooter } from '../../constants/shortcuts.js';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
@@ -70,7 +71,11 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
         ? 'DockaShell TUI - Select Project'
         : 'DockaShell TUI - No Projects Found'
     ),
-    footer: React.createElement(Text, { dimColor: true }, '[q] Quit'),
+    footer: React.createElement(
+      Text,
+      { dimColor: true },
+      buildFooter(SHORTCUTS.NAVIGATE, SHORTCUTS.OPEN, SHORTCUTS.QUIT)
+    ),
     children: React.createElement(
       Box,
       { flexDirection: 'column', flexGrow: 1, width: '100%' },

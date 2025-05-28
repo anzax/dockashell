@@ -6,6 +6,7 @@
 - [x] Improve multi-line command display with line indicators
 - [x] Use full terminal width for better readability
 - [x] Fix command truncation issues
+- [x] Standardize footer shortcuts across views
 
 ## Future Enhancements
 

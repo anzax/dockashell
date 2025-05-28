@@ -393,15 +393,27 @@ registerDecorator({
 
 **Project Selector:**
 
-- `↑↓` Navigate projects
-- `Enter` Select project
+- `↑↓` Navigate
+- `Enter` Open project
 - `q` Quit
 
 **Trace Viewer:**
 
 - `↑↓` Navigate entries
-- `b` Back to project selector
-- `q` Quit
+- `PgUp/PgDn` Page `g/G` Top/Bottom
+- `f` Filter `r` Refresh
+- `b` Back to projects `q` Quit
+
+**Trace Details:**
+
+- `↑↓` Scroll lines `PgUp/PgDn` Page
+- `g/G` Top/Bottom `←/→` Prev/Next
+- `Enter/Esc/q` Back
+
+**Filter View:**
+
+- `↑↓` Navigate `Space` Toggle
+- `Enter` Apply `Esc/q` Back
 
 ### Configuration
 
