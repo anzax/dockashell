@@ -367,6 +367,21 @@ dockashell-tui myproject
 - **Trace Viewing**: Navigate through agent logs with keyboard
 - **Entry Types**: Displays user inputs, agent reasoning, and command results
 - **Configurable**: Customizable display settings via `~/.dockashell/config.json`
+### Adding Custom Decorators
+
+You can customize how different trace events are rendered by registering a decorator before starting the TUI:
+
+```js
+import { registerDecorator } from "./src/tui/event-decorators/index.js";
+
+registerDecorator({
+  kind: "my_event",
+  headerLine(e,w) { /* ... */ },
+  contentCompact(e,w) { /* ... */ },
+  contentFull(e,w) { /* ... */ },
+});
+```
+
 
 ### Navigation
 
