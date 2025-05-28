@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert';
-import { getEntryHeight } from '../../src/tui/views/log-viewer/LogViewer.js';
+import { getEntryHeight } from '../../src/tui/views/LogViewer.js';
 
 const ensureVisible = (entries, terminalHeight, scrollOffset, index) => {
   if (entries.length === 0) return scrollOffset;
