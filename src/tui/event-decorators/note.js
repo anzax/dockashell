@@ -1,6 +1,6 @@
-import { formatTimestamp } from '../utils/entry-utils.js';
-import { TextLayout } from '../utils/text-layout.js';
-import { sanitizeText } from '../utils/line-formatter.js';
+import { formatTimestamp } from '../ui-utils/entry-utils.js';
+import { TextLayout } from '../ui-utils/text-layout.js';
+import { sanitizeText } from '../ui-utils/line-formatter.js';
 import { TRACE_ICONS, TRACE_COLORS } from '../constants/ui.js';
 
 /**

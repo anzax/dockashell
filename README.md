@@ -228,7 +228,7 @@ read_traces('project', {
   fields: ['timestamp', 'type', 'content', 'exit_code', 'output'],
 });
 
-// Search across commands and output
+// Search across traces
 read_traces('project', { search: 'error' });
 ```
 
@@ -246,16 +246,6 @@ DockaShell relies on Docker's proven container isolation rather than maintaining
 - **Timeout Protection**: Commands automatically terminated after configured time limit
 - **Audit Trail**: All commands logged with timestamps and exit codes
 - **Session Management**: Persistent containers maintain state but can be stopped/restarted
-
-### Configuration
-
-```json
-{
-  "security": {
-    "max_execution_time": 300 // 5 minutes default
-  }
-}
-```
 
 ## 📊 Logging
 
@@ -318,7 +308,7 @@ Or if installed globally:
 
 ## 🖥️ Terminal User Interface (TUI)
 
-DockaShell includes a Terminal User Interface for viewing agent activity and project traces.
+DockaShell includes a Terminal User Interface for viewing agent activity and project traces. The TUI provides immediate visibility into what agents are working on without interrupting their progress.
 
 ### Usage
 
@@ -326,12 +316,6 @@ DockaShell includes a Terminal User Interface for viewing agent activity and pro
 
 ```bash
 dockashell-tui
-```
-
-**Direct project access:**
-
-```bash
-dockashell-tui myproject
 ```
 
 ### Features
@@ -342,54 +326,7 @@ dockashell-tui myproject
 - **Entry Types**: Displays user inputs, agent reasoning, and command results
 - **Configurable**: Customizable display settings via `~/.dockashell/config.json`
 
-### Adding Custom Decorators
-
-You can customize how different trace events are rendered by registering a decorator before starting the TUI:
-
-```js
-import { registerDecorator } from './src/tui/event-decorators/index.js';
-
-registerDecorator({
-  kind: 'my_event',
-  headerLine(e, w) {
-    /* ... */
-  },
-  contentCompact(e, w) {
-    /* ... */
-  },
-  contentFull(e, w) {
-    /* ... */
-  },
-});
-```
-
-### Navigation
-
-**Project Selector:**
-
-- `↑↓` Navigate
-- `Enter` Open project
-- `q` Quit
-
-**Trace Viewer:**
-
-- `↑↓` Navigate entries
-- `PgUp/PgDn` Page `g/G` Top/Bottom
-- `f` Filter `r` Refresh
-- `b` Back to projects `q` Quit
-
-**Trace Details:**
-
-- `↑↓` Scroll lines `PgUp/PgDn` Page
-- `g/G` Top/Bottom `←/→` Prev/Next
-- `Enter/Esc/q` Back
-
-**Filter View:**
-
-- `↑↓` Navigate `Space` Toggle
-- `Enter` Apply `Esc/q` Back
-
-### Configuration
+### TUI Configuration
 
 TUI settings in `~/.dockashell/config.json`:
 
@@ -402,8 +339,6 @@ TUI settings in `~/.dockashell/config.json`:
   }
 }
 ```
-
-The TUI provides immediate visibility into what agents are working on without interrupting their progress.
 
 ---
 

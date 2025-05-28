@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { DEFAULT_FILTERS } from '../utils/entry-utils.js';
+import { DEFAULT_FILTERS } from '../ui-utils/entry-utils.js';
 
 export const useFilters = () => {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);

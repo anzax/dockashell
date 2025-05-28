@@ -1,6 +1,6 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert';
-import { sanitizeText } from '../../src/tui/utils/line-formatter.js';
+import { sanitizeText } from '../../src/tui/ui-utils/line-formatter.js';
 
 describe('sanitizeText', () => {
   test('replaces tabs with spaces', () => {
