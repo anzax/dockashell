@@ -117,11 +117,7 @@ export function registerLogTools(server, logger) {
                   lines.push('');
                   lines.push('**Content:**');
                   lines.push('```');
-                  const contentDisplay =
-                    entry.content.length > 300
-                      ? entry.content.substring(0, 300) + '...'
-                      : entry.content;
-                  lines.push(contentDisplay);
+                  lines.push(entry.content);
                   lines.push('```');
                 }
               } else {
@@ -138,11 +134,7 @@ export function registerLogTools(server, logger) {
               lines.push('');
               lines.push('**Output:**');
               lines.push('```');
-              const displayOutput =
-                entry.result?.output.length > 200
-                  ? entry.result?.output.substring(0, 200) + '...'
-                  : entry.result?.output;
-              lines.push(displayOutput);
+              lines.push(entry.result?.output);
               lines.push('```');
             }
             return lines.join('\n');
