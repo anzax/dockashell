@@ -1,6 +1,10 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert';
-import { isEnterKey, isBackKey, isExitKey } from '../../src/tui/ui-utils/input-utils.js';
+import {
+  isEnterKey,
+  isBackKey,
+  isExitKey,
+} from '../../src/tui/ui-utils/input-utils.js';
 
 describe('input utils', () => {
   test('isEnterKey detects enter', () => {
