@@ -109,4 +109,33 @@ describe('event decorators', () => {
     assert.strictEqual(full[0].text, '{');
     assert(full.some((l) => l.text.includes('"other"')));
   });
+
+  test('unknown decorator handles null/undefined entries', () => {
+    const deco = getDecorator('unknown');
+
+    // Test null entry
+    const headerNull = deco.headerLine(null);
+    assert.strictEqual(headerNull.text, 'No timestamp [UNKNOWN]');
+    assert.strictEqual(headerNull.icon, TRACE_ICONS.unknown);
+    assert.strictEqual(headerNull.color, 'gray');
+
+    const compactNull = deco.contentCompact(null, width);
+    assert.strictEqual(compactNull.text, 'No entry data');
+    assert.strictEqual(compactNull.color, 'gray');
+
+    const fullNull = deco.contentFull(null, width);
+    assert.strictEqual(fullNull.length, 1);
+    assert.strictEqual(fullNull[0].text, 'No entry data');
+
+    // Test undefined entry
+    const headerUndef = deco.headerLine(undefined);
+    assert.strictEqual(headerUndef.text, 'No timestamp [UNKNOWN]');
+
+    const compactUndef = deco.contentCompact(undefined, width);
+    assert.strictEqual(compactUndef.text, 'No entry data');
+
+    const fullUndef = deco.contentFull(undefined, width);
+    assert.strictEqual(fullUndef.length, 1);
+    assert.strictEqual(fullUndef[0].text, 'No entry data');
+  });
 });
