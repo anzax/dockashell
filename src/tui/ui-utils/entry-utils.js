@@ -1,6 +1,6 @@
 import { getDecorator } from '../event-decorators/index.js';
 import { TextLayout } from './text-layout.js';
-import { TRACE_ICONS, TRACE_COLORS, TRACE_TYPES } from '../constants/ui.js';
+import { TRACE_TYPES } from '../constants/ui.js';
 import { LAYOUT } from '../constants/layout.js';
 
 export const formatTimestamp = (timestamp) => {
@@ -83,22 +83,6 @@ export const findClosestTimestamp = (entries, targetTimestamp) => {
 
   return closestIndex;
 };
-
-export const getTraceIcon = (type) => TRACE_ICONS[type] || TRACE_ICONS.unknown;
-
-export const getTraceColor = (type, exitCode) => {
-  if (['command', 'apply_patch', 'write_file'].includes(type)) {
-    return exitCode !== undefined && exitCode !== 0
-      ? 'red'
-      : TRACE_COLORS[type] || 'white';
-  }
-  if (TRACE_COLORS[type]) return TRACE_COLORS[type];
-  return type === 'unknown' ? 'gray' : 'white';
-};
-
-// Backwards compatibility helpers for note types
-export const getNoteTypeColor = (noteType) => getTraceColor(noteType);
-export const getNoteTypeIcon = (noteType) => getTraceIcon(noteType);
 
 export const buildEntryLines = (
   entry,
