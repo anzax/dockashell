@@ -2,8 +2,6 @@ import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { TraceBuffer } from '../../ui-utils/trace-buffer.js';
 import { prepareEntry, DEFAULT_FILTERS } from '../../ui-utils/entry-utils.js';
-import { TraceDetailsView } from '../trace-details/TraceDetailsView.js';
-import { TraceTypesFilterView } from '../trace-types-filter/TraceTypesFilterView.js';
 import { AppContainer } from '../AppContainer.js';
 import { LineRenderer } from './LineRenderer.js';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
@@ -30,10 +28,16 @@ const Entry = ({ item, selected }) =>
 export const getEntryHeight = (entry, isSelected) =>
   (entry?.height || 3) + (isSelected ? 2 : 0); // Height based on prepared entry
 
-export const LogViewer = ({ project, onBack, onExit, config }) => {
+export const LogViewer = ({
+  project,
+  onBack,
+  onExit,
+  config,
+  onOpenDetails,
+  onOpenFilter,
+}) => {
   const [terminalWidth, terminalHeight] = useStdoutDimensions();
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [showFilterView, setShowFilterView] = useState(false);
   const filtersRef = useRef(filters);
   useEffect(() => {
     filtersRef.current = filters;
@@ -48,17 +52,8 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     selectedTimestampRef,
     scrollOffset,
     setScrollOffset,
-    detailsViewIndex,
-    setDetailsViewIndex,
-    detailsViewRef,
-    detailsTimestampRef,
     ensureVisible,
   } = useSelection(entries);
-
-  // Keep refs synced with state for callbacks
-  useEffect(() => {
-    detailsViewRef.current = detailsViewIndex;
-  }, [detailsViewIndex]);
 
   // Filter entries based on current filters
   const filteredEntries = entries.filter((entry) => {
@@ -71,13 +66,6 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     selectedTimestampRef.current =
       filteredEntries[selectedIndex]?.entry.timestamp || null;
   }, [selectedIndex, filteredEntries]);
-
-  useEffect(() => {
-    if (detailsViewIndex !== null) {
-      detailsTimestampRef.current =
-        filteredEntries[detailsViewIndex]?.entry.timestamp || null;
-    }
-  }, [detailsViewIndex, filteredEntries]);
 
   // Ensure selectedIndex is within bounds when filteredEntries changes
   useEffect(() => {
@@ -129,27 +117,6 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
 
       setEntries(prepared);
 
-      // Handle details view restoration
-      let newDetailsIndex = null;
-      if (detailsViewRef.current !== null) {
-        if (filtered.length === 0) {
-          newDetailsIndex = null;
-        } else {
-          newDetailsIndex = filtered.findIndex(
-            (e) => e.entry.timestamp === detailsTimestampRef.current
-          );
-          if (newDetailsIndex === -1) {
-            newDetailsIndex = Math.min(
-              detailsViewRef.current,
-              filtered.length - 1
-            );
-          }
-        }
-        setDetailsViewIndex(
-          newDetailsIndex === null ? null : Math.max(0, newDetailsIndex)
-        );
-      }
-
       if (filtered.length === 0) {
         setSelectedIndex(0);
         setScrollOffset(0);
@@ -168,14 +135,15 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
 
   // Input handling
   useInput((input, key) => {
-    // Skip input handling when details view is open (it handles its own input)
-    if (detailsViewIndex !== null || showFilterView) return;
-
     const { start, end } = calculateVisibleEntries();
     const pageSize = end - start || 1;
 
     if (isEnterKey(key)) {
-      setDetailsViewIndex(selectedIndex);
+      onOpenDetails?.({
+        traces: filteredEntries,
+        currentIndex: selectedIndex,
+        onNavigate: (newIndex) => setSelectedIndex(newIndex),
+      });
     } else if (key.downArrow && selectedIndex < filteredEntries.length - 1) {
       const idx = selectedIndex + 1;
       setSelectedIndex(idx);
@@ -203,7 +171,10 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       setSelectedIndex(idx);
       ensureVisibleWrapper(idx);
     } else if (input === 'f') {
-      setShowFilterView(true);
+      onOpenFilter?.({
+        currentFilters: filters,
+        onApply: (newFilters) => setFilters(newFilters),
+      });
     } else if (input === 'r') {
       buffer?.refresh().catch(() => {});
     } else if (input === 'b') {
@@ -225,30 +196,6 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const scrollIndicator = hasMore
     ? ` (${visibleStart + 1}-${visibleEnd} of ${filteredEntries.length}${filterIndicator})`
     : filterIndicator;
-
-  // Show filter view if requested
-  if (showFilterView) {
-    return React.createElement(TraceTypesFilterView, {
-      currentFilters: filters,
-      onBack: () => setShowFilterView(false),
-      onApply: (newFilters) => {
-        setFilters(newFilters);
-        setShowFilterView(false);
-      },
-    });
-  }
-  // Show details view if index is set
-  if (detailsViewIndex !== null) {
-    return React.createElement(TraceDetailsView, {
-      traces: filteredEntries,
-      currentIndex: detailsViewIndex,
-      onClose: () => setDetailsViewIndex(null),
-      onNavigate: (newIndex) => {
-        setDetailsViewIndex(newIndex);
-        setSelectedIndex(newIndex); // Keep main list in sync
-      },
-    });
-  }
 
   return React.createElement(AppContainer, {
     header: React.createElement(
