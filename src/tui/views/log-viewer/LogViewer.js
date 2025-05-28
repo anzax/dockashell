@@ -1,11 +1,12 @@
-import React, { useEffect, useCallback, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { TraceBuffer } from '../../ui-utils/trace-buffer.js';
 import { prepareEntry, DEFAULT_FILTERS } from '../../ui-utils/entry-utils.js';
 import { AppContainer } from '../AppContainer.js';
 import { LineRenderer } from './LineRenderer.js';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
-import { useSelection } from '../../hooks/useSelection.js';
+import { useVirtualList } from '../../hooks/useVirtualList.js';
+import { ScrollableList } from '../../components/ScrollableList.js';
 import { SHORTCUTS, buildFooter } from '../../ui-utils/constants.js';
 import { isEnterKey } from '../../ui-utils/text-utils.js';
 
@@ -36,7 +37,7 @@ export const LogViewer = ({
   onOpenDetails,
   onOpenFilter,
 }) => {
-  const [terminalWidth, terminalHeight] = useStdoutDimensions();
+  const [terminalWidth] = useStdoutDimensions();
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const filtersRef = useRef(filters);
   useEffect(() => {
@@ -45,19 +46,28 @@ export const LogViewer = ({
 
   const [buffer, setBuffer] = useState(null);
   const [entries, setEntries] = useState([]);
-  const {
-    selectedIndex,
-    setSelectedIndex,
-    scrollOffset,
-    setScrollOffset,
-    ensureVisible,
-  } = useSelection();
 
   // Filter entries based on current filters
   const filteredEntries = entries.filter((entry) => {
     const traceType = entry.traceType || 'unknown';
     return filters[traceType] !== false; // Show if filter is true or undefined
   });
+
+  const list = useVirtualList({
+    totalCount: filteredEntries.length,
+    getItem: (idx) => filteredEntries[idx],
+    getItemHeight: getEntryHeight,
+  });
+
+  const {
+    selectedIndex,
+    setSelectedIndex,
+    ensureVisible,
+    pageSize,
+    visibleStart,
+    visibleEnd,
+    setScrollOffset,
+  } = list;
 
   // Ensure selectedIndex is within bounds when filteredEntries changes
   useEffect(() => {
@@ -67,31 +77,6 @@ export const LogViewer = ({
       setSelectedIndex(filteredEntries.length - 1);
     }
   }, [filteredEntries, selectedIndex, setSelectedIndex]);
-
-  const ensureVisibleWrapper = useCallback(
-    (index) =>
-      ensureVisible(index, filteredEntries, terminalHeight, getEntryHeight),
-    [ensureVisible, filteredEntries, terminalHeight]
-  );
-
-  const calculateVisibleEntries = useCallback(() => {
-    if (filteredEntries.length === 0) return { start: 0, end: 0 };
-
-    const availableHeight = terminalHeight - 3; // header + help
-    let height = 0;
-    let end = scrollOffset;
-
-    while (
-      end < filteredEntries.length &&
-      height + getEntryHeight(filteredEntries[end], end === selectedIndex) <=
-        availableHeight
-    ) {
-      height += getEntryHeight(filteredEntries[end], end === selectedIndex);
-      end++;
-    }
-
-    return { start: scrollOffset, end };
-  }, [filteredEntries, scrollOffset, terminalHeight, selectedIndex]);
 
   // Load entries using TraceBuffer and update when buffer changes
   useEffect(() => {
@@ -123,13 +108,10 @@ export const LogViewer = ({
     return () => {
       buf.close();
     };
-  }, [project, config, terminalHeight, terminalWidth]);
+  }, [project, config, terminalWidth]);
 
   // Input handling
   useInput((input, key) => {
-    const { start, end } = calculateVisibleEntries();
-    const pageSize = end - start || 1;
-
     if (isEnterKey(key)) {
       onOpenDetails?.({
         traces: filteredEntries,
@@ -139,29 +121,29 @@ export const LogViewer = ({
     } else if (key.downArrow && selectedIndex < filteredEntries.length - 1) {
       const idx = selectedIndex + 1;
       setSelectedIndex(idx);
-      ensureVisibleWrapper(idx);
+      ensureVisible(idx);
     } else if (key.upArrow && selectedIndex > 0) {
       const idx = selectedIndex - 1;
       setSelectedIndex(idx);
-      ensureVisibleWrapper(idx);
+      ensureVisible(idx);
     } else if (key.pageDown) {
       const idx = Math.min(
         filteredEntries.length - 1,
-        selectedIndex + pageSize
+        selectedIndex + pageSize()
       );
       setSelectedIndex(idx);
-      ensureVisibleWrapper(idx);
+      ensureVisible(idx);
     } else if (key.pageUp) {
-      const idx = Math.max(0, selectedIndex - pageSize);
+      const idx = Math.max(0, selectedIndex - pageSize());
       setSelectedIndex(idx);
-      ensureVisibleWrapper(idx);
+      ensureVisible(idx);
     } else if (input === 'g') {
       setSelectedIndex(0);
-      ensureVisibleWrapper(0);
+      ensureVisible(0);
     } else if (input === 'G') {
       const idx = filteredEntries.length - 1;
       setSelectedIndex(idx);
-      ensureVisibleWrapper(idx);
+      ensureVisible(idx);
     } else if (input === 'f') {
       onOpenFilter?.({
         currentFilters: filters,
@@ -176,8 +158,6 @@ export const LogViewer = ({
     }
   });
 
-  const { start: visibleStart, end: visibleEnd } = calculateVisibleEntries();
-  const visibleEntries = filteredEntries.slice(visibleStart, visibleEnd);
   const hasMore = filteredEntries.length > visibleEnd - visibleStart;
   const activeFilters = Object.values(filters).filter(Boolean).length;
   const totalFilters = Object.keys(filters).length;
@@ -209,17 +189,14 @@ export const LogViewer = ({
         SHORTCUTS.QUIT
       )
     ),
-    children: React.createElement(
-      Box,
-      { flexDirection: 'column', flexGrow: 1 },
-      ...visibleEntries.map((entry, i) => {
-        const actualIndex = visibleStart + i;
-        return React.createElement(Entry, {
-          key: `${entry.entry.timestamp}-${actualIndex}`,
+    children: React.createElement(ScrollableList, {
+      list,
+      renderItem: (entry, index, selected) =>
+        React.createElement(Entry, {
+          key: `${entry.entry.timestamp}-${index}`,
           item: entry,
-          selected: actualIndex === selectedIndex,
-        });
-      })
-    ),
+          selected,
+        }),
+    }),
   });
 };
