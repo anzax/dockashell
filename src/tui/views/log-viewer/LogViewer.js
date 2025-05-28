@@ -120,7 +120,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
 
     const update = () => {
       const raw = buf.getTraces();
-      const prepared = raw.map((e) => prepareEntry(e, null, terminalWidth));
+      const prepared = raw.map((e) => prepareEntry(e, terminalWidth));
 
       const filtered = prepared.filter((entry) => {
         const traceType = entry.traceType || 'unknown';
