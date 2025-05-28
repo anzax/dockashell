@@ -1,33 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, Text, useInput } from 'ink';
+import { Text, useInput } from 'ink';
 import { TraceBuffer } from '../ui-utils/trace-buffer.js';
-import { prepareEntry, DEFAULT_FILTERS } from '../ui-utils/entry-utils.js';
+import { detectTraceType, DEFAULT_FILTERS } from '../ui-utils/entry-utils.js';
 import { AppContainer } from '../components/AppContainer.js';
-import { LineRenderer } from '../components/LineRenderer.js';
+import { TraceItemPreview } from '../components/TraceItemPreview.js';
 import { useStdoutDimensions } from '../hooks/useStdoutDimensions.js';
 import { useVirtualList } from '../hooks/useVirtualList.js';
 import { ScrollableList } from '../components/ScrollableList.js';
 import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
 import { isEnterKey } from '../ui-utils/text-utils.js';
 
-const Entry = ({ item, selected }) =>
-  React.createElement(
-    Box,
-    {
-      flexDirection: 'column',
-      borderStyle: selected ? 'single' : undefined,
-      borderColor: selected ? 'cyan' : undefined,
-      paddingLeft: 1,
-      paddingRight: 1,
-      marginBottom: 1,
-    },
-    ...item.lines.map((line, idx) =>
-      React.createElement(LineRenderer, { key: idx, line, selected })
-    )
-  );
-
-export const getEntryHeight = (entry, isSelected) =>
-  (entry?.height || 3) + (isSelected ? 2 : 0); // Height based on prepared entry
+export const getEntryHeight = (entry, isSelected, terminalWidth) =>
+  TraceItemPreview.getHeight(entry.trace, isSelected, 'compact', terminalWidth);
 
 export const LogViewer = ({
   project,
@@ -60,7 +44,8 @@ export const LogViewer = ({
   const list = useVirtualList({
     totalCount: filteredEntries.length,
     getItem: (idx) => filteredEntries[idx],
-    getItemHeight: getEntryHeight,
+    getItemHeight: (item, selected) =>
+      getEntryHeight(item, selected, terminalWidth),
   });
 
   const {
@@ -110,7 +95,10 @@ export const LogViewer = ({
 
     const update = () => {
       const raw = buf.getTraces();
-      const prepared = raw.map((e) => prepareEntry(e, terminalWidth));
+      const prepared = raw.map((e) => ({
+        trace: e,
+        traceType: detectTraceType(e),
+      }));
 
       const filtered = prepared.filter((entry) => {
         const traceType = entry.traceType || 'unknown';
@@ -213,10 +201,12 @@ export const LogViewer = ({
     children: React.createElement(ScrollableList, {
       list,
       renderItem: (entry, index, selected) =>
-        React.createElement(Entry, {
-          key: `${entry.entry.timestamp}-${index}`,
-          item: entry,
+        React.createElement(TraceItemPreview, {
+          key: `${entry.trace.timestamp}-${index}`,
+          trace: entry.trace,
           selected,
+          terminalWidth,
+          mode: 'compact',
         }),
     }),
   });
