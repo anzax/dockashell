@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ProjectSelector } from './views/project-selector/ProjectSelector.js';
-import { LogViewer } from './views/log-viewer/LogViewer.js';
-import { TraceDetailsView } from './views/trace-details/TraceDetailsView.js';
-import { TraceTypesFilterView } from './views/trace-types-filter/TraceTypesFilterView.js';
+import { ProjectSelector } from './views/ProjectSelector.js';
+import { LogViewer } from './views/LogViewer.js';
+import { TraceDetailsView } from './views/TraceDetailsView.js';
+import { TraceTypesFilterView } from './views/TraceTypesFilterView.js';
 import { loadConfig } from '../utils/config.js';
 
 const defaultTuiConfig = {

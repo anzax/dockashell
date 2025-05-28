@@ -5,7 +5,7 @@ import { render } from 'ink-testing-library';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
-import { ProjectSelector } from '../../../../src/tui/views/project-selector/ProjectSelector.js';
+import { ProjectSelector } from '../../../../src/tui/views/ProjectSelector.js';
 
 describe('ProjectSelector ink-ui integration', () => {
   let tmpHome;

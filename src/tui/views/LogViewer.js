@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Box, Text, useInput } from 'ink';
-import { TraceBuffer } from '../../ui-utils/trace-buffer.js';
-import { prepareEntry, DEFAULT_FILTERS } from '../../ui-utils/entry-utils.js';
-import { AppContainer } from '../AppContainer.js';
-import { LineRenderer } from './LineRenderer.js';
-import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
-import { useVirtualList } from '../../hooks/useVirtualList.js';
-import { ScrollableList } from '../../components/ScrollableList.js';
-import { SHORTCUTS, buildFooter } from '../../ui-utils/constants.js';
-import { isEnterKey } from '../../ui-utils/text-utils.js';
+import { TraceBuffer } from '../ui-utils/trace-buffer.js';
+import { prepareEntry, DEFAULT_FILTERS } from '../ui-utils/entry-utils.js';
+import { AppContainer } from '../components/AppContainer.js';
+import { LineRenderer } from '../components/LineRenderer.js';
+import { useStdoutDimensions } from '../hooks/useStdoutDimensions.js';
+import { useVirtualList } from '../hooks/useVirtualList.js';
+import { ScrollableList } from '../components/ScrollableList.js';
+import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
+import { isEnterKey } from '../ui-utils/text-utils.js';
 
 const Entry = ({ item, selected }) =>
   React.createElement(

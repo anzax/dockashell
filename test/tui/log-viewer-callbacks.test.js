@@ -5,7 +5,7 @@ import { render } from 'ink-testing-library';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
-import { LogViewer } from '../../src/tui/views/log-viewer/LogViewer.js';
+import { LogViewer } from '../../src/tui/views/LogViewer.js';
 
 describe('LogViewer callback triggers', () => {
   let tmpHome;

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useInput, Text } from 'ink';
 import { MultiSelect } from '@inkjs/ui';
-import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
-import { AppContainer } from '../AppContainer.js';
-import { DEFAULT_FILTERS } from '../../ui-utils/entry-utils.js';
-import { SHORTCUTS, buildFooter } from '../../ui-utils/constants.js';
-import { isBackKey } from '../../ui-utils/text-utils.js';
+import { useStdoutDimensions } from '../hooks/useStdoutDimensions.js';
+import { AppContainer } from '../components/AppContainer.js';
+import { DEFAULT_FILTERS } from '../ui-utils/entry-utils.js';
+import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
+import { isBackKey } from '../ui-utils/text-utils.js';
 
 /**
  * Full screen trace type filter view using ink-ui MultiSelect.
