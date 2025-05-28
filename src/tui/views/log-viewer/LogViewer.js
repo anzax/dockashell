@@ -11,6 +11,7 @@ import { useFilters } from '../../hooks/useFilters.js';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import { useSelection } from '../../hooks/useSelection.js';
 import { SHORTCUTS, buildFooter } from '../../constants/shortcuts.js';
+import { isEnterKey } from '../../utils/input-utils.js';
 
 const Entry = ({ item, selected }) =>
   React.createElement(
@@ -169,7 +170,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     const { start, end } = calculateVisibleEntries();
     const pageSize = end - start || 1;
 
-    if (key.return) {
+    if (isEnterKey(key)) {
       setDetailsViewIndex(selectedIndex);
     } else if (key.downArrow && selectedIndex < filteredEntries.length - 1) {
       const idx = selectedIndex + 1;
