@@ -39,6 +39,9 @@ describe('ProjectSelector ink-ui integration', () => {
       })
     );
     await new Promise((r) => setTimeout(r, 50));
-    assert.ok(lastFrame().includes('proj'));
+    const frame = lastFrame();
+    assert.ok(frame.includes('proj'));
+    assert.ok(frame.includes('[↑↓] Navigate'));
+    assert.ok(frame.includes('[Enter] Open'));
   });
 });
