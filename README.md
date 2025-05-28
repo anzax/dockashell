@@ -164,20 +164,6 @@ Projects are configured in `~/.dockashell/projects/{project-name}/config.json`:
 
 Note: The `image` field is optional - if omitted, projects will use the default `dockashell/default-dev:latest` image.
 
-### Configuration Options
-
-| Field                         | Description                 | Default                         |
-| ----------------------------- | --------------------------- | ------------------------------- |
-| `name`                        | Project identifier          | (required)                      |
-| `description`                 | Human-readable description  | ""                              |
-| `image`                       | Docker image to use         | "dockashell/default-dev:latest" |
-| `mounts`                      | File system mounts          | []                              |
-| `ports`                       | Port mappings               | []                              |
-| `environment`                 | Environment variables       | {}                              |
-| `working_dir`                 | Container working directory | "/workspace"                    |
-| `shell`                       | Default shell               | "/bin/bash"                     |
-| `security.max_execution_time` | Command timeout (seconds)   | 300                             |
-
 ## 🔧 MCP Tools
 
 DockaShell exposes several MCP tools:
@@ -248,18 +234,15 @@ read_traces('project', { search: 'error' });
 
 ## 🛡️ Security Model
 
-DockaShell provides security through **container isolation** rather than application-level command filtering:
+DockaShell relies on Docker's proven container isolation rather than maintaining command blocklists, enabling AI agents to use any legitimate tools while maintaining security boundaries.
 
-### Container-Based Security
+### Container-Based Security & Execution Controls
 
 - **Process Isolation**: Each project runs in its own Docker container
 - **Filesystem Isolation**: Container filesystem separate from host system
 - **Non-privileged Execution**: Containers run as non-root user (vscode, UID 1000)
 - **Network Isolation**: Controlled network access via Docker networking
 - **Resource Limits**: Memory and CPU constraints via Docker
-
-### Execution Controls
-
 - **Timeout Protection**: Commands automatically terminated after configured time limit
 - **Audit Trail**: All commands logged with timestamps and exit codes
 - **Session Management**: Persistent containers maintain state but can be stopped/restarted
@@ -273,15 +256,6 @@ DockaShell provides security through **container isolation** rather than applica
   }
 }
 ```
-
-### Security Philosophy
-
-DockaShell relies on Docker's proven container isolation rather than maintaining command blocklists. This approach:
-
-- **Simplifies configuration** - No complex rule management
-- **Reduces maintenance** - No need to update command patterns
-- **Improves reliability** - Container boundaries are well-tested
-- **Enables flexibility** - AI agents can use any legitimate tools
 
 ## 📊 Logging
 
