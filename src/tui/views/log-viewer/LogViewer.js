@@ -48,24 +48,16 @@ export const LogViewer = ({
   const {
     selectedIndex,
     setSelectedIndex,
-    selectedIndexRef,
-    selectedTimestampRef,
     scrollOffset,
     setScrollOffset,
     ensureVisible,
-  } = useSelection(entries);
+  } = useSelection();
 
   // Filter entries based on current filters
   const filteredEntries = entries.filter((entry) => {
     const traceType = entry.traceType || 'unknown';
     return filters[traceType] !== false; // Show if filter is true or undefined
   });
-
-  useEffect(() => {
-    selectedIndexRef.current = selectedIndex;
-    selectedTimestampRef.current =
-      filteredEntries[selectedIndex]?.entry.timestamp || null;
-  }, [selectedIndex, filteredEntries]);
 
   // Ensure selectedIndex is within bounds when filteredEntries changes
   useEffect(() => {

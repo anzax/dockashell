@@ -1,27 +1,8 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
-export const useSelection = (entries = []) => {
+export const useSelection = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const selectedIndexRef = useRef(0);
   const [scrollOffset, setScrollOffset] = useState(0);
-  const [detailsViewIndex, setDetailsViewIndex] = useState(null);
-  const detailsViewRef = useRef(null);
-  const selectedTimestampRef = useRef(null);
-  const detailsTimestampRef = useRef(null);
-
-  useEffect(() => {
-    selectedIndexRef.current = selectedIndex;
-    selectedTimestampRef.current =
-      entries[selectedIndex]?.entry.timestamp || null;
-  }, [selectedIndex, entries]);
-
-  useEffect(() => {
-    detailsViewRef.current = detailsViewIndex;
-    if (detailsViewIndex !== null) {
-      detailsTimestampRef.current =
-        entries[detailsViewIndex]?.entry.timestamp || null;
-    }
-  }, [detailsViewIndex, entries]);
 
   const ensureVisible = useCallback(
     (index, entries, terminalHeight, getEntryHeight) => {
@@ -49,14 +30,8 @@ export const useSelection = (entries = []) => {
   return {
     selectedIndex,
     setSelectedIndex,
-    selectedIndexRef,
-    selectedTimestampRef,
     scrollOffset,
     setScrollOffset,
-    detailsViewIndex,
-    setDetailsViewIndex,
-    detailsViewRef,
-    detailsTimestampRef,
     ensureVisible,
   };
 };
