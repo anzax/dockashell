@@ -2,7 +2,7 @@ import { formatTimestamp } from '../utils/entry-utils.js';
 import { TextLayout } from '../utils/text-layout.js';
 import { sanitizeText } from '../utils/line-formatter.js';
 
-import { TRACE_ICONS } from '../constants/ui.js';
+import { TRACE_ICONS, TRACE_COLORS } from '../constants/ui.js';
 
 /** @type {import('./index.js').EventDecorator} */
 export const applyPatch = {
@@ -15,7 +15,7 @@ export const applyPatch = {
       type: 'text',
       icon: TRACE_ICONS.apply_patch,
       text: `${ts} [APPLY_PATCH exit:${exit}]`,
-      color: exit === 0 ? 'white' : 'red',
+      color: exit === 0 ? TRACE_COLORS.apply_patch : 'red',
       bold: true,
     };
   },
@@ -26,7 +26,7 @@ export const applyPatch = {
     return {
       type: 'text',
       text: tl.truncate(first, width),
-      color: 'cyan',
+      color: 'gray',
       dimOnModal: false,
     };
   },
@@ -45,7 +45,7 @@ export const applyPatch = {
           lines.push({
             type: 'text',
             text: wrappedLine,
-            color: 'cyan',
+            color: 'white',
             dimOnModal: false,
           });
         });
@@ -56,7 +56,7 @@ export const applyPatch = {
           lines.push({
             type: 'text',
             text: '  ' + wrappedLine,
-            color: 'cyan',
+            color: 'white',
             dimOnModal: false,
           });
         });

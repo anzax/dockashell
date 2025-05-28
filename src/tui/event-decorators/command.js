@@ -26,7 +26,7 @@ export const command = {
     return {
       type: 'text',
       text: `$ ${tl.truncate(cmd, width - 3)}`,
-      color: 'white',
+      color: 'gray',
       dimOnModal: false,
     };
   },

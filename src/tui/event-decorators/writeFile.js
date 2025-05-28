@@ -2,7 +2,7 @@ import { formatTimestamp } from '../utils/entry-utils.js';
 import { TextLayout } from '../utils/text-layout.js';
 import { sanitizeText } from '../utils/line-formatter.js';
 
-import { TRACE_ICONS } from '../constants/ui.js';
+import { TRACE_ICONS, TRACE_COLORS } from '../constants/ui.js';
 
 /** @type {import('./index.js').EventDecorator} */
 export const writeFile = {
@@ -15,7 +15,7 @@ export const writeFile = {
       type: 'text',
       icon: TRACE_ICONS.write_file,
       text: `${ts} [WRITE_FILE exit:${exit}]`,
-      color: exit === 0 ? 'white' : 'red',
+      color: exit === 0 ? TRACE_COLORS.write_file : 'red',
       bold: true,
     };
   },
@@ -26,7 +26,7 @@ export const writeFile = {
     return {
       type: 'text',
       text: tl.truncate(pathLine, width),
-      color: 'magenta',
+      color: 'gray',
       dimOnModal: false,
     };
   },
@@ -41,7 +41,7 @@ export const writeFile = {
       lines.push({
         type: 'text',
         text: pathLine,
-        color: 'magenta',
+        color: 'white',
         dimOnModal: false,
       });
     });

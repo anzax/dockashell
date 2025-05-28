@@ -13,9 +13,7 @@
 import { command } from './command.js';
 import { applyPatch } from './applyPatch.js';
 import { writeFile } from './writeFile.js';
-import { user } from './user.js';
-import { agent } from './agent.js';
-import { summary } from './summary.js';
+import { user, agent, summary } from './note.js';
 import { unknown } from './unknown.js';
 
 /** @type {Map<string, EventDecorator>} */
