@@ -1,13 +1,11 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { TraceBuffer } from '../../ui-utils/trace-buffer.js';
-import { prepareEntry } from '../../ui-utils/entry-utils.js';
+import { prepareEntry, DEFAULT_FILTERS } from '../../ui-utils/entry-utils.js';
 import { TraceDetailsView } from '../trace-details/TraceDetailsView.js';
 import { TraceTypesFilterView } from '../trace-types-filter/TraceTypesFilterView.js';
 import { AppContainer } from '../AppContainer.js';
 import { LineRenderer } from './LineRenderer.js';
-import { useTraceBuffer } from '../../hooks/useTraceBuffer.js';
-import { useFilters } from '../../hooks/useFilters.js';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import { useSelection } from '../../hooks/useSelection.js';
 import { SHORTCUTS, buildFooter } from '../../constants/shortcuts.js';
@@ -34,9 +32,15 @@ export const getEntryHeight = (entry, isSelected) =>
 
 export const LogViewer = ({ project, onBack, onExit, config }) => {
   const [terminalWidth, terminalHeight] = useStdoutDimensions();
-  const { filters, setFilters, showFilterView, setShowFilterView, filtersRef } =
-    useFilters();
-  const { entries, setEntries, buffer, setBuffer } = useTraceBuffer();
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [showFilterView, setShowFilterView] = useState(false);
+  const filtersRef = useRef(filters);
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
+
+  const [buffer, setBuffer] = useState(null);
+  const [entries, setEntries] = useState([]);
   const {
     selectedIndex,
     setSelectedIndex,
