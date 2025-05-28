@@ -3,7 +3,8 @@ import { Box, Text, useInput } from 'ink';
 import { TraceBuffer } from '../../utils/trace-buffer.js';
 import { prepareEntry, findClosestTimestamp } from '../../utils/entry-utils.js';
 import { TraceDetailsView } from '../trace-details/TraceDetailsView.js';
-import { FilterModal } from './FilterModal.js';
+import { TraceTypesFilterView } from '../trace-types-filter/TraceTypesFilterView.js';
+import { AppContainer } from '../AppContainer.js';
 import { LineRenderer } from './LineRenderer.js';
 import { useTraceBuffer } from '../../hooks/useTraceBuffer.js';
 import { useFilters } from '../../hooks/useFilters.js';
@@ -37,8 +38,8 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     setFilters,
     lastFilterState,
     setLastFilterState,
-    showFilterModal,
-    setShowFilterModal,
+    showFilterView,
+    setShowFilterView,
     filtersRef,
   } = useFilters();
   const { entries, setEntries, buffer, setBuffer } = useTraceBuffer();
@@ -343,7 +344,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   // Input handling
   useInput((input, key) => {
     // Skip input handling when details view is open (it handles its own input)
-    if (detailsViewIndex !== null || showFilterModal) return;
+    if (detailsViewIndex !== null || showFilterView) return;
 
     const { start, end } = calculateVisibleEntries();
     const pageSize = end - start || 1;
@@ -385,7 +386,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     } else if (input === 'a') {
       setAutoScroll((s) => !s);
     } else if (input === 'f') {
-      setShowFilterModal(true);
+      setShowFilterView(true);
     } else if (input === 'r') {
       buffer?.refresh().catch(() => {});
     } else if (input === 'b') {
@@ -409,27 +410,18 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     : filterIndicator;
   const autoIndicator = ` [a] Auto:${autoScroll ? 'ON' : 'OFF'}`;
 
-  // Show filter modal if requested
-  if (showFilterModal) {
-    return React.createElement(
-      Box,
-      {
-        flexDirection: 'column',
-        height: terminalHeight,
-        justifyContent: 'center',
-        alignItems: 'center',
+  // Show filter view if requested
+  if (showFilterView) {
+    return React.createElement(TraceTypesFilterView, {
+      currentFilters: filters,
+      onBack: () => setShowFilterView(false),
+      onApply: (newFilters) => {
+        setFilters(newFilters);
+        setShowFilterView(false);
+        setSelectedIndex(0);
+        setScrollOffset(0);
       },
-      React.createElement(FilterModal, {
-        currentFilters: filters,
-        onClose: () => setShowFilterModal(false),
-        onApply: (newFilters) => {
-          setFilters(newFilters);
-          setShowFilterModal(false);
-          setSelectedIndex(0); // Reset selection after filtering
-          setScrollOffset(0);
-        },
-      })
-    );
+    });
   }
   // Show details view if index is set
   if (detailsViewIndex !== null) {
@@ -441,19 +433,23 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
         setDetailsViewIndex(newIndex);
         setSelectedIndex(newIndex); // Keep main list in sync
       },
-      height: terminalHeight,
     });
   }
 
-  return React.createElement(
-    Box,
-    { flexDirection: 'column', height: terminalHeight },
-    React.createElement(
+  return React.createElement(AppContainer, {
+    header: React.createElement(
       Text,
       { bold: true, wrap: 'truncate-end' },
       `DockaShell TUI - ${project}${scrollIndicator}`
     ),
-    React.createElement(
+    footer: React.createElement(
+      Text,
+      { dimColor: true, wrap: 'truncate-end' },
+      hasMore
+        ? `[↑↓] Navigate  [Enter] Detail  [PgUp/PgDn] Page  [g] Top  [G] Bottom [f] Filter  [r] Refresh${autoIndicator}  [b] Back  [q] Quit`
+        : `[↑↓] Navigate  [Enter] Detail  [f] Filter  [r] Refresh${autoIndicator}  [b] Back  [q] Quit`
+    ),
+    children: React.createElement(
       Box,
       { flexDirection: 'column', flexGrow: 1 },
       ...visibleEntries.map((entry, i) => {
@@ -465,12 +461,5 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
         });
       })
     ),
-    React.createElement(
-      Text,
-      { dimColor: true, wrap: 'truncate-end' },
-      hasMore
-        ? `[↑↓] Navigate  [Enter] Detail  [PgUp/PgDn] Page  [g] Top  [G] Bottom  [f] Filter  [r] Refresh${autoIndicator}  [b] Back  [q] Quit`
-        : `[↑↓] Navigate  [Enter] Detail  [f] Filter  [r] Refresh${autoIndicator}  [b] Back  [q] Quit`
-    )
-  );
+  });
 };
