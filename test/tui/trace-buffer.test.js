@@ -227,29 +227,4 @@ describe('TraceBuffer', () => {
       assert.strictEqual(traces[1].text, 'Trace3');
     });
   });
-
-  describe('search', () => {
-    beforeEach(async () => {
-      mockListSessions = () => Promise.resolve(['session1']);
-      mockReadTraceEntries = () =>
-        Promise.resolve([
-          { timestamp: '2025-05-26T10:01:00Z', text: 'Hello World' },
-          { timestamp: '2025-05-26T10:02:00Z', text: 'Goodbye Moon' },
-          { timestamp: '2025-05-26T10:03:00Z', text: 'Hello Again' },
-        ]);
-      await buffer.loadFromFiles();
-    });
-
-    test('should find traces containing search term', () => {
-      const results = buffer.search('hello');
-      assert.strictEqual(results.length, 2);
-      assert.strictEqual(results[0].text, 'Hello World');
-      assert.strictEqual(results[1].text, 'Hello Again');
-    });
-
-    test('should return empty array for non-matching search', () => {
-      const results = buffer.search('nonexistent');
-      assert.strictEqual(results.length, 0);
-    });
-  });
 });

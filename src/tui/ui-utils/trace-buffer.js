@@ -43,13 +43,6 @@ export class TraceBuffer extends EventEmitter {
     return limit ? this.entries.slice(-limit) : this.entries.slice();
   }
 
-  search(query) {
-    const q = query.toLowerCase();
-    return this.entries.filter((e) =>
-      JSON.stringify(e).toLowerCase().includes(q)
-    );
-  }
-
   onUpdate(callback) {
     this.on('update', callback);
     return () => this.off('update', callback);
@@ -89,14 +82,5 @@ export class TraceBuffer extends EventEmitter {
       await this.watcher.close().catch(() => {});
       this.watcher = null;
     }
-  }
-
-  /**
-   * Manual refresh for historical session data
-   * Use when you need to reload archived sessions (rare operation)
-   */
-  async refreshSessions() {
-    await this.loadFromFiles();
-    this.emit('update');
   }
 }
