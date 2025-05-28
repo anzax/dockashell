@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { TraceBuffer } from '../../utils/trace-buffer.js';
-import { prepareEntry, findClosestTimestamp } from '../../utils/entry-utils.js';
+import { prepareEntry } from '../../utils/entry-utils.js';
 import { TraceDetailsView } from '../trace-details/TraceDetailsView.js';
 import { TraceTypesFilterView } from '../trace-types-filter/TraceTypesFilterView.js';
 import { AppContainer } from '../AppContainer.js';
@@ -28,19 +28,12 @@ const Entry = ({ item, selected }) =>
   );
 
 export const getEntryHeight = (entry, isSelected) =>
-  (entry.height || 3) + (isSelected ? 2 : 0); // Height based on prepared entry
+  (entry?.height || 3) + (isSelected ? 2 : 0); // Height based on prepared entry
 
 export const LogViewer = ({ project, onBack, onExit, config }) => {
   const [terminalWidth, terminalHeight] = useStdoutDimensions();
-  const {
-    filters,
-    setFilters,
-    lastFilterState,
-    setLastFilterState,
-    showFilterView,
-    setShowFilterView,
-    filtersRef,
-  } = useFilters();
+  const { filters, setFilters, showFilterView, setShowFilterView, filtersRef } =
+    useFilters();
   const { entries, setEntries, buffer, setBuffer } = useTraceBuffer();
   const {
     selectedIndex,
@@ -53,8 +46,6 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     setDetailsViewIndex,
     detailsViewRef,
     detailsTimestampRef,
-    selectionBeforeFilter,
-    setSelectionBeforeFilter,
     ensureVisible,
   } = useSelection(entries);
 
@@ -75,132 +66,22 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       filteredEntries[selectedIndex]?.entry.timestamp || null;
   }, [selectedIndex, filteredEntries]);
 
-  // Handle filter changes separately from trace buffer updates
-  useEffect(() => {
-    // Check if filters actually changed
-    const filtersChanged = Object.keys(filters).some(
-      (key) => filters[key] !== lastFilterState[key]
-    );
-
-    if (!filtersChanged) return;
-
-    // Capture current state from the STABLE entries array, not derived filteredEntries
-    // This prevents race conditions where filteredEntries hasn't updated yet
-    const currentFilteredEntry = filteredEntries[selectedIndex];
-    if (currentFilteredEntry && entries.length > 0) {
-      // Find the actual index in the main entries array
-      const actualIndex = entries.findIndex(
-        (e) => e.entry.timestamp === currentFilteredEntry.entry.timestamp
-      );
-
-      setSelectionBeforeFilter({
-        timestamp: currentFilteredEntry.entry.timestamp,
-        scrollOffset,
-        selectedIndex,
-        actualIndex,
-        wasAtBottom: selectedIndex >= filteredEntries.length - 3,
-      });
-    }
-
-    setLastFilterState(filters);
-  }, [filters, lastFilterState, filteredEntries, selectedIndex, scrollOffset]);
-
-  // Restore position after filter changes
-  useEffect(() => {
-    if (!selectionBeforeFilter) return;
-
-    const {
-      timestamp,
-      scrollOffset: oldScrollOffset,
-      wasAtBottom,
-      actualIndex,
-    } = selectionBeforeFilter;
-
-    // This effect runs after filteredEntries has been updated
-    // No need for setTimeout - React guarantees order
-
-    if (filteredEntries.length === 0) {
-      setSelectedIndex(0);
-      setScrollOffset(0);
-      setSelectionBeforeFilter(null);
-      return;
-    }
-
-    // Find best matching entry
-    let newSelectedIndex = -1;
-
-    // Try exact timestamp match first
-    if (timestamp) {
-      newSelectedIndex = filteredEntries.findIndex(
-        (entry) => entry.entry.timestamp === timestamp
-      );
-    }
-
-    // Try closest timestamp if exact match not found
-    if (newSelectedIndex === -1 && timestamp) {
-      newSelectedIndex = findClosestTimestamp(filteredEntries, timestamp);
-    }
-
-    // Use proportional positioning as fallback
-    if (newSelectedIndex === -1 && actualIndex >= 0 && entries.length > 0) {
-      const proportion = actualIndex / entries.length;
-      newSelectedIndex = Math.round(proportion * filteredEntries.length);
-    }
-
-    // Final fallback
-    if (newSelectedIndex === -1) {
-      newSelectedIndex = 0;
-    }
-
-    // Ensure within bounds
-    newSelectedIndex = Math.max(
-      0,
-      Math.min(newSelectedIndex, filteredEntries.length - 1)
-    );
-
-    // Update selection first
-    setSelectedIndex(newSelectedIndex);
-
-    // Handle scroll position
-    {
-      // Calculate optimal scroll to keep selection centered
-      const viewportHeight = Math.max(1, terminalHeight - 5);
-      const halfViewport = Math.floor(viewportHeight / 2);
-
-      // Try to center the selection
-      let newScrollOffset = Math.max(0, newSelectedIndex - halfViewport);
-
-      // But respect the old scroll position if selection is already visible
-      const selectionVisible =
-        newSelectedIndex >= oldScrollOffset &&
-        newSelectedIndex < oldScrollOffset + viewportHeight;
-
-      if (selectionVisible && oldScrollOffset < filteredEntries.length) {
-        newScrollOffset = oldScrollOffset;
-      }
-
-      // Ensure within bounds
-      newScrollOffset = Math.max(
-        0,
-        Math.min(
-          newScrollOffset,
-          Math.max(0, filteredEntries.length - viewportHeight)
-        )
-      );
-
-      setScrollOffset(newScrollOffset);
-    }
-
-    // Clear restoration state
-    setSelectionBeforeFilter(null);
-  }, [filteredEntries, selectionBeforeFilter, terminalHeight, entries.length]);
-
   useEffect(() => {
     if (detailsViewIndex !== null) {
       detailsTimestampRef.current =
         filteredEntries[detailsViewIndex]?.entry.timestamp || null;
     }
   }, [detailsViewIndex, filteredEntries]);
+
+  // Ensure selectedIndex is within bounds when filteredEntries changes
+  useEffect(() => {
+    if (filteredEntries.length === 0) {
+      setSelectedIndex(0);
+    } else if (selectedIndex >= filteredEntries.length) {
+      setSelectedIndex(filteredEntries.length - 1);
+    }
+  }, [filteredEntries, selectedIndex, setSelectedIndex]);
+
   const ensureVisibleWrapper = useCallback(
     (index) =>
       ensureVisible(index, filteredEntries, terminalHeight, getEntryHeight),
@@ -268,7 +149,6 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
         setScrollOffset(0);
         return;
       }
-
     };
 
     buf.onUpdate(update);
@@ -348,8 +228,6 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       onApply: (newFilters) => {
         setFilters(newFilters);
         setShowFilterView(false);
-        setSelectedIndex(0);
-        setScrollOffset(0);
       },
     });
   }
