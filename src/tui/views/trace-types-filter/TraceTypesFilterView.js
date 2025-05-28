@@ -5,6 +5,7 @@ import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import { AppContainer } from '../AppContainer.js';
 import { DEFAULT_FILTERS } from '../../utils/entry-utils.js';
 import { SHORTCUTS, buildFooter } from '../../constants/shortcuts.js';
+import { isBackKey } from '../../utils/input-utils.js';
 
 /**
  * Full screen trace type filter view using ink-ui MultiSelect.
@@ -50,7 +51,7 @@ export const TraceTypesFilterView = ({ onBack, onApply, currentFilters }) => {
   };
 
   useInput((input, key) => {
-    if (key.escape || input === 'q') {
+    if (isBackKey(input, key)) {
       onBack();
     }
   });
