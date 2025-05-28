@@ -30,9 +30,3 @@ export const TRACE_COLORS = /** @type {const} */ ({
   note: 'white',
   unknown: 'gray',
 });
-
-export const UI_DIMENSIONS = /** @type {const} */ ({
-  HEADER_HEIGHT: 4,
-  MIN_CONTENT_WIDTH: 40,
-  MARGIN: 10,
-});

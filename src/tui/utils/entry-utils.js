@@ -5,8 +5,8 @@ import {
   sanitizeText,
 } from './line-formatter.js';
 import { TextLayout } from './text-layout.js';
-import { TRACE_ICONS, TRACE_COLORS, TRACE_TYPES } from '../../constants/ui.js';
-import { LAYOUT } from '../../constants/layout.js';
+import { TRACE_ICONS, TRACE_COLORS, TRACE_TYPES } from '../constants/ui.js';
+import { LAYOUT } from '../constants/layout.js';
 
 export const formatTimestamp = (timestamp) => {
   if (!timestamp) return 'No timestamp';
