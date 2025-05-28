@@ -51,38 +51,6 @@ export const DEFAULT_FILTERS = {
   write_file: true,
 };
 
-/**
- * Find the entry with the closest timestamp to the target
- * @param {Array} entries - Array of prepared entries
- * @param {string|null} targetTimestamp - Target timestamp to match
- * @returns {number} Index of closest entry, or -1 if no entries
- */
-export const findClosestTimestamp = (entries, targetTimestamp) => {
-  if (!entries || entries.length === 0) return -1;
-  if (!targetTimestamp) return -1;
-
-  const target = new Date(targetTimestamp).getTime();
-  if (isNaN(target)) return -1;
-
-  let closestIndex = 0;
-  let closestDiff = Math.abs(
-    new Date(entries[0].entry.timestamp).getTime() - target
-  );
-
-  for (let i = 1; i < entries.length; i++) {
-    const entryTime = new Date(entries[i].entry.timestamp).getTime();
-    if (isNaN(entryTime)) continue;
-
-    const diff = Math.abs(entryTime - target);
-    if (diff < closestDiff) {
-      closestDiff = diff;
-      closestIndex = i;
-    }
-  }
-
-  return closestIndex;
-};
-
 export const buildEntryLines = (
   entry,
   compact,
