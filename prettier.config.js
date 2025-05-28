@@ -26,7 +26,7 @@ export default {
     {
       files: '*.md',
       options: {
-        printWidth: 80,
+        printWidth: Infinity,
         proseWrap: 'always',
         tabWidth: 2,
       },

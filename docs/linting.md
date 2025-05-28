@@ -11,8 +11,7 @@ Install these VS Code extensions for the best development experience:
 - **ESLint** (`ms-vscode.vscode-eslint`)
 - **Prettier - Code formatter** (`esbenp.prettier-vscode`)
 
-The project includes VS Code settings that will automatically format code on
-save and fix ESLint issues.
+The project includes VS Code settings that will automatically format code on save and fix ESLint issues.
 
 ### Manual Usage
 
@@ -89,5 +88,4 @@ These tools run automatically in:
 - **Git hooks**: Could be added for pre-commit validation
 - **CI/CD**: Could be added to build pipeline
 
-The configuration is designed to be zero-friction while maintaining high code
-quality.
+The configuration is designed to be zero-friction while maintaining high code quality.

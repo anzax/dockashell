@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
-import { SystemLogger } from '../src/utils/system-logger.js';
+import { SystemLogger } from '../../src/utils/system-logger.js';
 
 describe('SystemLogger', () => {
   let tmpDir;

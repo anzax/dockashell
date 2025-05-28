@@ -1,12 +1,8 @@
 # apply_patch MCP Tool (OpenAI Format File Edits)
 
-**Based on:**
-[OpenAI Prompting Guide - Generating and Applying File Diffs](https://cookbook.openai.com/examples/gpt4-1_prompting_guide#appendix-generating-and-applying-file-diffs)
+**Based on:** [OpenAI Prompting Guide - Generating and Applying File Diffs](https://cookbook.openai.com/examples/gpt4-1_prompting_guide#appendix-generating-and-applying-file-diffs)
 
-The `apply_patch` tool enables flexible, incremental file updates using the
-OpenAI-proposed patch format. Executes a pure Python script inside the project
-container for reliable, context-based file patching without external
-dependencies.
+The `apply_patch` tool enables flexible, incremental file updates using the OpenAI-proposed patch format. Executes a pure Python script inside the project container for reliable, context-based file patching without external dependencies.
 
 ## How It Works
 
@@ -86,8 +82,7 @@ dependencies.
 
 1. **Provide sufficient context** – Include 3+ lines around changes
 2. **Use descriptive context** – Choose unique code snippets for matching
-3. **Handle complex changes incrementally** – Multiple small patches are more
-   reliable
+3. **Handle complex changes incrementally** – Multiple small patches are more reliable
 4. **Leverage fuzzy matching** – Script handles minor whitespace differences
 
 ### When to Use

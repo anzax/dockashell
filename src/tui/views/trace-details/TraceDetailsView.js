@@ -1,18 +1,35 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
-import { LineRenderer } from './LineRenderer.js';
+import { LineRenderer } from '../log-viewer/LineRenderer.js';
+import { AppContainer } from '../AppContainer.js';
+import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 
 export const TraceDetailsView = ({
   traces,
   currentIndex,
   onClose,
   onNavigate,
-  height,
 }) => {
   const [scrollOffset, setScrollOffset] = useState(0);
+  const [, height] = useStdoutDimensions();
 
   const currentTrace = traces[currentIndex];
-  const availableHeight = Math.max(1, height - 4); // Header, help, borders only
+  if (!currentTrace) {
+    return React.createElement(AppContainer, {
+      header: React.createElement(Text, { bold: true }, 'Trace Details'),
+      footer: React.createElement(
+        Text,
+        { dimColor: true },
+        '[Enter/Esc/q] Back'
+      ),
+      children: React.createElement(
+        Box,
+        { flexGrow: 1, justifyContent: 'center', alignItems: 'center' },
+        React.createElement(Text, { wrap: 'truncate-end' }, 'No trace selected')
+      ),
+    });
+  }
+  const availableHeight = Math.max(1, height - 4); // header, footer and spacing
   const maxOffset = Math.max(
     0,
     currentTrace.fullLines.length - availableHeight
@@ -48,7 +65,7 @@ export const TraceDetailsView = ({
     } else if (input === 'G') {
       setScrollOffset(maxOffset);
     }
-    // Close modal
+    // Close view
     else if (key.escape || key.return || input === 'q') {
       onClose();
     }
@@ -64,24 +81,25 @@ export const TraceDetailsView = ({
 
   const navigationIndicator = ` (${currentIndex + 1}/${traces.length})`;
 
-  return React.createElement(
-    Box,
-    { flexDirection: 'column', height },
-    React.createElement(
+  return React.createElement(AppContainer, {
+    header: React.createElement(
       Text,
       { bold: true, wrap: 'truncate-end' },
       `Trace Details${navigationIndicator}${scrollIndicator}`
     ),
-
-    React.createElement(
+    footer: React.createElement(
+      Text,
+      { dimColor: true, wrap: 'truncate-end' },
+      '[↑↓ PgUp/PgDn g/G] Scroll  ' +
+        (hasPrev || hasNext ? '[←/→] Navigate  ' : '') +
+        '[Enter/Esc/q] Back'
+    ),
+    children: React.createElement(
       Box,
       {
         flexDirection: 'column',
         flexGrow: 1,
-        borderStyle: 'double',
-        paddingLeft: 1,
-        paddingRight: 1,
-        marginY: 1,
+        borderStyle: 'single',
       },
       ...visibleLines.map((line, idx) =>
         React.createElement(LineRenderer, {
@@ -91,13 +109,5 @@ export const TraceDetailsView = ({
         })
       )
     ),
-
-    React.createElement(
-      Text,
-      { dimColor: true, wrap: 'truncate-end' },
-      '[↑↓ PgUp/PgDn g/G] Scroll  ' +
-        (hasPrev || hasNext ? '[←/→] Navigate  ' : '') +
-        '[Enter/Esc/q] Close'
-    )
-  );
+  });
 };

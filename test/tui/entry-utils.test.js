@@ -5,7 +5,7 @@ import {
   formatTimestamp,
   prepareEntry,
   detectTraceType,
-} from '../src/tui/entry-utils.js';
+} from '../../src/tui/utils/entry-utils.js';
 
 const sampleCommand = {
   kind: 'command',
@@ -158,5 +158,22 @@ describe('detectTraceType', () => {
     assert.strictEqual(detectTraceType(patch), 'apply_patch');
     assert.strictEqual(detectTraceType(cmd), 'command');
     assert.strictEqual(detectTraceType(write), 'write_file');
+  });
+
+  test('edge cases and fallbacks', () => {
+    assert.strictEqual(detectTraceType(), 'unknown');
+    assert.strictEqual(detectTraceType(null), 'unknown');
+
+    const noTypeNote = { kind: 'note' };
+    assert.strictEqual(detectTraceType(noTypeNote), 'note');
+
+    const legacy = { kind: 'misc', type: 'legacy' };
+    assert.strictEqual(detectTraceType(legacy), 'legacy');
+
+    const byProp = { patch: 'diff' };
+    assert.strictEqual(detectTraceType(byProp), 'apply_patch');
+
+    const customNote = { noteType: 'custom' };
+    assert.strictEqual(detectTraceType(customNote), 'custom');
   });
 });
