@@ -10,6 +10,7 @@ import { useTraceBuffer } from '../../hooks/useTraceBuffer.js';
 import { useFilters } from '../../hooks/useFilters.js';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import { useSelection } from '../../hooks/useSelection.js';
+import { SHORTCUTS, buildFooter } from '../../constants/shortcuts.js';
 
 const Entry = ({ item, selected }) =>
   React.createElement(
@@ -253,9 +254,16 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     footer: React.createElement(
       Text,
       { dimColor: true, wrap: 'truncate-end' },
-      hasMore
-        ? `[↑↓] Navigate  [Enter] Detail  [PgUp/PgDn] Page  [g] Top  [G] Bottom [f] Filter  [r] Refresh  [b] Back  [q] Quit`
-        : `[↑↓] Navigate  [Enter] Detail  [f] Filter  [r] Refresh  [b] Back  [q] Quit`
+      buildFooter(
+        SHORTCUTS.NAVIGATE,
+        SHORTCUTS.DETAIL,
+        SHORTCUTS.PAGE,
+        SHORTCUTS.TOP_BOTTOM,
+        SHORTCUTS.FILTER,
+        SHORTCUTS.REFRESH,
+        SHORTCUTS.BACK_B,
+        SHORTCUTS.QUIT
+      )
     ),
     children: React.createElement(
       Box,
