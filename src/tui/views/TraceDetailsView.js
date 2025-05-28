@@ -34,7 +34,7 @@ export const TraceDetailsView = ({
 
   // Generate full lines on-demand using the decorator system
   const fullLines = buildEntryLines(
-    currentTrace.entry,
+    currentTrace.trace,
     false,
     terminalWidth - 2 // Account for border width (1 char on each side)
   );
