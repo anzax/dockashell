@@ -100,7 +100,6 @@ export const buildEntryLines = (
 
 export const prepareEntry = (
   entry,
-  maxLines,
   terminalWidth = LAYOUT.DEFAULT_TERMINAL_WIDTH
 ) => {
   // List view: always 2 lines, compact mode

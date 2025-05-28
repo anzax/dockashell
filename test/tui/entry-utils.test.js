@@ -45,7 +45,7 @@ describe('formatTimestamp', () => {
 
 describe('prepareEntry', () => {
   test('creates list and detail views', () => {
-    const prepared = prepareEntry(sampleCommand, 10, 80);
+    const prepared = prepareEntry(sampleCommand, 80);
     assert.strictEqual(prepared.lines.length, 2);
     // Full lines are now generated on-demand in TraceDetailsView, not pre-computed
     assert(prepared.entry);
