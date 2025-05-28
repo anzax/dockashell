@@ -36,9 +36,13 @@ export const LogViewer = ({
   config,
   onOpenDetails,
   onOpenFilter,
+  filters = DEFAULT_FILTERS,
+  selectedIndex: externalIndex,
+  setSelectedIndex: setExternalIndex,
+  scrollOffset: externalOffset,
+  setScrollOffset: setExternalOffset,
 }) => {
   const [terminalWidth] = useStdoutDimensions();
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const filtersRef = useRef(filters);
   useEffect(() => {
     filtersRef.current = filters;
@@ -66,8 +70,29 @@ export const LogViewer = ({
     pageSize,
     visibleStart,
     visibleEnd,
+    scrollOffset,
     setScrollOffset,
   } = list;
+
+  useEffect(() => {
+    if (externalIndex !== undefined) {
+      setSelectedIndex(externalIndex);
+    }
+  }, [externalIndex, setSelectedIndex]);
+
+  useEffect(() => {
+    if (externalOffset !== undefined) {
+      setScrollOffset(externalOffset);
+    }
+  }, [externalOffset, setScrollOffset]);
+
+  useEffect(() => {
+    if (setExternalIndex) setExternalIndex(selectedIndex);
+  }, [selectedIndex, setExternalIndex]);
+
+  useEffect(() => {
+    if (setExternalOffset) setExternalOffset(scrollOffset);
+  }, [scrollOffset, setExternalOffset]);
 
   // Ensure selectedIndex is within bounds when filteredEntries changes
   useEffect(() => {
@@ -116,7 +141,6 @@ export const LogViewer = ({
       onOpenDetails?.({
         traces: filteredEntries,
         currentIndex: selectedIndex,
-        onNavigate: (newIndex) => setSelectedIndex(newIndex),
       });
     } else if (key.downArrow && selectedIndex < filteredEntries.length - 1) {
       const idx = selectedIndex + 1;
@@ -145,10 +169,7 @@ export const LogViewer = ({
       setSelectedIndex(idx);
       ensureVisible(idx);
     } else if (input === 'f') {
-      onOpenFilter?.({
-        currentFilters: filters,
-        onApply: (newFilters) => setFilters(newFilters),
-      });
+      onOpenFilter?.();
     } else if (input === 'r') {
       buffer?.refresh().catch(() => {});
     } else if (input === 'b') {
