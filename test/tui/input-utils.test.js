@@ -4,7 +4,7 @@ import {
   isEnterKey,
   isBackKey,
   isExitKey,
-} from '../../src/tui/ui-utils/input-utils.js';
+} from '../../src/tui/ui-utils/text-utils.js';
 
 describe('input utils', () => {
   test('isEnterKey detects enter', () => {

@@ -1,10 +1,10 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert';
-import { sanitizeText } from '../../src/tui/ui-utils/line-formatter.js';
 import {
   TextLayout,
   ELLIPSIS_LENGTH,
-} from '../../src/tui/ui-utils/text-layout.js';
+  sanitizeText,
+} from '../../src/tui/ui-utils/text-utils.js';
 
 const layout = new TextLayout(80);
 

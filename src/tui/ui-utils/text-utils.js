@@ -68,3 +68,28 @@ export class TextLayout {
     return '─'.repeat(sepWidth);
   }
 }
+
+// Regex patterns for text sanitization
+// eslint-disable-next-line no-control-regex
+const ANSI_ESCAPE_PATTERN = /\x1b\[[0-9;]*m/g;
+// eslint-disable-next-line no-control-regex
+const CONTROL_CHARS_PATTERN = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g;
+const CHECKMARK_EMOJI_PATTERN = /✅/g;
+const CROSSMARK_EMOJI_PATTERN = /❌/g;
+
+export const sanitizeText = (text) => {
+  if (!text) return '';
+
+  return text
+    .replace(/\t/g, '  ')
+    .replace(ANSI_ESCAPE_PATTERN, '')
+    .replace(CONTROL_CHARS_PATTERN, ' ')
+    .replace(CHECKMARK_EMOJI_PATTERN, '[✓]')
+    .replace(CROSSMARK_EMOJI_PATTERN, '[✗]');
+};
+
+export const isEnterKey = (key) => !!(key && key.return);
+export const isBackKey = (input, key) =>
+  !!((key && key.escape) || input === 'q');
+export const isExitKey = (input, key) =>
+  isEnterKey(key) || isBackKey(input, key);
