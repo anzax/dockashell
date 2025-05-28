@@ -3,6 +3,7 @@ import { Box, Text, useInput } from 'ink';
 import { LineRenderer } from '../log-viewer/LineRenderer.js';
 import { AppContainer } from '../AppContainer.js';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
+import { buildEntryLines } from '../../utils/entry-utils.js';
 
 export const TraceDetailsView = ({
   traces,
@@ -11,7 +12,7 @@ export const TraceDetailsView = ({
   onNavigate,
 }) => {
   const [scrollOffset, setScrollOffset] = useState(0);
-  const [, height] = useStdoutDimensions();
+  const [terminalWidth, height] = useStdoutDimensions();
 
   const currentTrace = traces[currentIndex];
   if (!currentTrace) {
@@ -29,14 +30,20 @@ export const TraceDetailsView = ({
       ),
     });
   }
-  const availableHeight = Math.max(1, height - 4); // header, footer and spacing
-  const maxOffset = Math.max(
-    0,
-    currentTrace.fullLines.length - availableHeight
+
+  // Generate full lines on-demand using the decorator system
+  const fullLines = buildEntryLines(
+    currentTrace.entry,
+    false,
+    terminalWidth - 2 // Account for border width (1 char on each side)
   );
-  const visibleLines = currentTrace.fullLines.slice(
+
+  // Calculate viewport and visible lines
+  const viewportHeight = Math.max(1, height - 6); // Account for: header(1) + marginTop(1) + marginBottom(1) + footer(1) + borderTop(1) + borderBottom(1)
+  const maxScrollOffset = Math.max(0, fullLines.length - viewportHeight);
+  const visibleLines = fullLines.slice(
     scrollOffset,
-    scrollOffset + availableHeight
+    scrollOffset + viewportHeight
   );
 
   const hasNext = currentIndex < traces.length - 1;
@@ -46,24 +53,34 @@ export const TraceDetailsView = ({
     // Navigation between traces (simplified - no Alt required)
     if (key.leftArrow && hasPrev) {
       onNavigate(currentIndex - 1);
-      setScrollOffset(0); // Reset scroll when switching traces
+      setScrollOffset(0); // Reset scroll when changing traces
     } else if (key.rightArrow && hasNext) {
       onNavigate(currentIndex + 1);
-      setScrollOffset(0); // Reset scroll when switching traces
+      setScrollOffset(0); // Reset scroll when changing traces
     }
-    // Content scrolling
-    else if (key.downArrow) {
-      setScrollOffset((o) => Math.min(maxOffset, o + 1));
-    } else if (key.upArrow) {
-      setScrollOffset((o) => Math.max(0, o - 1));
-    } else if (key.pageDown) {
-      setScrollOffset((o) => Math.min(maxOffset, o + availableHeight));
+    // Scrolling
+    else if (key.upArrow) {
+      setScrollOffset((prev) => Math.max(0, prev - 1));
+    } else if (key.downArrow) {
+      setScrollOffset((prev) => Math.min(maxScrollOffset, prev + 1));
     } else if (key.pageUp) {
-      setScrollOffset((o) => Math.max(0, o - availableHeight));
+      setScrollOffset((prev) => Math.max(0, prev - viewportHeight));
+    } else if (key.pageDown) {
+      setScrollOffset((prev) =>
+        Math.min(maxScrollOffset, prev + viewportHeight)
+      );
+    } else if (key.ctrl && input === 'u') {
+      // Ctrl+U as alternative to Page Up
+      setScrollOffset((prev) => Math.max(0, prev - viewportHeight));
+    } else if (key.ctrl && input === 'd') {
+      // Ctrl+D as alternative to Page Down
+      setScrollOffset((prev) =>
+        Math.min(maxScrollOffset, prev + viewportHeight)
+      );
     } else if (input === 'g') {
       setScrollOffset(0);
     } else if (input === 'G') {
-      setScrollOffset(maxOffset);
+      setScrollOffset(maxScrollOffset);
     }
     // Close view
     else if (key.escape || key.return || input === 'q') {
@@ -71,15 +88,13 @@ export const TraceDetailsView = ({
     }
   });
 
-  const scrollIndicator =
-    currentTrace.fullLines.length > availableHeight
-      ? ` (${scrollOffset + 1}-${Math.min(
-          currentTrace.fullLines.length,
-          scrollOffset + availableHeight
-        )} of ${currentTrace.fullLines.length})`
-      : '';
-
   const navigationIndicator = ` (${currentIndex + 1}/${traces.length})`;
+
+  // Show scroll indicator only if content is scrollable
+  const scrollable = fullLines.length > viewportHeight;
+  const scrollIndicator = scrollable
+    ? ` (${scrollOffset + 1}-${Math.min(fullLines.length, scrollOffset + viewportHeight)} of ${fullLines.length})`
+    : '';
 
   return React.createElement(AppContainer, {
     header: React.createElement(
@@ -90,7 +105,9 @@ export const TraceDetailsView = ({
     footer: React.createElement(
       Text,
       { dimColor: true, wrap: 'truncate-end' },
-      '[↑↓ PgUp/PgDn g/G] Scroll  ' +
+      (scrollable
+        ? '[↑↓] Line  [PgUp/PgDn Ctrl+U/D] Page  [g/G] Top/Bottom  '
+        : '') +
         (hasPrev || hasNext ? '[←/→] Navigate  ' : '') +
         '[Enter/Esc/q] Back'
     ),

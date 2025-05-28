@@ -1,32 +1,30 @@
 import { formatTimestamp } from '../utils/entry-utils.js';
 import { TextLayout } from '../utils/text-layout.js';
-
-import { TRACE_ICONS } from '../constants/ui.js';
+import { sanitizeText } from '../utils/line-formatter.js';
+import { TRACE_ICONS, TRACE_COLORS } from '../constants/ui.js';
 
 /** @type {import('./index.js').EventDecorator} */
-export const unknown = {
-  kind: 'unknown',
+export const user = {
+  kind: 'user',
 
   headerLine(entry) {
     const ts = formatTimestamp(entry.timestamp);
-    const type = entry.type || entry.kind || 'unknown';
     return {
       type: 'text',
-      icon: TRACE_ICONS.unknown,
-      text: `${ts} [${type.toUpperCase()}]`,
-      color: 'gray',
+      icon: TRACE_ICONS.user,
+      text: `${ts} [USER]`,
+      color: TRACE_COLORS.user,
       bold: true,
     };
   },
 
   contentCompact(entry, width) {
     const tl = new TextLayout(width);
-    const text = JSON.stringify(entry).split('\n')[0];
+    const text = sanitizeText(entry.text || '').split('\n')[0];
     return {
       type: 'text',
       text: tl.truncate(text, width),
-      color: 'gray',
-      dimOnModal: false,
+      color: TRACE_COLORS.user,
     };
   },
 
@@ -34,8 +32,8 @@ export const unknown = {
     const tl = new TextLayout(width);
     const lines = [];
 
-    // Wrap JSON lines instead of truncating
-    JSON.stringify(entry, null, 2)
+    // Wrap text lines instead of truncating
+    sanitizeText(entry.text || '')
       .split('\n')
       .forEach((line) => {
         const wrappedLines = tl.wrap(line, { width });
@@ -43,8 +41,7 @@ export const unknown = {
           lines.push({
             type: 'text',
             text: wrappedLine,
-            color: 'gray',
-            dimOnModal: false,
+            color: TRACE_COLORS.user,
           });
         });
       });

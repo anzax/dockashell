@@ -21,13 +21,18 @@ const sampleCommand = {
 describe('buildEntryLines', () => {
   test('compact command without output', () => {
     const lines = buildEntryLines(sampleCommand, true, 80);
-    assert.strictEqual(lines[0].type, 'header');
-    assert.strictEqual(lines[1].type, 'command');
+    assert.strictEqual(lines[0].type, 'text');
+    assert.strictEqual(lines[1].type, 'text');
+    assert(lines[0].bold); // header should be bold
+    assert(lines[0].icon); // header should have icon
   });
 
   test('full command with output', () => {
     const lines = buildEntryLines(sampleCommand, false, 80);
-    assert(lines.some((l) => l.type === 'output'));
+    // All lines should be type 'text', but output lines should have specific formatting
+    assert(lines.every((l) => l.type === 'text'));
+    // Output lines should have 2-space prefix
+    assert(lines.some((l) => l.text.startsWith('  ok')));
   });
 });
 
@@ -42,7 +47,10 @@ describe('prepareEntry', () => {
   test('creates list and detail views', () => {
     const prepared = prepareEntry(sampleCommand, 10, 80);
     assert.strictEqual(prepared.lines.length, 2);
-    assert(prepared.fullLines.length > 2);
+    // Full lines are now generated on-demand in TraceDetailsView, not pre-computed
+    assert(prepared.entry);
+    assert(prepared.height);
+    assert(prepared.traceType);
   });
 });
 

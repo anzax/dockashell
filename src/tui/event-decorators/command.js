@@ -2,20 +2,21 @@ import { formatTimestamp } from '../utils/entry-utils.js';
 import { TextLayout } from '../utils/text-layout.js';
 import { sanitizeText } from '../utils/line-formatter.js';
 
-const ICON = '💻';
+import { TRACE_ICONS } from '../constants/ui.js';
 
 /** @type {import('./index.js').EventDecorator} */
 export const command = {
   kind: 'command',
 
-  headerLine(entry, width) {
+  headerLine(entry) {
     const ts = formatTimestamp(entry.timestamp);
     const exit = entry.result?.exitCode ?? 'N/A';
     return {
-      type: 'header',
-      icon: ICON,
+      type: 'text',
+      icon: TRACE_ICONS.command,
       text: `${ts} [COMMAND exit:${exit}]`,
       color: exit === 0 ? 'white' : 'red',
+      bold: true,
     };
   },
 
@@ -23,30 +24,57 @@ export const command = {
     const tl = new TextLayout(width);
     const cmd = sanitizeText(entry.command || '').split('\n')[0];
     return {
-      type: 'command',
+      type: 'text',
       text: `$ ${tl.truncate(cmd, width - 3)}`,
       color: 'white',
+      dimOnModal: false,
     };
   },
 
   contentFull(entry, width) {
     const tl = new TextLayout(width);
     const lines = [];
-    sanitizeText(entry.command || '')
-      .split('\n')
-      .forEach((line, i) => {
+
+    // Wrap command lines instead of truncating
+    const commandLines = sanitizeText(entry.command || '').split('\n');
+    commandLines.forEach((line, i) => {
+      const prefix = i === 0 ? '$ ' : '  ';
+      const wrappedLines = tl.wrap(line, {
+        width: width - prefix.length,
+        prefix: '  ',
+      });
+
+      wrappedLines.forEach((wrappedLine, j) => {
         lines.push({
-          type: 'command',
-          text: (i === 0 ? '$ ' : '  ') + tl.truncate(line, width - 2),
+          type: 'text',
+          text: (i === 0 && j === 0 ? '$ ' : '  ') + wrappedLine,
+          color: 'white',
+          dimOnModal: false,
         });
       });
+    });
+
     const output = sanitizeText(entry.result?.output || '').trim();
     if (output) {
-      lines.push({ type: 'separator', text: tl.createSeparator() });
-      output.split('\n').forEach((o) => {
-        lines.push({
-          type: 'output',
-          text: tl.truncate(o, width),
+      lines.push({
+        type: 'text',
+        text: tl.createSeparator(),
+        color: 'gray',
+        dim: true,
+      });
+      // Wrap output lines instead of truncating
+      output.split('\n').forEach((outputLine) => {
+        const wrappedOutputLines = tl.wrap(outputLine, {
+          width: width - 2,
+          prefix: '  ',
+        });
+        wrappedOutputLines.forEach((wrappedLine) => {
+          lines.push({
+            type: 'text',
+            text: '  ' + wrappedLine,
+            color: 'gray',
+            dimOnModal: true,
+          });
         });
       });
     }

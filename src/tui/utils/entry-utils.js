@@ -1,9 +1,4 @@
-import {
-  formatMultilineText,
-  truncateText,
-  formatCommandOutput,
-  sanitizeText,
-} from './line-formatter.js';
+import {} from './line-formatter.js';
 import { getDecorator } from '../event-decorators/index.js';
 import { TextLayout } from './text-layout.js';
 import { TRACE_ICONS, TRACE_COLORS, TRACE_TYPES } from '../constants/ui.js';
@@ -48,7 +43,7 @@ export const detectTraceType = (entry) => {
   for (const [type, detector] of Object.entries(TRACE_TYPE_DETECTORS)) {
     if (detector(entry)) return type;
   }
-  if (entry.kind === 'note') return entry.noteType || TRACE_TYPES.NOTE;
+  // Legacy note handling - try to detect noteType
   if (entry.noteType) return entry.noteType;
   if (entry.type) return entry.type; // legacy notes
   return TRACE_TYPES.UNKNOWN;
@@ -114,41 +109,19 @@ export const getTraceColor = (type, exitCode) => {
 export const getNoteTypeColor = (noteType) => getTraceColor(noteType);
 export const getNoteTypeIcon = (noteType) => getTraceIcon(noteType);
 
-// Helper to build a standard header line
-export const createHeaderLine = (entry, traceType, typeText) => ({
-  type: 'header',
-  icon: getTraceIcon(traceType),
-  timestamp: formatTimestamp(entry.timestamp),
-  typeText,
-  typeColor: getTraceColor(traceType, entry.result?.exitCode),
-});
-
-// Helper to append formatted output lines if present
-export const appendOutputLines = (lines, output, layout, maxLines) => {
-  if (!output || !output.trim()) return;
-  lines.push({
-    type: 'separator',
-    text: layout.createSeparator(),
-  });
-
-  const outputLines = formatCommandOutput(
-    output.trim(),
-    layout.contentWidth,
-    maxLines - lines.length
-  );
-  outputLines.forEach((line) => lines.push({ type: 'output', text: line }));
-};
-export const buildEntryLines = (entry, compact, terminalWidth = LAYOUT.DEFAULT_TERMINAL_WIDTH) => {
+export const buildEntryLines = (
+  entry,
+  compact,
+  terminalWidth = LAYOUT.DEFAULT_TERMINAL_WIDTH
+) => {
   const kind = detectTraceType(entry);
   const deco = getDecorator(kind);
   const width = new TextLayout(terminalWidth).contentWidth;
   if (compact) {
-    return [deco.headerLine(entry, width), deco.contentCompact(entry, width)];
+    return [deco.headerLine(entry), deco.contentCompact(entry, width)];
   }
-  return [deco.headerLine(entry, width), ...deco.contentFull(entry, width)];
+  return [deco.headerLine(entry), ...deco.contentFull(entry, width)];
 };
-
-
 
 export const prepareEntry = (
   entry,
@@ -158,12 +131,9 @@ export const prepareEntry = (
   // List view: always 2 lines, compact mode
   const lines = buildEntryLines(entry, true, terminalWidth);
 
-  // Detail view: full content with output
-  const fullLines = buildEntryLines(entry, false, terminalWidth);
-
   // Stable height for list view (2 content lines + 1 margin)
   const height = 3;
   const traceType = detectTraceType(entry);
 
-  return { entry, lines, fullLines, height, traceType };
+  return { entry, lines, height, traceType };
 };
