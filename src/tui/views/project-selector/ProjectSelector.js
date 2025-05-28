@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Text, useInput } from 'ink';
-import SelectInput from 'ink-select-input';
+import { Select } from '@inkjs/ui';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import fs from 'fs-extra';
 import path from 'path';
@@ -84,7 +84,7 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
     return React.createElement(EmptyState, { height: terminalHeight });
   }
 
-  const items = projects.map((p) => ({
+  const options = projects.map((p) => ({
     label:
       p.name +
       (p.last ? ` - ${new Date(p.last).toLocaleString()}` : ' - no traces yet'),
@@ -96,6 +96,7 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
     {
       flexDirection: 'column',
       height: terminalHeight,
+      width: '100%', // Force full width
       paddingX: 2,
       paddingY: 1,
     },
@@ -106,10 +107,14 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
     ),
     React.createElement(
       Box,
-      { flexGrow: 1, flexDirection: 'column' },
-      React.createElement(SelectInput, {
-        items,
-        onSelect: (item) => onSelect(item.value),
+      {
+        flexGrow: 1,
+        flexDirection: 'column',
+        width: '100%', // Force full width on content area
+      },
+      React.createElement(Select, {
+        options,
+        onChange: onSelect,
       })
     ),
     React.createElement(

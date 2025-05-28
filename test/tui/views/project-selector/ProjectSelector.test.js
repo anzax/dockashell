@@ -7,7 +7,7 @@ import path from 'path';
 import os from 'os';
 import { ProjectSelector } from '../../../../src/tui/views/project-selector/ProjectSelector.js';
 
-describe('ProjectSelector ink-select-input integration', () => {
+describe('ProjectSelector ink-ui integration', () => {
   let tmpHome;
   let oldHome;
 
