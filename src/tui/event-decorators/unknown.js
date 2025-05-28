@@ -43,7 +43,7 @@ export const unknown = {
           lines.push({
             type: 'text',
             text: wrappedLine,
-            color: 'gray',
+            color: 'white',
             dimOnModal: false,
           });
         });
