@@ -8,7 +8,6 @@ import { AppContainer } from '../AppContainer.js';
 import { LineRenderer } from './LineRenderer.js';
 import { useTraceBuffer } from '../../hooks/useTraceBuffer.js';
 import { useFilters } from '../../hooks/useFilters.js';
-import { useAutoScroll } from '../../hooks/useAutoScroll.js';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import { useSelection } from '../../hooks/useSelection.js';
 
@@ -43,8 +42,6 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     filtersRef,
   } = useFilters();
   const { entries, setEntries, buffer, setBuffer } = useTraceBuffer();
-  const { autoScroll, setAutoScroll, autoScrollRef, updateAutoScrollState } =
-    useAutoScroll();
   const {
     selectedIndex,
     setSelectedIndex,
@@ -62,10 +59,6 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   } = useSelection(entries);
 
   // Keep refs synced with state for callbacks
-  useEffect(() => {
-    autoScrollRef.current = autoScroll;
-  }, [autoScroll]);
-
   useEffect(() => {
     detailsViewRef.current = detailsViewIndex;
   }, [detailsViewIndex]);
@@ -169,27 +162,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
     setSelectedIndex(newSelectedIndex);
 
     // Handle scroll position
-    if (wasAtBottom && autoScroll) {
-      // User was at bottom, maintain bottom position
-      const lastIndex = filteredEntries.length - 1;
-      const availableHeight = terminalHeight - 3;
-      let totalHeight = 0;
-      let visibleCount = 0;
-
-      for (let i = lastIndex; i >= 0; i--) {
-        const entryHeight = getEntryHeight(filteredEntries[i], i === lastIndex);
-        if (totalHeight + entryHeight <= availableHeight) {
-          totalHeight += entryHeight;
-          visibleCount++;
-        } else {
-          break;
-        }
-      }
-
-      const newScroll = Math.max(0, lastIndex - visibleCount + 1);
-      setScrollOffset(newScroll);
-      // Keep the calculated selection, don't override with lastIndex
-    } else {
+    {
       // Calculate optimal scroll to keep selection centered
       const viewportHeight = Math.max(1, terminalHeight - 5);
       const halfViewport = Math.floor(viewportHeight / 2);
@@ -220,13 +193,7 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
 
     // Clear restoration state
     setSelectionBeforeFilter(null);
-  }, [
-    filteredEntries,
-    selectionBeforeFilter,
-    autoScroll,
-    terminalHeight,
-    entries.length,
-  ]);
+  }, [filteredEntries, selectionBeforeFilter, terminalHeight, entries.length]);
 
   useEffect(() => {
     if (detailsViewIndex !== null) {
@@ -302,34 +269,6 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
         return;
       }
 
-      // Only handle auto-scroll for new entries (filter changes handled separately)
-      if (autoScrollRef.current && detailsViewRef.current === null) {
-        const currentSelected = selectedIndexRef.current;
-        const wasAtBottom = currentSelected >= filteredEntries.length - 1;
-
-        if (wasAtBottom) {
-          // User was following latest entries, continue doing so
-          const newSelected = filtered.length - 1;
-          setSelectedIndex(newSelected);
-
-          const availableHeight = terminalHeight - 3;
-          let totalHeight = 0;
-          let visibleCount = 0;
-
-          for (let i = filtered.length - 1; i >= 0; i--) {
-            const entryHeight = getEntryHeight(filtered[i], i === newSelected);
-            if (totalHeight + entryHeight <= availableHeight) {
-              totalHeight += entryHeight;
-              visibleCount++;
-            } else {
-              break;
-            }
-          }
-
-          const newOffset = Math.max(0, filtered.length - 1 - visibleCount + 1);
-          setScrollOffset(newOffset);
-        }
-      }
     };
 
     buf.onUpdate(update);
@@ -355,12 +294,10 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       const idx = selectedIndex + 1;
       setSelectedIndex(idx);
       ensureVisibleWrapper(idx);
-      updateAutoScrollState(idx);
     } else if (key.upArrow && selectedIndex > 0) {
       const idx = selectedIndex - 1;
       setSelectedIndex(idx);
       ensureVisibleWrapper(idx);
-      updateAutoScrollState(idx);
     } else if (key.pageDown) {
       const idx = Math.min(
         filteredEntries.length - 1,
@@ -368,23 +305,17 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       );
       setSelectedIndex(idx);
       ensureVisibleWrapper(idx);
-      updateAutoScrollState(idx);
     } else if (key.pageUp) {
       const idx = Math.max(0, selectedIndex - pageSize);
       setSelectedIndex(idx);
       ensureVisibleWrapper(idx);
-      updateAutoScrollState(idx);
     } else if (input === 'g') {
       setSelectedIndex(0);
       ensureVisibleWrapper(0);
-      updateAutoScrollState(0);
     } else if (input === 'G') {
       const idx = filteredEntries.length - 1;
       setSelectedIndex(idx);
       ensureVisibleWrapper(idx);
-      updateAutoScrollState(idx);
-    } else if (input === 'a') {
-      setAutoScroll((s) => !s);
     } else if (input === 'f') {
       setShowFilterView(true);
     } else if (input === 'r') {
@@ -408,7 +339,6 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
   const scrollIndicator = hasMore
     ? ` (${visibleStart + 1}-${visibleEnd} of ${filteredEntries.length}${filterIndicator})`
     : filterIndicator;
-  const autoIndicator = ` [a] Auto:${autoScroll ? 'ON' : 'OFF'}`;
 
   // Show filter view if requested
   if (showFilterView) {
@@ -446,8 +376,8 @@ export const LogViewer = ({ project, onBack, onExit, config }) => {
       Text,
       { dimColor: true, wrap: 'truncate-end' },
       hasMore
-        ? `[↑↓] Navigate  [Enter] Detail  [PgUp/PgDn] Page  [g] Top  [G] Bottom [f] Filter  [r] Refresh${autoIndicator}  [b] Back  [q] Quit`
-        : `[↑↓] Navigate  [Enter] Detail  [f] Filter  [r] Refresh${autoIndicator}  [b] Back  [q] Quit`
+        ? `[↑↓] Navigate  [Enter] Detail  [PgUp/PgDn] Page  [g] Top  [G] Bottom [f] Filter  [r] Refresh  [b] Back  [q] Quit`
+        : `[↑↓] Navigate  [Enter] Detail  [f] Filter  [r] Refresh  [b] Back  [q] Quit`
     ),
     children: React.createElement(
       Box,
