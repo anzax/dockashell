@@ -1,13 +1,17 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert';
 import { sanitizeText } from '../../src/tui/ui-utils/line-formatter.js';
-import { TextLayout, ELLIPSIS_LENGTH } from '../../src/tui/ui-utils/text-layout.js';
+import {
+  TextLayout,
+  ELLIPSIS_LENGTH,
+} from '../../src/tui/ui-utils/text-layout.js';
 
 const layout = new TextLayout(80);
 
 describe('TextLayout.wrap', () => {
   test('wraps long text to specified width', () => {
-    const text = 'This is a very long line that needs to be wrapped because it exceeds the maximum width';
+    const text =
+      'This is a very long line that needs to be wrapped because it exceeds the maximum width';
     const wrapped = layout.wrap(text, { width: 20 });
     assert.deepStrictEqual(wrapped, [
       'This is a very long',
@@ -48,7 +52,10 @@ describe('TextLayout.wrap', () => {
 
 describe('TextLayout.truncate', () => {
   test('truncates text exceeding width', () => {
-    assert.strictEqual(layout.truncate('This is a long text', 10), 'This is...');
+    assert.strictEqual(
+      layout.truncate('This is a long text', 10),
+      'This is...'
+    );
     assert.strictEqual(layout.truncate('Short', 10), 'Short');
   });
 
