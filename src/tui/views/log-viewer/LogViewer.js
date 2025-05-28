@@ -6,7 +6,7 @@ import { AppContainer } from '../AppContainer.js';
 import { LineRenderer } from './LineRenderer.js';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import { useSelection } from '../../hooks/useSelection.js';
-import { SHORTCUTS, buildFooter } from '../../constants/index.js';
+import { SHORTCUTS, buildFooter } from '../../ui-utils/constants.js';
 import { isEnterKey } from '../../ui-utils/text-utils.js';
 
 const Entry = ({ item, selected }) =>

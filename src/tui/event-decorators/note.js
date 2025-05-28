@@ -1,6 +1,6 @@
 import { formatTimestamp } from '../ui-utils/entry-utils.js';
 import { TextLayout, sanitizeText } from '../ui-utils/text-utils.js';
-import { TRACE_ICONS, TRACE_COLORS } from '../constants/index.js';
+import { TRACE_ICONS, TRACE_COLORS } from '../ui-utils/constants.js';
 
 /**
  * Factory function to create note decorators with different configurations

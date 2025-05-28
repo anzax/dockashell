@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { Select } from '@inkjs/ui';
 import { AppContainer } from '../AppContainer.js';
-import { SHORTCUTS, buildFooter } from '../../constants/index.js';
+import { SHORTCUTS, buildFooter } from '../../ui-utils/constants.js';
 import { isBackKey } from '../../ui-utils/text-utils.js';
 import fs from 'fs-extra';
 import path from 'path';

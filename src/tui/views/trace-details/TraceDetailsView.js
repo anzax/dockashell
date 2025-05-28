@@ -4,7 +4,7 @@ import { LineRenderer } from '../log-viewer/LineRenderer.js';
 import { AppContainer } from '../AppContainer.js';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import { buildEntryLines } from '../../ui-utils/entry-utils.js';
-import { SHORTCUTS, buildFooter } from '../../constants/index.js';
+import { SHORTCUTS, buildFooter } from '../../ui-utils/constants.js';
 import { isExitKey } from '../../ui-utils/text-utils.js';
 
 export const TraceDetailsView = ({
