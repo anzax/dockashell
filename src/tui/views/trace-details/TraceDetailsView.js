@@ -5,6 +5,7 @@ import { AppContainer } from '../AppContainer.js';
 import { useStdoutDimensions } from '../../hooks/useStdoutDimensions.js';
 import { buildEntryLines } from '../../utils/entry-utils.js';
 import { SHORTCUTS, buildFooter } from '../../constants/shortcuts.js';
+import { isExitKey } from '../../utils/input-utils.js';
 
 export const TraceDetailsView = ({
   traces,
@@ -84,7 +85,7 @@ export const TraceDetailsView = ({
       setScrollOffset(maxScrollOffset);
     }
     // Close view
-    else if (key.escape || key.return || input === 'q') {
+    else if (isExitKey(input, key)) {
       onClose();
     }
   });

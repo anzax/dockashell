@@ -3,6 +3,7 @@ import { Box, Text, useInput } from 'ink';
 import { Select } from '@inkjs/ui';
 import { AppContainer } from '../AppContainer.js';
 import { SHORTCUTS, buildFooter } from '../../constants/shortcuts.js';
+import { isBackKey } from '../../utils/input-utils.js';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
@@ -10,8 +11,8 @@ import os from 'os';
 export const ProjectSelector = ({ onSelect, onExit }) => {
   const [projects, setProjects] = useState([]);
 
-  useInput((input) => {
-    if (input === 'q') {
+  useInput((input, key) => {
+    if (isBackKey(input, key)) {
       onExit();
     }
   });
