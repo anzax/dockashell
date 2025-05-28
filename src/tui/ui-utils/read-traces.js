@@ -1,7 +1,10 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { parseTraceLines } from '../../utils/trace-utils.js';
-import { getCurrentTraceFile, getSessionsDir } from './trace-paths.js';
+import {
+  getCurrentTraceFile,
+  getSessionsDir,
+} from '../../utils/trace-paths.js';
 
 export function getTraceFile(projectName, session = 'current') {
   return session === 'current'

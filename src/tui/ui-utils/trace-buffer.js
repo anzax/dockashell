@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import chokidar from 'chokidar';
 import { listSessions, readTraceEntries } from './read-traces.js';
-import { getCurrentTraceFile } from './trace-paths.js';
+import { getCurrentTraceFile } from '../../utils/trace-paths.js';
 
 export class TraceBuffer extends EventEmitter {
   constructor(projectName, maxEntries = 100) {

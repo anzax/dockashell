@@ -4,7 +4,7 @@ import {
   getProjectTraceDir,
   getCurrentTraceFile,
   getSessionsDir,
-} from '../tui/ui-utils/trace-paths.js';
+} from './trace-paths.js';
 
 export class TraceRecorder {
   constructor(projectName, sessionTimeoutMs = 4 * 60 * 60 * 1000) {
