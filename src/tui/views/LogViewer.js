@@ -16,8 +16,8 @@ import { ScrollableList } from '../components/ScrollableList.js';
 import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
 import { isEnterKey } from '../ui-utils/text-utils.js';
 
-export const getEntryHeight = (entry, isSelected, terminalWidth) =>
-  TraceItemPreview.getHeight(entry.trace, isSelected, 'compact', terminalWidth);
+export const getEntryHeight = (entry, isSelected) =>
+  TraceItemPreview.getHeight(entry.trace, isSelected);
 
 export const LogViewer = ({
   project,
@@ -50,15 +50,14 @@ export const LogViewer = ({
 
   // Filter entries based on current filters
   const filteredEntries = entries.filter((entry) => {
-    const traceType = entry.traceType || 'unknown';
+    const traceType = detectTraceType(entry.trace);
     return filters[traceType] !== false; // Show if filter is true or undefined
   });
 
   const list = useVirtualList({
     totalCount: filteredEntries.length,
     getItem: (idx) => filteredEntries[idx],
-    getItemHeight: (item, selected) =>
-      getEntryHeight(item, selected, terminalWidth),
+    getItemHeight: (item, selected) => getEntryHeight(item, selected),
     initialIndex: selectedIndex,
     initialOffset: scrollOffset,
   });
@@ -116,17 +115,14 @@ export const LogViewer = ({
 
     const update = () => {
       const raw = buf.getTraces();
-      const prepared = raw.map((e) => ({
-        trace: e,
-        traceType: detectTraceType(e),
-      }));
+      const prepared = raw.map((e) => ({ trace: e }));
+      setEntries(prepared);
 
+      // Apply filters to get current filtered count
       const filtered = prepared.filter((entry) => {
-        const traceType = entry.traceType || 'unknown';
+        const traceType = detectTraceType(entry.trace);
         return filtersRef.current[traceType] !== false;
       });
-
-      setEntries(prepared);
 
       if (filtered.length === 0) {
         setSelectedIndex(0);
@@ -230,11 +226,7 @@ export const LogViewer = ({
       const startRow = 2; // header + marginTop
       let r = evt.y - startRow;
       for (const { item, index } of list.visibleItems) {
-        const h = getEntryHeight(
-          item,
-          index === listSelectedIndex,
-          terminalWidth
-        );
+        const h = getEntryHeight(item, index === listSelectedIndex);
         if (r < h) {
           setSelectedIndex(index);
           setSelectedTimestamp?.(filteredEntries[index].trace.timestamp);
@@ -285,7 +277,6 @@ export const LogViewer = ({
           trace: entry.trace,
           selected,
           terminalWidth,
-          mode: 'compact',
         }),
     }),
   });

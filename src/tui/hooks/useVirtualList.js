@@ -47,7 +47,7 @@ export const useVirtualList = ({
       if (idx < offset) {
         offset = idx;
       } else {
-        const availableHeight = terminalHeight - 3;
+        const availableHeight = terminalHeight - 4; // header(1) + marginTop(1) + marginBottom(1) + footer(1)
         let height = 0;
         for (let i = idx; i >= offset; i--) {
           const item = getCachedItem(i);
@@ -66,7 +66,7 @@ export const useVirtualList = ({
 
   const calculateVisibleRange = useCallback(() => {
     if (totalCount === 0) return { start: 0, end: 0 };
-    const availableHeight = terminalHeight - 3;
+    const availableHeight = terminalHeight - 4; // header(1) + marginTop(1) + marginBottom(1) + footer(1)
     let height = 0;
     let end = scrollOffset;
     while (

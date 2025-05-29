@@ -1,6 +1,9 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert';
-import { buildEntryLines } from '../../src/tui/components/TraceItemPreview.js';
+import {
+  buildCompactLines,
+  buildFullLines,
+} from '../../src/tui/components/TraceItemPreview.js';
 import {
   formatTimestamp,
   detectTraceType,
@@ -18,17 +21,19 @@ const sampleCommand = {
   },
 };
 
-describe('buildEntryLines', () => {
+describe('buildCompactLines', () => {
   test('compact command without output', () => {
-    const lines = buildEntryLines(sampleCommand, true, 80);
+    const lines = buildCompactLines(sampleCommand, 80);
     assert.strictEqual(lines[0].type, 'text');
     assert.strictEqual(lines[1].type, 'text');
     assert(lines[0].bold); // header should be bold
     assert(lines[0].icon); // header should have icon
   });
+});
 
+describe('buildFullLines', () => {
   test('full command with output', () => {
-    const lines = buildEntryLines(sampleCommand, false, 80);
+    const lines = buildFullLines(sampleCommand, 80);
     // All lines should be type 'text', but output lines should have specific formatting
     assert(lines.every((l) => l.type === 'text'));
     // Output lines should have 2-space prefix
