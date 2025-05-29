@@ -67,4 +67,24 @@ describe('useVirtualList hook', () => {
     assert.strictEqual(list.scrollOffset, 0);
     assert.strictEqual(list.visibleEnd, 3);
   });
+
+  test('respects initial index and offset', async () => {
+    process.stdout.rows = 10;
+    const items = Array.from({ length: 10 }, () => ({ height: 1 }));
+    let list;
+    const Test = () => {
+      list = useVirtualList({
+        totalCount: items.length,
+        getItem: (i) => items[i],
+        getItemHeight: () => 1,
+        initialIndex: 5,
+        initialOffset: 3,
+      });
+      return null;
+    };
+    render(React.createElement(Test));
+    await new Promise((r) => setTimeout(r, 20));
+    assert.strictEqual(list.selectedIndex, 5);
+    assert.strictEqual(list.scrollOffset, 3);
+  });
 });
