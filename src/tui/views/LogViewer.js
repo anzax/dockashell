@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Text, useInput } from 'ink';
+import { useTraceSelection } from '../contexts/trace-context.js';
 import { useMouseInput } from '../hooks/use-mouse-input.js';
 import { TraceBuffer } from '../ui-utils/trace-buffer.js';
 import {
@@ -26,13 +27,18 @@ export const LogViewer = ({
   onOpenDetails,
   onOpenFilter,
   filters = DEFAULT_FILTERS,
-  selectedIndex: externalIndex,
-  setSelectedIndex: setExternalIndex,
-  scrollOffset: externalOffset,
-  setScrollOffset: setExternalOffset,
-  selectedTimestamp,
-  setSelectedTimestamp,
 }) => {
+  // Get selection state from context
+  const {
+    selectedIndex,
+    setSelectedIndex,
+    scrollOffset,
+    setScrollOffset,
+    selectedTimestamp,
+    setSelectedTimestamp,
+    restoreSelection,
+  } = useTraceSelection();
+
   const [terminalWidth] = useStdoutDimensions();
   const filtersRef = useRef(filters);
   useEffect(() => {
@@ -53,55 +59,55 @@ export const LogViewer = ({
     getItem: (idx) => filteredEntries[idx],
     getItemHeight: (item, selected) =>
       getEntryHeight(item, selected, terminalWidth),
-    initialIndex: externalIndex,
-    initialOffset: externalOffset,
+    initialIndex: selectedIndex,
+    initialOffset: scrollOffset,
   });
 
   const {
-    selectedIndex,
-    setSelectedIndex,
+    selectedIndex: listSelectedIndex,
+    setSelectedIndex: setListSelectedIndex,
     ensureVisible,
     pageSize,
     visibleStart,
     visibleEnd,
-    scrollOffset,
-    setScrollOffset,
+    scrollOffset: listScrollOffset,
+    setScrollOffset: setListScrollOffset,
   } = list;
 
+  // Sync context changes to virtual list (during restoration)
+  useEffect(() => {
+    if (selectedIndex !== listSelectedIndex) {
+      setListSelectedIndex(selectedIndex);
+      ensureVisible(selectedIndex);
+    }
+    if (scrollOffset !== listScrollOffset) {
+      setListScrollOffset(scrollOffset);
+    }
+  }, [
+    selectedIndex,
+    listSelectedIndex,
+    setListSelectedIndex,
+    ensureVisible,
+    scrollOffset,
+    listScrollOffset,
+    setListScrollOffset,
+  ]);
   useEffect(() => {
     if (selectedTimestamp) {
       const idx = findClosestIndexByTimestamp(
         filteredEntries,
         selectedTimestamp
       );
-      setSelectedIndex(idx);
+      setListSelectedIndex(idx);
       ensureVisible(idx);
     }
   }, [selectedTimestamp, filteredEntries, setSelectedIndex, ensureVisible]);
 
+  // Update timestamp when selection changes
+  // Restore selection when filters change
   useEffect(() => {
-    if (setExternalIndex) setExternalIndex(selectedIndex);
-    if (setSelectedTimestamp) {
-      const ts = filteredEntries[selectedIndex]?.trace.timestamp;
-      if (ts) setSelectedTimestamp(ts);
-    }
-  }, [selectedIndex, setExternalIndex, setSelectedTimestamp, filteredEntries]);
-
-  useEffect(() => {
-    if (setExternalOffset) setExternalOffset(scrollOffset);
-  }, [scrollOffset, setExternalOffset]);
-
-  // Ensure selectedIndex is within bounds when filteredEntries changes
-  useEffect(() => {
-    if (filteredEntries.length === 0) {
-      setSelectedIndex(0);
-      setSelectedTimestamp?.(null);
-    } else if (selectedIndex >= filteredEntries.length) {
-      const idx = filteredEntries.length - 1;
-      setSelectedIndex(idx);
-      setSelectedTimestamp?.(filteredEntries[idx].trace.timestamp);
-    }
-  }, [filteredEntries, selectedIndex, setSelectedIndex, setSelectedTimestamp]);
+    restoreSelection(filteredEntries);
+  }, [filteredEntries, restoreSelection]);
 
   // Load entries using TraceBuffer and update when buffer changes
   useEffect(() => {
@@ -135,7 +141,7 @@ export const LogViewer = ({
         idx = filtered.length - 1;
         setSelectedTimestamp?.(filtered[idx].trace.timestamp);
       }
-      setSelectedIndex(idx);
+      setListSelectedIndex(idx);
       ensureVisible(idx);
     };
 
@@ -151,32 +157,37 @@ export const LogViewer = ({
   // Input handling
   useInput((input, key) => {
     if (isEnterKey(key)) {
-      setSelectedTimestamp?.(filteredEntries[selectedIndex]?.trace.timestamp);
+      setSelectedTimestamp?.(
+        filteredEntries[listSelectedIndex]?.trace.timestamp
+      );
       onOpenDetails?.({
         traces: filteredEntries,
-        currentIndex: selectedIndex,
+        currentIndex: listSelectedIndex,
       });
-    } else if (key.downArrow && selectedIndex < filteredEntries.length - 1) {
-      const idx = selectedIndex + 1;
-      setSelectedIndex(idx);
+    } else if (
+      key.downArrow &&
+      listSelectedIndex < filteredEntries.length - 1
+    ) {
+      const idx = listSelectedIndex + 1;
+      setListSelectedIndex(idx);
       setSelectedTimestamp?.(filteredEntries[idx].trace.timestamp);
       ensureVisible(idx);
-    } else if (key.upArrow && selectedIndex > 0) {
-      const idx = selectedIndex - 1;
-      setSelectedIndex(idx);
+    } else if (key.upArrow && listSelectedIndex > 0) {
+      const idx = listSelectedIndex - 1;
+      setListSelectedIndex(idx);
       setSelectedTimestamp?.(filteredEntries[idx].trace.timestamp);
       ensureVisible(idx);
     } else if (key.pageDown) {
       const idx = Math.min(
         filteredEntries.length - 1,
-        selectedIndex + pageSize()
+        listSelectedIndex + pageSize()
       );
-      setSelectedIndex(idx);
+      setListSelectedIndex(idx);
       setSelectedTimestamp?.(filteredEntries[idx].trace.timestamp);
       ensureVisible(idx);
     } else if (key.pageUp) {
-      const idx = Math.max(0, selectedIndex - pageSize());
-      setSelectedIndex(idx);
+      const idx = Math.max(0, listSelectedIndex - pageSize());
+      setListSelectedIndex(idx);
       setSelectedTimestamp?.(filteredEntries[idx].trace.timestamp);
       ensureVisible(idx);
     } else if (input === 'g') {
@@ -185,7 +196,7 @@ export const LogViewer = ({
       ensureVisible(0);
     } else if (input === 'G') {
       const idx = filteredEntries.length - 1;
-      setSelectedIndex(idx);
+      setListSelectedIndex(idx);
       setSelectedTimestamp?.(filteredEntries[idx].trace.timestamp);
       ensureVisible(idx);
     } else if (input === 'f') {
@@ -202,16 +213,16 @@ export const LogViewer = ({
   // Mouse handling
   useMouseInput((evt) => {
     if (evt.wheel === 'up') {
-      if (selectedIndex > 0) {
-        const idx = selectedIndex - 1;
-        setSelectedIndex(idx);
+      if (listSelectedIndex > 0) {
+        const idx = listSelectedIndex - 1;
+        setListSelectedIndex(idx);
         setSelectedTimestamp?.(filteredEntries[idx].trace.timestamp);
         ensureVisible(idx);
       }
     } else if (evt.wheel === 'down') {
-      if (selectedIndex < filteredEntries.length - 1) {
-        const idx = selectedIndex + 1;
-        setSelectedIndex(idx);
+      if (listSelectedIndex < filteredEntries.length - 1) {
+        const idx = listSelectedIndex + 1;
+        setListSelectedIndex(idx);
         setSelectedTimestamp?.(filteredEntries[idx].trace.timestamp);
         ensureVisible(idx);
       }
@@ -219,7 +230,11 @@ export const LogViewer = ({
       const startRow = 2; // header + marginTop
       let r = evt.y - startRow;
       for (const { item, index } of list.visibleItems) {
-        const h = getEntryHeight(item, index === selectedIndex, terminalWidth);
+        const h = getEntryHeight(
+          item,
+          index === listSelectedIndex,
+          terminalWidth
+        );
         if (r < h) {
           setSelectedIndex(index);
           setSelectedTimestamp?.(filteredEntries[index].trace.timestamp);
