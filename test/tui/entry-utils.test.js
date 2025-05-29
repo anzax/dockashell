@@ -4,6 +4,7 @@ import { buildEntryLines } from '../../src/tui/components/TraceItemPreview.js';
 import {
   formatTimestamp,
   detectTraceType,
+  findClosestIndexByTimestamp,
 } from '../../src/tui/ui-utils/entry-utils.js';
 
 const sampleCommand = {
@@ -52,5 +53,25 @@ describe('detectTraceType', () => {
     assert.strictEqual(detectTraceType(patch), 'apply_patch');
     assert.strictEqual(detectTraceType(cmd), 'command');
     assert.strictEqual(detectTraceType(write), 'write_file');
+  });
+});
+
+describe('findClosestIndexByTimestamp', () => {
+  const entries = [
+    { trace: { timestamp: '2025-01-01T00:00:00Z' } },
+    { trace: { timestamp: '2025-01-01T00:01:00Z' } },
+    { trace: { timestamp: '2025-01-01T00:02:00Z' } },
+  ];
+
+  test('finds exact and nearest match', () => {
+    const exact = findClosestIndexByTimestamp(entries, '2025-01-01T00:01:00Z');
+    assert.strictEqual(exact, 1);
+    const near = findClosestIndexByTimestamp(entries, '2025-01-01T00:01:30Z');
+    assert.strictEqual(near, 1);
+  });
+
+  test('handles empty list and invalid timestamp', () => {
+    assert.strictEqual(findClosestIndexByTimestamp([], '2025'), -1);
+    assert.strictEqual(findClosestIndexByTimestamp(entries, 'bad'), -1);
   });
 });

@@ -40,3 +40,24 @@ export const DEFAULT_FILTERS = {
   apply_patch: true,
   write_file: true,
 };
+
+export const findClosestIndexByTimestamp = (entries, timestamp) => {
+  if (!timestamp || entries.length === 0) return -1;
+  const target = new Date(timestamp).getTime();
+  if (Number.isNaN(target)) return -1;
+  let nearestIdx = 0;
+  let nearestDiff = Infinity;
+  for (let i = 0; i < entries.length; i++) {
+    const ts = new Date(
+      entries[i].trace?.timestamp || entries[i].timestamp
+    ).getTime();
+    if (Number.isNaN(ts)) continue;
+    const diff = Math.abs(ts - target);
+    if (diff < nearestDiff) {
+      nearestDiff = diff;
+      nearestIdx = i;
+    }
+    if (diff === 0) break;
+  }
+  return nearestIdx;
+};

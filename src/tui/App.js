@@ -22,6 +22,7 @@ export const App = ({ projectArg }) => {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [scrollOffset, setScrollOffset] = useState(0);
+  const [selectedTimestamp, setSelectedTimestamp] = useState(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const [detailsState, setDetailsState] = useState(null);
 
@@ -57,7 +58,11 @@ export const App = ({ projectArg }) => {
       currentIndex: detailsState.currentIndex,
       onClose: () => setDetailsState(null),
       onNavigate: (idx) => {
-        setDetailsState((prev) => ({ ...prev, currentIndex: idx }));
+        setDetailsState((prev) => {
+          const ts = prev.traces[idx]?.trace.timestamp;
+          setSelectedTimestamp(ts || null);
+          return { ...prev, currentIndex: idx };
+        });
         setSelectedIndex(idx);
       },
     });
@@ -71,10 +76,14 @@ export const App = ({ projectArg }) => {
     setSelectedIndex,
     scrollOffset,
     setScrollOffset,
+    selectedTimestamp,
+    setSelectedTimestamp,
     onBack: () => setProject(null),
     onExit: () => process.exit(0),
-    onOpenDetails: ({ traces, currentIndex }) =>
-      setDetailsState({ traces, currentIndex }),
+    onOpenDetails: ({ traces, currentIndex }) => {
+      setSelectedTimestamp(traces[currentIndex]?.trace.timestamp || null);
+      setDetailsState({ traces, currentIndex });
+    },
     onOpenFilter: () => setFilterOpen(true),
   });
 };
