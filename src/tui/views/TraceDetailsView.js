@@ -4,7 +4,7 @@ import { useTraceSelection } from '../contexts/trace-context.js';
 import { useMouseInput } from '../hooks/use-mouse-input.js';
 import { AppContainer } from '../components/AppContainer.js';
 import { useStdoutDimensions } from '../hooks/useStdoutDimensions.js';
-import { buildEntryLines } from '../components/TraceItemPreview.js';
+import { buildFullLines } from '../components/TraceItemPreview.js';
 import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
 import { isExitKey } from '../ui-utils/text-utils.js';
 
@@ -51,9 +51,8 @@ export const TraceDetailsView = () => {
   }
 
   // Generate full lines on-demand using the decorator system
-  const fullLines = buildEntryLines(
+  const fullLines = buildFullLines(
     currentTrace.trace,
-    false,
     terminalWidth - 2 // Account for border width (1 char on each side)
   );
 
