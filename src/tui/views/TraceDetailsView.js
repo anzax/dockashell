@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
+import { useTraceSelection } from '../contexts/trace-context.js';
 import { useMouseInput } from '../hooks/use-mouse-input.js';
 import { AppContainer } from '../components/AppContainer.js';
 import { useStdoutDimensions } from '../hooks/useStdoutDimensions.js';
@@ -7,12 +8,28 @@ import { buildEntryLines } from '../components/TraceItemPreview.js';
 import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
 import { isExitKey } from '../ui-utils/text-utils.js';
 
-export const TraceDetailsView = ({
-  traces,
-  currentIndex,
-  onClose,
-  onNavigate,
-}) => {
+export const TraceDetailsView = () => {
+  // Get details state from context
+  const { detailsState, closeDetails, navigateDetails } = useTraceSelection();
+
+  if (!detailsState) {
+    return React.createElement(AppContainer, {
+      header: React.createElement(Text, { bold: true }, 'Trace Details'),
+      footer: React.createElement(
+        Text,
+        { dimColor: true },
+        buildFooter(SHORTCUTS.EXIT)
+      ),
+      children: React.createElement(
+        Box,
+        { flexGrow: 1, justifyContent: 'center', alignItems: 'center' },
+        React.createElement(Text, { wrap: 'truncate-end' }, 'No details state')
+      ),
+    });
+  }
+
+  const { traces, currentIndex } = detailsState;
+
   const [scrollOffset, setScrollOffset] = useState(0);
   const [terminalWidth, height] = useStdoutDimensions();
 
@@ -54,10 +71,10 @@ export const TraceDetailsView = ({
   useInput((input, key) => {
     // Navigation between traces (simplified - no Alt required)
     if (key.leftArrow && hasPrev) {
-      onNavigate(currentIndex - 1);
+      navigateDetails(currentIndex - 1);
       setScrollOffset(0); // Reset scroll when changing traces
     } else if (key.rightArrow && hasNext) {
-      onNavigate(currentIndex + 1);
+      navigateDetails(currentIndex + 1);
       setScrollOffset(0); // Reset scroll when changing traces
     }
     // Scrolling
@@ -86,7 +103,7 @@ export const TraceDetailsView = ({
     }
     // Close view
     else if (isExitKey(input, key)) {
-      onClose();
+      closeDetails();
     }
   });
 

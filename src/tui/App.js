@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { TraceProvider, useTraceSelection } from './contexts/trace-context.js';
 import { useTerminalMouseMode } from './hooks/useTerminalMouseMode.js';
 import { ProjectSelector } from './views/ProjectSelector.js';
 import { LogViewer } from './views/LogViewer.js';
@@ -13,18 +14,21 @@ const defaultTuiConfig = {
   },
 };
 
-export const App = ({ projectArg }) => {
+/**
+ * Main application component that uses trace context
+ */
+const MainApp = ({ projectArg }) => {
   // Enable mouse mode for the entire application
   useTerminalMouseMode();
+
+  // Get trace selection state from context
+  const { detailsState, openDetails, closeDetails, navigateDetails } =
+    useTraceSelection();
 
   const [project, setProject] = useState(projectArg || null);
   const [config, setConfig] = useState({ tui: defaultTuiConfig });
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [scrollOffset, setScrollOffset] = useState(0);
-  const [selectedTimestamp, setSelectedTimestamp] = useState(null);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [detailsState, setDetailsState] = useState(null);
 
   useEffect(() => {
     loadConfig()
@@ -56,15 +60,8 @@ export const App = ({ projectArg }) => {
     return React.createElement(TraceDetailsView, {
       traces: detailsState.traces,
       currentIndex: detailsState.currentIndex,
-      onClose: () => setDetailsState(null),
-      onNavigate: (idx) => {
-        setDetailsState((prev) => {
-          const ts = prev.traces[idx]?.trace.timestamp;
-          setSelectedTimestamp(ts || null);
-          return { ...prev, currentIndex: idx };
-        });
-        setSelectedIndex(idx);
-      },
+      onClose: closeDetails,
+      onNavigate: navigateDetails,
     });
   }
 
@@ -72,18 +69,21 @@ export const App = ({ projectArg }) => {
     project,
     config: config.tui || defaultTuiConfig,
     filters,
-    selectedIndex,
-    setSelectedIndex,
-    scrollOffset,
-    setScrollOffset,
-    selectedTimestamp,
-    setSelectedTimestamp,
     onBack: () => setProject(null),
     onExit: () => process.exit(0),
-    onOpenDetails: ({ traces, currentIndex }) => {
-      setSelectedTimestamp(traces[currentIndex]?.trace.timestamp || null);
-      setDetailsState({ traces, currentIndex });
-    },
+    onOpenDetails: ({ traces, currentIndex }) =>
+      openDetails(traces, currentIndex),
     onOpenFilter: () => setFilterOpen(true),
   });
+};
+
+/**
+ * Root App component that provides trace selection context
+ */
+export const App = ({ projectArg }) => {
+  return React.createElement(
+    TraceProvider,
+    null,
+    React.createElement(MainApp, { projectArg })
+  );
 };

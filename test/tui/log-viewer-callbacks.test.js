@@ -5,6 +5,7 @@ import { render } from 'ink-testing-library';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
+import { TraceProvider } from '../../src/tui/contexts/trace-context.js';
 import { LogViewer } from '../../src/tui/views/LogViewer.js';
 
 describe('LogViewer callback triggers', () => {
@@ -39,19 +40,23 @@ describe('LogViewer callback triggers', () => {
     let detailCalled = false;
     let detailIndex = null;
     const { stdin, unmount } = render(
-      React.createElement(LogViewer, {
-        project: 'proj',
-        config: {},
-        onBack: () => {},
-        onExit: () => {},
-        onOpenFilter: () => {
-          filterCalled = true;
-        },
-        onOpenDetails: ({ currentIndex }) => {
-          detailCalled = true;
-          detailIndex = currentIndex;
-        },
-      })
+      React.createElement(
+        TraceProvider,
+        null,
+        React.createElement(LogViewer, {
+          project: 'proj',
+          config: {},
+          onBack: () => {},
+          onExit: () => {},
+          onOpenFilter: () => {
+            filterCalled = true;
+          },
+          onOpenDetails: ({ currentIndex }) => {
+            detailCalled = true;
+            detailIndex = currentIndex;
+          },
+        })
+      )
     );
     await new Promise((r) => setTimeout(r, 50));
     stdin.write('f');
