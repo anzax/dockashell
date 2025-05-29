@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
+import { useMouseInput } from '../hooks/use-mouse-input.js';
 import { AppContainer } from '../components/AppContainer.js';
 import { useStdoutDimensions } from '../hooks/useStdoutDimensions.js';
 import { buildEntryLines } from '../components/TraceItemPreview.js';
@@ -86,6 +87,14 @@ export const TraceDetailsView = ({
     // Close view
     else if (isExitKey(input, key)) {
       onClose();
+    }
+  });
+
+  useMouseInput((evt) => {
+    if (evt.wheel === 'up') {
+      setScrollOffset((prev) => Math.max(0, prev - 1));
+    } else if (evt.wheel === 'down') {
+      setScrollOffset((prev) => Math.min(maxScrollOffset, prev + 1));
     }
   });
 

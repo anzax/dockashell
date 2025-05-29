@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Text, useInput } from 'ink';
+import { useMouseInput } from '../hooks/use-mouse-input.js';
 import { TraceBuffer } from '../ui-utils/trace-buffer.js';
 import { detectTraceType, DEFAULT_FILTERS } from '../ui-utils/entry-utils.js';
 import { AppContainer } from '../components/AppContainer.js';
@@ -164,6 +165,35 @@ export const LogViewer = ({
       onBack();
     } else if (input === 'q') {
       onExit();
+    }
+  });
+
+  // Mouse handling
+  useMouseInput((evt) => {
+    if (evt.wheel === 'up') {
+      if (selectedIndex > 0) {
+        const idx = selectedIndex - 1;
+        setSelectedIndex(idx);
+        ensureVisible(idx);
+      }
+    } else if (evt.wheel === 'down') {
+      if (selectedIndex < filteredEntries.length - 1) {
+        const idx = selectedIndex + 1;
+        setSelectedIndex(idx);
+        ensureVisible(idx);
+      }
+    } else if (evt.button === 'left' && !evt.isRelease) {
+      const startRow = 2; // header + marginTop
+      let r = evt.y - startRow;
+      for (const { item, index } of list.visibleItems) {
+        const h = getEntryHeight(item, index === selectedIndex, terminalWidth);
+        if (r < h) {
+          setSelectedIndex(index);
+          ensureVisible(index);
+          break;
+        }
+        r -= h;
+      }
     }
   });
 
