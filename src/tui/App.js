@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTerminalMouseMode } from './hooks/useTerminalMouseMode.js';
 import { ProjectSelector } from './views/ProjectSelector.js';
 import { LogViewer } from './views/LogViewer.js';
 import { TraceDetailsView } from './views/TraceDetailsView.js';
@@ -13,6 +14,9 @@ const defaultTuiConfig = {
 };
 
 export const App = ({ projectArg }) => {
+  // Enable mouse mode for the entire application
+  useTerminalMouseMode();
+
   const [project, setProject] = useState(projectArg || null);
   const [config, setConfig] = useState({ tui: defaultTuiConfig });
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
