@@ -12,10 +12,16 @@ import { useStdoutDimensions } from './useStdoutDimensions.js';
  * @returns {object} Virtual list state and helpers.
  */
 
-export const useVirtualList = ({ totalCount, getItem, getItemHeight }) => {
+export const useVirtualList = ({
+  totalCount,
+  getItem,
+  getItemHeight,
+  initialIndex = 0,
+  initialOffset = 0,
+}) => {
   const [, terminalHeight] = useStdoutDimensions();
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [scrollOffset, setScrollOffset] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(initialIndex);
+  const [scrollOffset, setScrollOffset] = useState(initialOffset);
   const cacheRef = useRef(new Map());
 
   useEffect(() => {

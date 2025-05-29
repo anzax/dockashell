@@ -53,6 +53,8 @@ export const LogViewer = ({
     getItem: (idx) => filteredEntries[idx],
     getItemHeight: (item, selected) =>
       getEntryHeight(item, selected, terminalWidth),
+    initialIndex: externalIndex,
+    initialOffset: externalOffset,
   });
 
   const {
@@ -67,12 +69,6 @@ export const LogViewer = ({
   } = list;
 
   useEffect(() => {
-    if (externalIndex !== undefined) {
-      setSelectedIndex(externalIndex);
-    }
-  }, [externalIndex, setSelectedIndex]);
-
-  useEffect(() => {
     if (selectedTimestamp) {
       const idx = findClosestIndexByTimestamp(
         filteredEntries,
@@ -82,12 +78,6 @@ export const LogViewer = ({
       ensureVisible(idx);
     }
   }, [selectedTimestamp, filteredEntries, setSelectedIndex, ensureVisible]);
-
-  useEffect(() => {
-    if (externalOffset !== undefined) {
-      setScrollOffset(externalOffset);
-    }
-  }, [externalOffset, setScrollOffset]);
 
   useEffect(() => {
     if (setExternalIndex) setExternalIndex(selectedIndex);
