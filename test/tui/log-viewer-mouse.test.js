@@ -6,6 +6,8 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import { LogViewer } from '../../src/tui/views/LogViewer.js';
+import { AppContext } from '../../src/tui/app-context.js';
+import { DEFAULT_FILTERS } from '../../src/tui/ui-utils/entry-utils.js';
 
 describe('LogViewer mouse interactions', () => {
   let tmpHome;
@@ -39,17 +41,35 @@ describe('LogViewer mouse interactions', () => {
 
   test('mouse wheel moves selection', async () => {
     let detailIndex = null;
-    const { stdin, unmount } = render(
-      React.createElement(LogViewer, {
+    const Wrapper = () => {
+      const [selectedIndex, setSelectedIndex] = React.useState(0);
+      const [scrollOffset, setScrollOffset] = React.useState(0);
+      const [selectedTimestamp, setSelectedTimestamp] = React.useState(null);
+      const context = {
         project: 'proj',
         config: {},
-        onBack: () => {},
-        onExit: () => {},
-        onOpenDetails: ({ currentIndex }) => {
+        filters: DEFAULT_FILTERS,
+        selectedIndex,
+        setSelectedIndex,
+        scrollOffset,
+        setScrollOffset,
+        selectedTimestamp,
+        setSelectedTimestamp,
+        openDetails: ({ currentIndex }) => {
           detailIndex = currentIndex;
         },
-      })
-    );
+        openFilter: () => {},
+        backToProjects: () => {},
+        exitApp: () => {},
+      };
+      return React.createElement(
+        AppContext.Provider,
+        { value: context },
+        React.createElement(LogViewer)
+      );
+    };
+
+    const { stdin, unmount } = render(React.createElement(Wrapper));
     await new Promise((r) => setTimeout(r, 50));
     stdin.write('\x1b[<65;1;3M');
     await new Promise((r) => setTimeout(r, 20));
@@ -61,17 +81,35 @@ describe('LogViewer mouse interactions', () => {
 
   test('mouse click selects item', async () => {
     let detailIndex = null;
-    const { stdin, unmount } = render(
-      React.createElement(LogViewer, {
+    const Wrapper = () => {
+      const [selectedIndex, setSelectedIndex] = React.useState(0);
+      const [scrollOffset, setScrollOffset] = React.useState(0);
+      const [selectedTimestamp, setSelectedTimestamp] = React.useState(null);
+      const context = {
         project: 'proj',
         config: {},
-        onBack: () => {},
-        onExit: () => {},
-        onOpenDetails: ({ currentIndex }) => {
+        filters: DEFAULT_FILTERS,
+        selectedIndex,
+        setSelectedIndex,
+        scrollOffset,
+        setScrollOffset,
+        selectedTimestamp,
+        setSelectedTimestamp,
+        openDetails: ({ currentIndex }) => {
           detailIndex = currentIndex;
         },
-      })
-    );
+        openFilter: () => {},
+        backToProjects: () => {},
+        exitApp: () => {},
+      };
+      return React.createElement(
+        AppContext.Provider,
+        { value: context },
+        React.createElement(LogViewer)
+      );
+    };
+
+    const { stdin, unmount } = render(React.createElement(Wrapper));
     await new Promise((r) => setTimeout(r, 50));
     stdin.write('\x1b[<0;5;8M');
     await new Promise((r) => setTimeout(r, 20));

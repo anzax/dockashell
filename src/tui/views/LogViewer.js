@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 import { Text, useInput } from 'ink';
 import { useMouseInput } from '../hooks/use-mouse-input.js';
 import { TraceBuffer } from '../ui-utils/trace-buffer.js';
@@ -14,25 +14,27 @@ import { useVirtualList } from '../hooks/useVirtualList.js';
 import { ScrollableList } from '../components/ScrollableList.js';
 import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
 import { isEnterKey } from '../ui-utils/text-utils.js';
+import { AppContext } from '../app-context.js';
 
 export const getEntryHeight = (entry, isSelected, terminalWidth) =>
   TraceItemPreview.getHeight(entry.trace, isSelected, 'compact', terminalWidth);
 
-export const LogViewer = ({
-  project,
-  onBack,
-  onExit,
-  config,
-  onOpenDetails,
-  onOpenFilter,
-  filters = DEFAULT_FILTERS,
-  selectedIndex: externalIndex,
-  setSelectedIndex: setExternalIndex,
-  scrollOffset: externalOffset,
-  setScrollOffset: setExternalOffset,
-  selectedTimestamp,
-  setSelectedTimestamp,
-}) => {
+export const LogViewer = () => {
+  const {
+    project,
+    backToProjects,
+    exitApp,
+    config,
+    openDetails,
+    openFilter,
+    filters = DEFAULT_FILTERS,
+    selectedIndex: initialIndex,
+    setSelectedIndex: externalSetIndex,
+    scrollOffset: initialOffset,
+    setScrollOffset: externalSetOffset,
+    selectedTimestamp,
+    setSelectedTimestamp,
+  } = useContext(AppContext);
   const [terminalWidth] = useStdoutDimensions();
   const filtersRef = useRef(filters);
   useEffect(() => {
@@ -53,8 +55,8 @@ export const LogViewer = ({
     getItem: (idx) => filteredEntries[idx],
     getItemHeight: (item, selected) =>
       getEntryHeight(item, selected, terminalWidth),
-    initialIndex: externalIndex,
-    initialOffset: externalOffset,
+    initialIndex,
+    initialOffset,
   });
 
   const {
@@ -80,16 +82,16 @@ export const LogViewer = ({
   }, [selectedTimestamp, filteredEntries, setSelectedIndex, ensureVisible]);
 
   useEffect(() => {
-    if (setExternalIndex) setExternalIndex(selectedIndex);
+    externalSetIndex(selectedIndex);
     if (setSelectedTimestamp) {
       const ts = filteredEntries[selectedIndex]?.trace.timestamp;
       if (ts) setSelectedTimestamp(ts);
     }
-  }, [selectedIndex, setExternalIndex, setSelectedTimestamp, filteredEntries]);
+  }, [selectedIndex, externalSetIndex, setSelectedTimestamp, filteredEntries]);
 
   useEffect(() => {
-    if (setExternalOffset) setExternalOffset(scrollOffset);
-  }, [scrollOffset, setExternalOffset]);
+    externalSetOffset(scrollOffset);
+  }, [scrollOffset, externalSetOffset]);
 
   // Ensure selectedIndex is within bounds when filteredEntries changes
   useEffect(() => {
@@ -152,7 +154,7 @@ export const LogViewer = ({
   useInput((input, key) => {
     if (isEnterKey(key)) {
       setSelectedTimestamp?.(filteredEntries[selectedIndex]?.trace.timestamp);
-      onOpenDetails?.({
+      openDetails({
         traces: filteredEntries,
         currentIndex: selectedIndex,
       });
@@ -189,13 +191,13 @@ export const LogViewer = ({
       setSelectedTimestamp?.(filteredEntries[idx].trace.timestamp);
       ensureVisible(idx);
     } else if (input === 'f') {
-      onOpenFilter?.();
+      openFilter();
     } else if (input === 'r') {
       buffer?.refresh().catch(() => {});
     } else if (input === 'b') {
-      onBack();
+      backToProjects();
     } else if (input === 'q') {
-      onExit();
+      exitApp();
     }
   });
 

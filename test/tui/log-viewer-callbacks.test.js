@@ -6,6 +6,8 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import { LogViewer } from '../../src/tui/views/LogViewer.js';
+import { AppContext } from '../../src/tui/app-context.js';
+import { DEFAULT_FILTERS } from '../../src/tui/ui-utils/entry-utils.js';
 
 describe('LogViewer callback triggers', () => {
   let tmpHome;
@@ -38,21 +40,38 @@ describe('LogViewer callback triggers', () => {
     let filterCalled = false;
     let detailCalled = false;
     let detailIndex = null;
-    const { stdin, unmount } = render(
-      React.createElement(LogViewer, {
+    const Wrapper = () => {
+      const [selectedIndex, setSelectedIndex] = React.useState(0);
+      const [scrollOffset, setScrollOffset] = React.useState(0);
+      const [selectedTimestamp, setSelectedTimestamp] = React.useState(null);
+      const context = {
         project: 'proj',
         config: {},
-        onBack: () => {},
-        onExit: () => {},
-        onOpenFilter: () => {
+        filters: DEFAULT_FILTERS,
+        selectedIndex,
+        setSelectedIndex,
+        scrollOffset,
+        setScrollOffset,
+        selectedTimestamp,
+        setSelectedTimestamp,
+        openFilter: () => {
           filterCalled = true;
         },
-        onOpenDetails: ({ currentIndex }) => {
+        openDetails: ({ currentIndex }) => {
           detailCalled = true;
           detailIndex = currentIndex;
         },
-      })
-    );
+        backToProjects: () => {},
+        exitApp: () => {},
+      };
+      return React.createElement(
+        AppContext.Provider,
+        { value: context },
+        React.createElement(LogViewer)
+      );
+    };
+
+    const { stdin, unmount } = render(React.createElement(Wrapper));
     await new Promise((r) => setTimeout(r, 50));
     stdin.write('f');
     await new Promise((r) => setTimeout(r, 20));

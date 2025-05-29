@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { useMouseInput } from '../hooks/use-mouse-input.js';
 import { AppContainer } from '../components/AppContainer.js';
@@ -6,13 +6,13 @@ import { useStdoutDimensions } from '../hooks/useStdoutDimensions.js';
 import { buildEntryLines } from '../components/TraceItemPreview.js';
 import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
 import { isExitKey } from '../ui-utils/text-utils.js';
+import { AppContext } from '../app-context.js';
 
-export const TraceDetailsView = ({
-  traces,
-  currentIndex,
-  onClose,
-  onNavigate,
-}) => {
+export const TraceDetailsView = () => {
+  const { detailsState, closeDetails, updateDetailsIndex } =
+    useContext(AppContext);
+  const traces = detailsState?.traces || [];
+  const currentIndex = detailsState?.currentIndex || 0;
   const [scrollOffset, setScrollOffset] = useState(0);
   const [terminalWidth, height] = useStdoutDimensions();
 
@@ -54,10 +54,10 @@ export const TraceDetailsView = ({
   useInput((input, key) => {
     // Navigation between traces (simplified - no Alt required)
     if (key.leftArrow && hasPrev) {
-      onNavigate(currentIndex - 1);
+      updateDetailsIndex(currentIndex - 1);
       setScrollOffset(0); // Reset scroll when changing traces
     } else if (key.rightArrow && hasNext) {
-      onNavigate(currentIndex + 1);
+      updateDetailsIndex(currentIndex + 1);
       setScrollOffset(0); // Reset scroll when changing traces
     }
     // Scrolling
@@ -86,7 +86,7 @@ export const TraceDetailsView = ({
     }
     // Close view
     else if (isExitKey(input, key)) {
-      onClose();
+      closeDetails();
     }
   });
 

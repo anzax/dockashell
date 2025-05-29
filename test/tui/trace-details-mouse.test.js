@@ -3,6 +3,7 @@ import assert from 'node:assert';
 import React from 'react';
 import { render } from 'ink-testing-library';
 import { TraceDetailsView } from '../../src/tui/views/TraceDetailsView.js';
+import { AppContext } from '../../src/tui/app-context.js';
 
 describe('TraceDetailsView mouse wheel', () => {
   test('scrolls content with wheel', async () => {
@@ -11,14 +12,19 @@ describe('TraceDetailsView mouse wheel', () => {
     const traces = [
       { trace: { timestamp: '2025-01-01T00:00:00Z', text: longText } },
     ];
-    const { stdin, lastFrame } = render(
-      React.createElement(TraceDetailsView, {
-        traces,
-        currentIndex: 0,
-        onClose: () => {},
-        onNavigate: () => {},
-      })
-    );
+    const Wrapper = () => {
+      const context = {
+        detailsState: { traces, currentIndex: 0 },
+        closeDetails: () => {},
+        updateDetailsIndex: () => {},
+      };
+      return React.createElement(
+        AppContext.Provider,
+        { value: context },
+        React.createElement(TraceDetailsView)
+      );
+    };
+    const { stdin, lastFrame } = render(React.createElement(Wrapper));
     await new Promise((r) => setTimeout(r, 50));
     const first = lastFrame();
     stdin.write('\x1b[<65;1;3M');

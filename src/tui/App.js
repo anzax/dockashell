@@ -6,6 +6,7 @@ import { TraceDetailsView } from './views/TraceDetailsView.js';
 import { TraceTypesFilterView } from './views/TraceTypesFilterView.js';
 import { loadConfig } from '../utils/config.js';
 import { DEFAULT_FILTERS } from './ui-utils/entry-utils.js';
+import { AppContext } from './app-context.js';
 
 const defaultTuiConfig = {
   display: {
@@ -34,56 +35,58 @@ export const App = ({ projectArg }) => {
       });
   }, []);
 
-  if (!project) {
-    return React.createElement(ProjectSelector, {
-      onSelect: setProject,
-      onExit: () => process.exit(0),
-    });
-  }
-
-  if (filterOpen) {
-    return React.createElement(TraceTypesFilterView, {
-      currentFilters: filters,
-      onBack: () => setFilterOpen(false),
-      onApply: (newFilters) => {
-        setFilters(newFilters);
-        setFilterOpen(false);
-      },
-    });
-  }
-
-  if (detailsState) {
-    return React.createElement(TraceDetailsView, {
-      traces: detailsState.traces,
-      currentIndex: detailsState.currentIndex,
-      onClose: () => setDetailsState(null),
-      onNavigate: (idx) => {
-        setDetailsState((prev) => {
-          const ts = prev.traces[idx]?.trace.timestamp;
-          setSelectedTimestamp(ts || null);
-          return { ...prev, currentIndex: idx };
-        });
-        setSelectedIndex(idx);
-      },
-    });
-  }
-
-  return React.createElement(LogViewer, {
+  const contextValue = {
     project,
+    setProject,
     config: config.tui || defaultTuiConfig,
+    setConfig,
     filters,
+    setFilters,
     selectedIndex,
     setSelectedIndex,
     scrollOffset,
     setScrollOffset,
     selectedTimestamp,
     setSelectedTimestamp,
-    onBack: () => setProject(null),
-    onExit: () => process.exit(0),
-    onOpenDetails: ({ traces, currentIndex }) => {
+    openFilter: () => setFilterOpen(true),
+    closeFilter: () => setFilterOpen(false),
+    openDetails: ({ traces, currentIndex }) => {
       setSelectedTimestamp(traces[currentIndex]?.trace.timestamp || null);
       setDetailsState({ traces, currentIndex });
     },
-    onOpenFilter: () => setFilterOpen(true),
-  });
+    updateDetailsIndex: (idx) => {
+      setDetailsState((prev) => {
+        if (!prev) return prev;
+        const ts = prev.traces[idx]?.trace.timestamp;
+        setSelectedTimestamp(ts || null);
+        return { ...prev, currentIndex: idx };
+      });
+      setSelectedIndex(idx);
+    },
+    closeDetails: () => setDetailsState(null),
+    backToProjects: () => setProject(null),
+    exitApp: () => process.exit(0),
+    detailsState,
+    filterOpen,
+  };
+
+  let view = null;
+  if (!project) {
+    view = React.createElement(ProjectSelector, {
+      onSelect: setProject,
+      onExit: () => process.exit(0),
+    });
+  } else if (filterOpen) {
+    view = React.createElement(TraceTypesFilterView);
+  } else if (detailsState) {
+    view = React.createElement(TraceDetailsView);
+  } else {
+    view = React.createElement(LogViewer);
+  }
+
+  return React.createElement(
+    AppContext.Provider,
+    { value: contextValue },
+    view
+  );
 };

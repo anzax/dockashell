@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useInput, Text } from 'ink';
 import { MultiSelect } from '@inkjs/ui';
 import { useStdoutDimensions } from '../hooks/useStdoutDimensions.js';
@@ -6,11 +6,17 @@ import { AppContainer } from '../components/AppContainer.js';
 import { DEFAULT_FILTERS } from '../ui-utils/entry-utils.js';
 import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
 import { isBackKey } from '../ui-utils/text-utils.js';
+import { AppContext } from '../app-context.js';
 
 /**
  * Full screen trace type filter view using ink-ui MultiSelect.
  */
-export const TraceTypesFilterView = ({ onBack, onApply, currentFilters }) => {
+export const TraceTypesFilterView = () => {
+  const {
+    filters: currentFilters,
+    setFilters,
+    closeFilter,
+  } = useContext(AppContext);
   const [, terminalHeight] = useStdoutDimensions();
 
   const traceTypes = [
@@ -47,12 +53,13 @@ export const TraceTypesFilterView = ({ onBack, onApply, currentFilters }) => {
 
   const handleSubmit = (finalValues) => {
     const newFilters = arrayToFilters(finalValues);
-    onApply(newFilters);
+    setFilters(newFilters);
+    closeFilter();
   };
 
   useInput((input, key) => {
     if (isBackKey(input, key)) {
-      onBack();
+      closeFilter();
     }
   });
 
