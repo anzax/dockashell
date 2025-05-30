@@ -22,6 +22,10 @@ export async function loadConfig() {
       cfg.logging.traces.session_timeout =
         defaultConfig.logging.traces.session_timeout;
     }
+    if (!cfg.logging.traces.max_output_length) {
+      cfg.logging.traces.max_output_length =
+        defaultConfig.logging.traces.max_output_length;
+    }
     return cfg;
   } catch {
     return { ...defaultConfig };

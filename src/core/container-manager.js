@@ -202,6 +202,9 @@ class ContainerManager {
 
       let output = '';
       let error = '';
+      const MAX_OUTPUT = 128 * 1024; // 128 KiB
+      let outputTruncated = false;
+      let errorTruncated = false;
 
       const stdoutStream = new PassThrough();
       const stderrStream = new PassThrough();
@@ -212,16 +215,30 @@ class ContainerManager {
       const result = await Promise.race([
         new Promise((resolve, reject) => {
           stdoutStream.on('data', (chunk) => {
-            output += chunk.toString();
+            if (output.length < MAX_OUTPUT) {
+              const remaining = MAX_OUTPUT - output.length;
+              output += chunk.toString().slice(0, remaining);
+              if (chunk.length > remaining) outputTruncated = true;
+            } else {
+              outputTruncated = true;
+            }
           });
 
           stderrStream.on('data', (chunk) => {
-            error += chunk.toString();
+            if (error.length < MAX_OUTPUT) {
+              const remaining = MAX_OUTPUT - error.length;
+              error += chunk.toString().slice(0, remaining);
+              if (chunk.length > remaining) errorTruncated = true;
+            } else {
+              errorTruncated = true;
+            }
           });
 
           stream.on('end', async () => {
             try {
               const inspect = await exec.inspect();
+              if (outputTruncated) output += '[truncated]';
+              if (errorTruncated) error += '[truncated]';
               resolve({
                 stdout: output.trim(),
                 stderr: error.trim(),
