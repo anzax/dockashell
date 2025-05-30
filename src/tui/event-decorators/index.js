@@ -11,8 +11,8 @@
  */
 
 import { command } from './command.js';
-import { applyPatch } from './applyPatch.js';
-import { writeFile } from './writeFile.js';
+import { applyPatch } from './apply-patch.js';
+import { writeFile } from './write-file.js';
 import { user, agent, summary } from './note.js';
 import { unknown } from './unknown.js';
 
