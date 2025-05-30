@@ -10,9 +10,7 @@
  * @property {(entry: any, width: number) => RenderLine[]} contentFull
  */
 
-import { command } from './command.js';
-import { applyPatch } from './apply-patch.js';
-import { writeFile } from './write-file.js';
+import { command, applyPatch, writeFile } from './shell.js';
 import { user, agent, summary } from './note.js';
 import { unknown } from './unknown.js';
 
