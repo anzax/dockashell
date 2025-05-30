@@ -20,7 +20,7 @@ describe('event decorators', () => {
     const header = deco.headerLine(entry);
     assert.strictEqual(
       header.text,
-      `${formatted} [COMMAND exit:0 dur:N/A in:1 out:1]`
+      `${formatted} [COMMAND exit:0 dur:N/A] [↑:1 ↓:1 lines]`
     );
     assert.strictEqual(header.icon, TRACE_ICONS.command);
     assert.strictEqual(header.color, 'white');
@@ -46,7 +46,7 @@ describe('event decorators', () => {
     const header = deco.headerLine(entry);
     assert.strictEqual(
       header.text,
-      `${formatted} [APPLY_PATCH exit:0 dur:N/A in:2 out:1]`
+      `${formatted} [APPLY_PATCH exit:0 dur:N/A] [↑:2 ↓:1 lines]`
     );
     assert.strictEqual(header.icon, TRACE_ICONS.apply_patch);
     assert.strictEqual(header.color, TRACE_COLORS.apply_patch);
@@ -71,7 +71,7 @@ describe('event decorators', () => {
     const header = deco.headerLine(entry);
     assert.strictEqual(
       header.text,
-      `${formatted} [WRITE_FILE exit:0 dur:N/A in:1 out:0]`
+      `${formatted} [WRITE_FILE exit:0 dur:N/A] [↑:1 ↓:0 lines]`
     );
     assert.strictEqual(header.icon, TRACE_ICONS.write_file);
     assert.strictEqual(header.color, TRACE_COLORS.write_file);
