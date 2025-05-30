@@ -6,7 +6,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import { TraceProvider } from '../../src/tui/contexts/trace-context.js';
-import { LogViewer } from '../../src/tui/views/LogViewer.js';
+import { LogViewer } from '../../src/tui/views/log-viewer.js';
 
 describe('LogViewer default selection', () => {
   let tmpHome;

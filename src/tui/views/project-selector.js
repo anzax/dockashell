@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { Select } from '@inkjs/ui';
-import { AppContainer } from '../components/AppContainer.js';
+import { AppContainer } from '../components/app-container.js';
 import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
 import { isBackKey } from '../ui-utils/text-utils.js';
 import { discoverProjects } from '../ui-utils/project-discovery.js';

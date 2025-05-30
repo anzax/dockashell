@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { useStdoutDimensions } from './useStdoutDimensions.js';
+import { useStdoutDimensions } from './use-stdout-dimensions.js';
 
 /**
  * Hook to manage large lists with virtual scrolling.

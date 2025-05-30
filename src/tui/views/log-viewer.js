@@ -8,11 +8,11 @@ import {
   DEFAULT_FILTERS,
   findClosestIndexByTimestamp,
 } from '../ui-utils/entry-utils.js';
-import { AppContainer } from '../components/AppContainer.js';
-import { TraceItemPreview } from '../components/TraceItemPreview.js';
-import { useStdoutDimensions } from '../hooks/useStdoutDimensions.js';
-import { useVirtualList } from '../hooks/useVirtualList.js';
-import { ScrollableList } from '../components/ScrollableList.js';
+import { AppContainer } from '../components/app-container.js';
+import { TraceItemPreview } from '../components/trace-item-preview.js';
+import { useStdoutDimensions } from '../hooks/use-stdout-dimensions.js';
+import { useVirtualList } from '../hooks/use-virtual-list.js';
+import { ScrollableList } from '../components/scrollable-list.js';
 import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
 import { isEnterKey } from '../ui-utils/text-utils.js';
 
