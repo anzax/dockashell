@@ -1,4 +1,4 @@
-export class SecurityManager {
+class SecurityManager {
   constructor() {}
 
   validateCommand(command, projectConfig) {
@@ -40,3 +40,5 @@ export class SecurityManager {
     };
   }
 }
+
+export default SecurityManager;

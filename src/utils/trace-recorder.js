@@ -6,7 +6,7 @@ import {
   getSessionsDir,
 } from './trace-paths.js';
 
-export class TraceRecorder {
+class TraceRecorder {
   constructor(projectName, sessionTimeoutMs = 4 * 60 * 60 * 1000) {
     this.projectName = projectName;
     this.baseDir = getProjectTraceDir(projectName);
@@ -114,3 +114,5 @@ export class TraceRecorder {
     }
   }
 }
+
+export default TraceRecorder;

@@ -1,6 +1,6 @@
 import { test, describe, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { SecurityManager } from '../../src/core/security.js';
+import SecurityManager from '../../src/core/security.js';
 
 describe('SecurityManager', () => {
   let securityManager;
