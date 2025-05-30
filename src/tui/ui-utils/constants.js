@@ -66,4 +66,5 @@ export const TRACE_COLORS = /** @type {const} */ ({
   write_file: 'magenta',
   note: 'white',
   unknown: 'gray',
+  error: 'red',
 });

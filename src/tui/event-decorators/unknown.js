@@ -1,7 +1,7 @@
 import { formatTimestamp } from '../ui-utils/entry-utils.js';
 import { TextLayout } from '../ui-utils/text-utils.js';
 
-import { TRACE_ICONS } from '../ui-utils/constants.js';
+import { TRACE_ICONS, TRACE_COLORS } from '../ui-utils/constants.js';
 
 /** @type {import('./index.js').EventDecorator} */
 export const unknown = {
@@ -14,7 +14,7 @@ export const unknown = {
         type: 'text',
         icon: TRACE_ICONS.unknown,
         text: 'No timestamp [UNKNOWN]',
-        color: 'gray',
+        color: TRACE_COLORS.unknown,
         bold: true,
       };
     }
@@ -24,7 +24,7 @@ export const unknown = {
       type: 'text',
       icon: TRACE_ICONS.unknown,
       text: `${ts} [${type.toUpperCase()}]`,
-      color: 'gray',
+      color: TRACE_COLORS.unknown,
       bold: true,
     };
   },

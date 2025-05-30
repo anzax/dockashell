@@ -38,7 +38,7 @@ function createShellDecorator({
         type: 'text',
         icon,
         text: `${ts} [${label} exit:${exit} dur:${duration}] [↑:${inLines} ↓:${outLines} lines]`,
-        color: exit === 0 ? color : 'red',
+        color: exit === 0 ? color : TRACE_COLORS.error,
         bold: true,
       };
     },
