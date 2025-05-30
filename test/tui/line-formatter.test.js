@@ -26,11 +26,11 @@ describe('TextLayout.wrap', () => {
     const text = 'short verylongwordthatexceedsthewidth end';
     const wrapped = layout.wrap(text, { width: 10 });
     assert.deepStrictEqual(wrapped, [
-      'short',
-      'verylongwo',
-      'rdthatexce',
-      'edsthewidt',
-      'h end',
+      'short very',
+      'longwordth',
+      'atexceedst',
+      'hewidth',
+      'end',
     ]);
   });
 

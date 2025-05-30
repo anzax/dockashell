@@ -18,7 +18,10 @@ describe('event decorators', () => {
     };
     const deco = getDecorator('command');
     const header = deco.headerLine(entry);
-    assert.strictEqual(header.text, `${formatted} [COMMAND exit:0]`);
+    assert.strictEqual(
+      header.text,
+      `${formatted} [COMMAND exit:0 dur:N/A in:1 out:1]`
+    );
     assert.strictEqual(header.icon, TRACE_ICONS.command);
     assert.strictEqual(header.color, 'white');
     assert(header.bold);
@@ -41,7 +44,10 @@ describe('event decorators', () => {
     };
     const deco = getDecorator('apply_patch');
     const header = deco.headerLine(entry);
-    assert.strictEqual(header.text, `${formatted} [APPLY_PATCH exit:0]`);
+    assert.strictEqual(
+      header.text,
+      `${formatted} [APPLY_PATCH exit:0 dur:N/A in:2 out:1]`
+    );
     assert.strictEqual(header.icon, TRACE_ICONS.apply_patch);
     assert.strictEqual(header.color, TRACE_COLORS.apply_patch);
 
@@ -63,7 +69,10 @@ describe('event decorators', () => {
     };
     const deco = getDecorator('write_file');
     const header = deco.headerLine(entry);
-    assert.strictEqual(header.text, `${formatted} [WRITE_FILE exit:0]`);
+    assert.strictEqual(
+      header.text,
+      `${formatted} [WRITE_FILE exit:0 dur:N/A in:1 out:0]`
+    );
     assert.strictEqual(header.icon, TRACE_ICONS.write_file);
     assert.strictEqual(header.color, TRACE_COLORS.write_file);
 
