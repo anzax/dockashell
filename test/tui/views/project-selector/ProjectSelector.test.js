@@ -23,7 +23,6 @@ describe('ProjectSelector ink-ui integration', () => {
       'traces'
     );
     await fs.ensureDir(traceDir);
-    await fs.writeFile(path.join(traceDir, 'current.jsonl'), '{}\n');
   });
 
   afterEach(async () => {
@@ -32,6 +31,14 @@ describe('ProjectSelector ink-ui integration', () => {
   });
 
   test('renders project list', async () => {
+    const traceDir = path.join(
+      tmpHome,
+      '.dockashell',
+      'projects',
+      'proj',
+      'traces'
+    );
+    await fs.writeFile(path.join(traceDir, 'current.jsonl'), '{}\n');
     const { lastFrame } = render(
       React.createElement(ProjectSelector, {
         onSelect: () => {},
@@ -43,5 +50,28 @@ describe('ProjectSelector ink-ui integration', () => {
     assert.ok(frame.includes('proj'));
     assert.ok(frame.includes('[↑↓] Navigate'));
     assert.ok(frame.includes('[Enter] Open'));
+  });
+
+  test('lists project with only archived sessions', async () => {
+    const sessionsDir = path.join(
+      tmpHome,
+      '.dockashell',
+      'projects',
+      'proj',
+      'traces',
+      'sessions'
+    );
+    await fs.ensureDir(sessionsDir);
+    await fs.writeFile(path.join(sessionsDir, 'old.jsonl'), '{}\n');
+
+    const { lastFrame } = render(
+      React.createElement(ProjectSelector, {
+        onSelect: () => {},
+        onExit: () => {},
+      })
+    );
+    await new Promise((r) => setTimeout(r, 50));
+    const frame = lastFrame();
+    assert.ok(frame.includes('proj'));
   });
 });
