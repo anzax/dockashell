@@ -1,6 +1,6 @@
 import { test, describe, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert';
-import { Logger } from '../../src/utils/logger.js';
+import Logger from '../../src/utils/logger.js';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';

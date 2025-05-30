@@ -5,10 +5,10 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { registerProjectTools } from './tools/project-tools.js';
 import { registerExecutionTools } from './tools/execution-tools.js';
 import { registerLogTools } from './tools/log-tools.js';
-import { ProjectManager } from '../core/project-manager.js';
-import { ContainerManager } from '../core/container-manager.js';
-import { SecurityManager } from '../core/security.js';
-import { Logger } from '../utils/logger.js';
+import ProjectManager from '../core/project-manager.js';
+import ContainerManager from '../core/container-manager.js';
+import SecurityManager from '../core/security.js';
+import Logger from '../utils/logger.js';
 
 class DockashellServer {
   constructor() {
@@ -78,7 +78,7 @@ class DockashellServer {
 }
 
 // Export the class for testing
-export { DockashellServer };
+export default DockashellServer;
 
 // Run the server
 if (import.meta.url === `file://${process.argv[1]}`) {

@@ -3,7 +3,7 @@ import path from 'path';
 import os from 'os';
 import { defaultConfig } from '../utils/default-config.js';
 
-export class ProjectManager {
+class ProjectManager {
   constructor() {
     this.configDir = path.join(os.homedir(), '.dockashell');
     this.projectsDir = path.join(this.configDir, 'projects');
@@ -211,3 +211,5 @@ export class ProjectManager {
     }
   }
 }
+
+export default ProjectManager;

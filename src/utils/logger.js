@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import { systemLogger } from './system-logger.js';
-import { TraceRecorder } from './trace-recorder.js';
+import TraceRecorder from './trace-recorder.js';
 import { loadConfig } from './config.js';
 import { parseTraceLines } from './trace-utils.js';
 
@@ -26,7 +26,7 @@ const parseDuration = (value) => {
   }
 };
 
-export class Logger {
+class Logger {
   constructor() {
     this.traceRecorders = new Map();
     this._config = null;
@@ -183,3 +183,5 @@ export class Logger {
     this.traceRecorders.clear();
   }
 }
+
+export default Logger;
