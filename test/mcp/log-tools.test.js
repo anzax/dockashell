@@ -81,4 +81,52 @@ describe('log-tools', () => {
       /Failed to read traces: bad/
     );
   });
+
+  test('truncates output and reports length', async () => {
+    const server = createServer();
+    const logger = {
+      readTraces: async () => [
+        {
+          timestamp: 't',
+          kind: 'command',
+          command: 'ls',
+          result: { exitCode: 0, output: 'abcdef' },
+        },
+      ],
+    };
+    registerLogTools(server, logger);
+    const res = await server.tools.read_traces.handler({
+      project_name: 'p',
+      fields: ['timestamp', 'type', 'content', 'exit_code', 'output'],
+      output_max_len: 3,
+    });
+    const text = res.content[0].text;
+    assert.ok(text.includes('output_chars=6'));
+    assert.ok(text.includes('abc'));
+    assert.ok(!text.includes('def'));
+  });
+
+  test('uses default preview length', async () => {
+    const long = 'x'.repeat(1200);
+    const server = createServer();
+    const logger = {
+      readTraces: async () => [
+        {
+          timestamp: 't',
+          kind: 'command',
+          command: 'ls',
+          result: { exitCode: 0, output: long },
+        },
+      ],
+    };
+    registerLogTools(server, logger);
+    const res = await server.tools.read_traces.handler({
+      project_name: 'p',
+      fields: ['timestamp', 'type', 'content', 'exit_code', 'output'],
+    });
+    const text = res.content[0].text;
+    assert.ok(text.includes('output_chars=1200'));
+    assert.ok(text.includes('x'.repeat(1000)));
+    assert.ok(!text.includes('x'.repeat(1001)));
+  });
 });

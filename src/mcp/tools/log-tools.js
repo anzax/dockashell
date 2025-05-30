@@ -40,8 +40,21 @@ export function registerLogTools(server, logger) {
         .describe(
           'Fields to include: timestamp, type, content (always shown), exit_code, duration, output (preview)'
         ),
+      output_max_len: z
+        .number()
+        .int()
+        .optional()
+        .describe('Preview output length (default 1000 characters)'),
     },
-    async ({ project_name, type, search, skip = 0, limit = 20, fields }) => {
+    async ({
+      project_name,
+      type,
+      search,
+      skip = 0,
+      limit = 20,
+      fields,
+      output_max_len,
+    }) => {
       try {
         const entries = await logger.readTraces(project_name, {
           type,
@@ -62,6 +75,10 @@ export function registerLogTools(server, logger) {
           : ['timestamp', 'type', 'content'];
         if (!selected.includes('timestamp')) selected.unshift('timestamp');
         if (!selected.includes('type')) selected.splice(1, 0, 'type');
+        const previewLen =
+          typeof output_max_len === 'number' && output_max_len > 0
+            ? output_max_len
+            : 1000;
         const text = entries
           .map((entry) => {
             const meta = [];
@@ -90,6 +107,15 @@ export function registerLogTools(server, logger) {
               entry.result?.duration
             ) {
               meta.push(`duration=${entry.result.duration}`);
+            }
+            if (
+              selected.includes('output') &&
+              (entry.kind === 'command' ||
+                entry.kind === 'apply_patch' ||
+                entry.kind === 'write_file') &&
+              entry.result?.output
+            ) {
+              meta.push(`output_chars=${entry.result.output.length}`);
             }
             let header = `## ${entry.timestamp} [${typeLabel}]`;
             if (meta.length) header += ' ' + meta.join(' ');
@@ -134,7 +160,7 @@ export function registerLogTools(server, logger) {
               lines.push('');
               lines.push('**Output:**');
               lines.push('```');
-              lines.push(entry.result?.output);
+              lines.push(entry.result.output.slice(0, previewLen));
               lines.push('```');
             }
             return lines.join('\n');
