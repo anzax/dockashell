@@ -64,13 +64,25 @@ class Logger {
         return;
       }
 
+      const maxLen =
+        this._config?.logging?.traces?.max_output_length || 128 * 1024;
+
+      const logResult = { ...result };
+
+      if (
+        typeof logResult.output === 'string' &&
+        logResult.output.length > maxLen
+      ) {
+        logResult.output = logResult.output.slice(0, maxLen) + '[truncated]';
+      }
+
       // Record trace
       systemLogger.debug('Command executed', {
         projectName,
         command: (command || '').substring(0, 50),
       });
       const recorder = await this.getTraceRecorder(projectName);
-      await recorder.execution('run_command', { command }, result);
+      await recorder.execution('run_command', { command }, logResult);
     } catch (error) {
       console.error('Failed to log command:', error.message);
       // Don't throw - logging failures shouldn't break the main operation
