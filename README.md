@@ -202,13 +202,13 @@ Lists all configured projects with their status.
 
 ### `read_traces`
 
-**Arguments:** `{"project_name": "string", "type?": "string", "search?": "string", "skip?": "number", "limit?": "number", "fields?": "string[]"}` Returns formatted trace entries with optional filtering and field selection.
+**Arguments:** `{"project_name": "string", "type?": "string", "search?": "string", "skip?": "number", "limit?": "number", "fields?": "string[]", "output_max_len?": "number"}` Returns formatted trace entries with optional filtering and field selection.
 
 **Field Options:**
 
 - `timestamp`, `type`, `content` - Always included for context
 - `exit_code`, `duration` - Command execution metadata (commands only)
-- `output` - Command output preview, truncated to 200 chars for display (commands only)
+- `output` - Command output preview. The preview is truncated to 1000 characters by default (override with `output_max_len`).
 
 **Type Filtering:**
 
