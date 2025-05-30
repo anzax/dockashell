@@ -23,7 +23,7 @@ describe('event decorators', () => {
       `${formatted} [COMMAND exit:0 dur:N/A] [↑:1 ↓:1 lines]`
     );
     assert.strictEqual(header.icon, TRACE_ICONS.command);
-    assert.strictEqual(header.color, 'white');
+    assert.strictEqual(header.color, TRACE_COLORS.command);
     assert(header.bold);
 
     const compact = deco.contentCompact(entry, width);
@@ -109,7 +109,7 @@ describe('event decorators', () => {
     const header = deco.headerLine(entry);
     assert.strictEqual(header.text, `${formatted} [UNKNOWN]`);
     assert.strictEqual(header.icon, TRACE_ICONS.unknown);
-    assert.strictEqual(header.color, 'gray');
+    assert.strictEqual(header.color, TRACE_COLORS.unknown);
 
     const compact = deco.contentCompact(entry, width);
     assert.ok(compact.text.startsWith('{'));
@@ -126,7 +126,7 @@ describe('event decorators', () => {
     const headerNull = deco.headerLine(null);
     assert.strictEqual(headerNull.text, 'No timestamp [UNKNOWN]');
     assert.strictEqual(headerNull.icon, TRACE_ICONS.unknown);
-    assert.strictEqual(headerNull.color, 'gray');
+    assert.strictEqual(headerNull.color, TRACE_COLORS.unknown);
 
     const compactNull = deco.contentCompact(null, width);
     assert.strictEqual(compactNull.text, 'No entry data');
