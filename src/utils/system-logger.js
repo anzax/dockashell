@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 
-export class SystemLogger {
+class SystemLogger {
   constructor() {
     this.logsDir = path.join(os.homedir(), '.dockashell', 'logs');
     this.logFile = path.join(this.logsDir, 'system.log');
@@ -36,3 +36,5 @@ export class SystemLogger {
 }
 
 export const systemLogger = new SystemLogger();
+
+export default SystemLogger;
