@@ -59,9 +59,9 @@ export const TRACE_ICONS = /** @type {const} */ ({
 
 export const TRACE_COLORS = /** @type {const} */ ({
   user: 'blue',
-  agent: 'yellow',
-  summary: 'green',
-  command: 'white',
+  agent: 'white',
+  summary: 'yellow',
+  command: 'green',
   apply_patch: 'cyan',
   write_file: 'magenta',
   note: 'white',
