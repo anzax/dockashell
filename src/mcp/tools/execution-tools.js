@@ -43,7 +43,9 @@ export function registerExecutionTools(
         if (result.timedOut) {
           response += `**Note:** Command timed out after ${maxTime} seconds\n`;
         }
-        return textResponse(response);
+        return result.success
+          ? textResponse(response)
+          : { ...textResponse(response), isError: true };
       } catch (error) {
         return { ...textResponse(`Error: ${error.message}`), isError: true };
       }
@@ -76,7 +78,9 @@ export function registerExecutionTools(
         if (result.stderr) {
           response += `**Error Output:**\n\`\`\`\n${result.stderr}\n\`\`\`\n\n`;
         }
-        return textResponse(response);
+        return result.success
+          ? textResponse(response)
+          : { ...textResponse(response), isError: true };
       } catch (error) {
         return { ...textResponse(`Error: ${error.message}`), isError: true };
       }
@@ -112,7 +116,9 @@ export function registerExecutionTools(
         if (result.stderr) {
           response += `\n**Error Output:**\n\`\`\`\n${result.stderr}\n\`\`\``;
         }
-        return textResponse(response);
+        return result.success
+          ? textResponse(response)
+          : { ...textResponse(response), isError: true };
       } catch (error) {
         return { ...textResponse(`Error: ${error.message}`), isError: true };
       }
