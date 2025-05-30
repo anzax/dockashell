@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { TraceProvider, useTraceSelection } from './contexts/trace-context.js';
-import { useTerminalMouseMode } from './hooks/useTerminalMouseMode.js';
-import { ProjectSelector } from './views/ProjectSelector.js';
-import { LogViewer } from './views/LogViewer.js';
-import { TraceDetailsView } from './views/TraceDetailsView.js';
-import { TraceTypesFilterView } from './views/TraceTypesFilterView.js';
+import { useTerminalMouseMode } from './hooks/use-terminal-mouse-mode.js';
+import { ProjectSelector } from './views/project-selector.js';
+import { LogViewer } from './views/log-viewer.js';
+import { TraceDetailsView } from './views/trace-details-view.js';
+import { TraceTypesFilterView } from './views/trace-types-filter-view.js';
 import { loadConfig } from '../utils/config.js';
 import { DEFAULT_FILTERS } from './ui-utils/entry-utils.js';
 

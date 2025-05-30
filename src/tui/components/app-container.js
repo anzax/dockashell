@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box } from 'ink';
-import { useStdoutDimensions } from '../hooks/useStdoutDimensions.js';
+import { useStdoutDimensions } from '../hooks/use-stdout-dimensions.js';
 
 /**
  * Standard full screen layout with header and footer.

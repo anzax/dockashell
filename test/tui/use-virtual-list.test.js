@@ -2,7 +2,7 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert';
 import React from 'react';
 import { render } from 'ink-testing-library';
-import { useVirtualList } from '../../src/tui/hooks/useVirtualList.js';
+import { useVirtualList } from '../../src/tui/hooks/use-virtual-list.js';
 
 describe('useVirtualList hook', () => {
   test('computes visible range and keeps selection in view', async () => {

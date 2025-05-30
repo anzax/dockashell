@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { useTraceSelection } from '../contexts/trace-context.js';
 import { useMouseInput } from '../hooks/use-mouse-input.js';
-import { AppContainer } from '../components/AppContainer.js';
-import { useStdoutDimensions } from '../hooks/useStdoutDimensions.js';
-import { buildFullLines } from '../components/TraceItemPreview.js';
+import { AppContainer } from '../components/app-container.js';
+import { useStdoutDimensions } from '../hooks/use-stdout-dimensions.js';
+import { buildFullLines } from '../components/trace-item-preview.js';
 import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
 import { isExitKey } from '../ui-utils/text-utils.js';
 

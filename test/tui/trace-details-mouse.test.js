@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import React from 'react';
 import { render } from 'ink-testing-library';
 import { TraceProvider } from '../../src/tui/contexts/trace-context.js';
-import { TraceDetailsView } from '../../src/tui/views/TraceDetailsView.js';
+import { TraceDetailsView } from '../../src/tui/views/trace-details-view.js';
 
 describe('TraceDetailsView', () => {
   test('renders without details state', async () => {

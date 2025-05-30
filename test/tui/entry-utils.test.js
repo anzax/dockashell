@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import {
   buildCompactLines,
   buildFullLines,
-} from '../../src/tui/components/TraceItemPreview.js';
+} from '../../src/tui/components/trace-item-preview.js';
 import {
   formatTimestamp,
   detectTraceType,
