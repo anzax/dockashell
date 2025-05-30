@@ -16,6 +16,7 @@ System logs contain operational messages and error details that help developers 
 - **Path**: `~/.dockashell/projects/{project}/traces/current.jsonl`
 - **Format**: JSON Lines, one structured object per entry
 - **Session Rotation**: automatically rotates when no trace has been written for four hours (configurable via `logging.traces.session_timeout`). Sessions persist across restarts within this window so the `current.jsonl` file remains active.
+- **Output Truncation**: command output in traces is capped by `logging.traces.max_output_length` (default 128 KiB) and marked with `[truncated]` when exceeded.
 - Managed by `TraceRecorder` in `src/trace-recorder.js`
 - Accessed through the `Logger` facade (`src/logger.js`)
 

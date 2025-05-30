@@ -114,4 +114,31 @@ describe('Logger', () => {
     assert.strictEqual(entries[0].path, 'foo.txt');
     assert.strictEqual(entries[0].result.exitCode, 0);
   });
+
+  test('truncates command output based on config', async () => {
+    const customLogger = new Logger();
+    customLogger._config = {
+      logging: { traces: { max_output_length: 10 } },
+    };
+
+    const result = {
+      type: 'exec',
+      exitCode: 0,
+      duration: '0.1s',
+      output: 'abcdefghijklmnopqrstuvwxyz',
+    };
+
+    await customLogger.logCommand('proj', 'cmd', result);
+
+    const traceFile = path.join(
+      tmpHome,
+      '.dockashell',
+      'projects',
+      'proj',
+      'traces',
+      'current.jsonl'
+    );
+    const entry = JSON.parse((await fs.readFile(traceFile, 'utf8')).trim());
+    assert.strictEqual(entry.result.output, 'abcdefghij[truncated]');
+  });
 });
