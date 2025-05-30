@@ -18,7 +18,7 @@ export const writeFile = {
     return {
       type: 'text',
       icon: TRACE_ICONS.write_file,
-      text: `${ts} [WRITE_FILE exit:${exit} dur:${duration} in:${inLines} out:${outLines}]`,
+      text: `${ts} [WRITE_FILE exit:${exit} dur:${duration}] [↑:${inLines} ↓:${outLines} lines]`,
       color: exit === 0 ? TRACE_COLORS.write_file : 'red',
       bold: true,
     };

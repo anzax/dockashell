@@ -18,7 +18,7 @@ export const command = {
     return {
       type: 'text',
       icon: TRACE_ICONS.command,
-      text: `${ts} [COMMAND exit:${exit} dur:${duration} in:${inLines} out:${outLines}]`,
+      text: `${ts} [COMMAND exit:${exit} dur:${duration}] [↑:${inLines} ↓:${outLines} lines]`,
       color: exit === 0 ? 'white' : 'red',
       bold: true,
     };

@@ -23,7 +23,7 @@ export const applyPatch = {
     return {
       type: 'text',
       icon: TRACE_ICONS.apply_patch,
-      text: `${ts} [APPLY_PATCH exit:${exit} dur:${duration} in:${inLines} out:${outLines}]`,
+      text: `${ts} [APPLY_PATCH exit:${exit} dur:${duration}] [↑:${inLines} ↓:${outLines} lines]`,
       color: exit === 0 ? TRACE_COLORS.apply_patch : 'red',
       bold: true,
     };
