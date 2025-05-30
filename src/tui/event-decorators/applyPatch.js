@@ -10,10 +10,20 @@ export const applyPatch = {
   headerLine(entry) {
     const ts = formatTimestamp(entry.timestamp);
     const exit = entry.result?.exitCode ?? 'N/A';
+    const duration = entry.result?.duration || 'N/A';
+    let patchLines = (entry.patch || '').split('\n').filter(Boolean);
+    if (patchLines[0] === '*** Begin Patch') patchLines = patchLines.slice(1);
+    if (patchLines[patchLines.length - 1] === '*** End Patch') {
+      patchLines = patchLines.slice(0, -1);
+    }
+    const inLines = patchLines.length;
+    const outLines = (entry.result?.output || '')
+      .split('\n')
+      .filter(Boolean).length;
     return {
       type: 'text',
       icon: TRACE_ICONS.apply_patch,
-      text: `${ts} [APPLY_PATCH exit:${exit}]`,
+      text: `${ts} [APPLY_PATCH exit:${exit} dur:${duration} in:${inLines} out:${outLines}]`,
       color: exit === 0 ? TRACE_COLORS.apply_patch : 'red',
       bold: true,
     };
@@ -21,7 +31,12 @@ export const applyPatch = {
 
   contentCompact(entry, width) {
     const tl = new TextLayout(width);
-    const first = sanitizeText(entry.patch || '').split('\n')[0];
+    let lines = sanitizeText(entry.patch || '').split('\n');
+    if (lines[0] === '*** Begin Patch') lines = lines.slice(1);
+    if (lines[lines.length - 1] === '*** End Patch') {
+      lines = lines.slice(0, -1);
+    }
+    const first = lines[0] || '';
     return {
       type: 'text',
       text: tl.truncate(first, width),
@@ -35,7 +50,11 @@ export const applyPatch = {
     const lines = [];
 
     // Wrap patch lines instead of truncating
-    const patchLines = sanitizeText(entry.patch || '').split('\n');
+    let patchLines = sanitizeText(entry.patch || '').split('\n');
+    if (patchLines[0] === '*** Begin Patch') patchLines = patchLines.slice(1);
+    if (patchLines[patchLines.length - 1] === '*** End Patch') {
+      patchLines = patchLines.slice(0, -1);
+    }
     patchLines.forEach((line, i) => {
       if (i === 0) {
         // First line doesn't need prefix, just wrap it

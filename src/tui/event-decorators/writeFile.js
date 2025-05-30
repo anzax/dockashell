@@ -10,10 +10,15 @@ export const writeFile = {
   headerLine(entry) {
     const ts = formatTimestamp(entry.timestamp);
     const exit = entry.result?.exitCode ?? 'N/A';
+    const duration = entry.result?.duration || 'N/A';
+    const inLines = (entry.content || '').split('\n').filter(Boolean).length;
+    const outLines = (entry.result?.output || '')
+      .split('\n')
+      .filter(Boolean).length;
     return {
       type: 'text',
       icon: TRACE_ICONS.write_file,
-      text: `${ts} [WRITE_FILE exit:${exit}]`,
+      text: `${ts} [WRITE_FILE exit:${exit} dur:${duration} in:${inLines} out:${outLines}]`,
       color: exit === 0 ? TRACE_COLORS.write_file : 'red',
       bold: true,
     };

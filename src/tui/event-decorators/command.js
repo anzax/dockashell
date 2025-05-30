@@ -10,10 +10,15 @@ export const command = {
   headerLine(entry) {
     const ts = formatTimestamp(entry.timestamp);
     const exit = entry.result?.exitCode ?? 'N/A';
+    const duration = entry.result?.duration || 'N/A';
+    const inLines = (entry.command || '').split('\n').filter(Boolean).length;
+    const outLines = (entry.result?.output || '')
+      .split('\n')
+      .filter(Boolean).length;
     return {
       type: 'text',
       icon: TRACE_ICONS.command,
-      text: `${ts} [COMMAND exit:${exit}]`,
+      text: `${ts} [COMMAND exit:${exit} dur:${duration} in:${inLines} out:${outLines}]`,
       color: exit === 0 ? 'white' : 'red',
       bold: true,
     };

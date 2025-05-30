@@ -16,40 +16,34 @@ export class TextLayout {
     if (!text || width <= 0) return [];
 
     const lines = [];
-    const words = text.split(/\s+/);
+    const tokens = text.match(/(\s+|\S+)/g) || [];
     let currentLine = '';
 
-    for (const word of words) {
-      if (word.length > width) {
-        if (currentLine) {
-          lines.push(currentLine);
-          currentLine = '';
+    for (let token of tokens) {
+      while (token.length > width) {
+        const spaceLeft = width - currentLine.length;
+        if (spaceLeft === 0) {
+          lines.push(currentLine.trimEnd());
+          currentLine = prefix;
         }
-        let lastChunk = '';
-        for (let i = 0; i < word.length; i += width) {
-          const chunk = word.slice(i, Math.min(i + width, word.length));
-          const fullLine = (lines.length > 0 ? prefix : '') + chunk;
-          lines.push(fullLine);
-          lastChunk = chunk;
+        currentLine += token.slice(0, spaceLeft);
+        token = token.slice(spaceLeft);
+        if (currentLine.length === width) {
+          lines.push(currentLine.trimEnd());
+          currentLine = prefix;
         }
-        const lastLineLength =
-          (lines.length > 0 ? prefix.length : 0) + lastChunk.length;
-        if (lastLineLength < width) {
-          currentLine = lines.pop();
-        }
-        continue;
       }
-      const testLine = currentLine ? currentLine + ' ' + word : word;
-      if (testLine.length > width) {
-        lines.push(currentLine);
-        currentLine = prefix + word;
+
+      if (currentLine.length + token.length > width && currentLine) {
+        lines.push(currentLine.trimEnd());
+        currentLine = prefix + token;
       } else {
-        currentLine = testLine;
+        currentLine += token;
       }
     }
 
     if (currentLine) {
-      lines.push(currentLine);
+      lines.push(currentLine.trimEnd());
     }
 
     return lines.length > 0 ? lines : [''];
