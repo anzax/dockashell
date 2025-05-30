@@ -4,9 +4,7 @@ import { Select } from '@inkjs/ui';
 import { AppContainer } from '../components/AppContainer.js';
 import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
 import { isBackKey } from '../ui-utils/text-utils.js';
-import fs from 'fs-extra';
-import path from 'path';
-import os from 'os';
+import { discoverProjects } from '../ui-utils/project-discovery.js';
 
 export const ProjectSelector = ({ onSelect, onExit }) => {
   const [projects, setProjects] = useState([]);
@@ -18,38 +16,9 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
   });
 
   useEffect(() => {
-    const loadProjects = async () => {
-      const projectsDir = path.join(os.homedir(), '.dockashell', 'projects');
-      await fs.ensureDir(projectsDir);
-      const projectNames = await fs.readdir(projectsDir);
-      const list = [];
-
-      for (const name of projectNames) {
-        const file = path.join(projectsDir, name, 'traces', 'current.jsonl');
-        if (!(await fs.pathExists(file))) continue;
-        try {
-          const content = await fs.readFile(file, 'utf8');
-          const lines = content.split('\n').filter(Boolean);
-          let last = '';
-          if (lines.length > 0) {
-            try {
-              const obj = JSON.parse(lines[lines.length - 1]);
-              last = obj.timestamp;
-            } catch {
-              // Skip malformed JSON entries
-            }
-          }
-          list.push({ name, count: lines.length, last });
-        } catch {
-          // Skip unreadable files
-        }
-      }
-      list.sort(
-        (a, b) => new Date(b.last).getTime() - new Date(a.last).getTime()
-      );
-      setProjects(list);
-    };
-    loadProjects();
+    discoverProjects()
+      .then(setProjects)
+      .catch(() => setProjects([]));
   }, []);
 
   const options =
