@@ -7,6 +7,7 @@ import path from 'path';
 import os from 'os';
 import { TraceProvider } from '../../src/tui/contexts/trace-context.js';
 import { LogViewer } from '../../src/tui/views/log-viewer.js';
+import { setActiveProject } from '../../src/tui/stores/project-store.js';
 
 describe('LogViewer default selection', () => {
   let tmpHome;
@@ -33,11 +34,13 @@ describe('LogViewer default selection', () => {
         JSON.stringify({ timestamp: '2025-01-01T00:00:02Z', text: 't3' }) +
         '\n'
     );
+    setActiveProject('proj');
   });
 
   afterEach(async () => {
     process.env.HOME = oldHome;
     if (tmpHome) await fs.remove(tmpHome);
+    setActiveProject(null);
   });
 
   test('selects last trace on load', async () => {
@@ -47,8 +50,6 @@ describe('LogViewer default selection', () => {
         TraceProvider,
         null,
         React.createElement(LogViewer, {
-          project: 'proj',
-          config: {},
           onBack: () => {},
           onExit: () => {},
           onOpenDetails: ({ currentIndex }) => {
