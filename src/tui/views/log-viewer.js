@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Text, useInput } from 'ink';
 import { useStore } from '@nanostores/react';
 import {
@@ -6,14 +6,13 @@ import {
   dispatch as traceDispatch,
 } from '../stores/trace-selection-store.js';
 import { $activeProject } from '../stores/project-store.js';
-import { $appConfig } from '../stores/config-store.js';
 import { $traceFilters } from '../stores/filter-store.js';
-import { useMouseInput } from '../hooks/use-mouse-input.js';
-import { TraceBuffer } from '../ui-utils/trace-buffer.js';
 import {
-  detectTraceType,
-  findClosestIndexByTimestamp,
-} from '../ui-utils/entry-utils.js';
+  $traceBuffer,
+  $filteredEntries,
+} from '../stores/trace-buffer-store.js';
+import { useMouseInput } from '../hooks/use-mouse-input.js';
+import { findClosestIndexByTimestamp } from '../ui-utils/entry-utils.js';
 import { AppContainer } from '../components/app-container.js';
 import { TraceItemPreview } from '../components/trace-item-preview.js';
 import { useStdoutDimensions } from '../hooks/use-stdout-dimensions.js';
@@ -30,23 +29,11 @@ export const LogViewer = () => {
     useStore($traceSelection);
 
   const project = useStore($activeProject);
-  const appConfig = useStore($appConfig);
   const filters = useStore($traceFilters);
+  const buffer = useStore($traceBuffer);
+  const filteredEntries = useStore($filteredEntries);
 
   const [terminalWidth] = useStdoutDimensions();
-  const filtersRef = useRef(filters);
-  useEffect(() => {
-    filtersRef.current = filters;
-  }, [filters]);
-
-  const [buffer, setBuffer] = useState(null);
-  const [entries, setEntries] = useState([]);
-
-  // Filter entries based on current filters
-  const filteredEntries = entries.filter((entry) => {
-    const traceType = detectTraceType(entry.trace);
-    return filters[traceType] !== false; // Show if filter is true or undefined
-  });
 
   const list = useVirtualList({
     totalCount: filteredEntries.length,
@@ -102,53 +89,27 @@ export const LogViewer = () => {
     traceDispatch({ type: 'restore-selection', traces: filteredEntries });
   }, [filteredEntries]);
 
-  // Load entries using TraceBuffer and update when buffer changes
+  // Restore selection when entries update
   useEffect(() => {
-    const buf = new TraceBuffer(
-      project,
-      appConfig.tui?.display?.max_entries || 100
-    );
-    setBuffer(buf);
+    if (filteredEntries.length === 0) {
+      traceDispatch({ type: 'set-index', index: 0 });
+      traceDispatch({ type: 'set-scroll', offset: 0 });
+      return;
+    }
 
-    const update = () => {
-      const raw = buf.getTraces();
-      const prepared = raw.map((e) => ({ trace: e }));
-      setEntries(prepared);
-
-      // Apply filters to get current filtered count
-      const filtered = prepared.filter((entry) => {
-        const traceType = detectTraceType(entry.trace);
-        return filtersRef.current[traceType] !== false;
+    let idx = selectedIndex;
+    if (selectedTimestamp) {
+      idx = findClosestIndexByTimestamp(filteredEntries, selectedTimestamp);
+    } else {
+      idx = filteredEntries.length - 1;
+      traceDispatch({
+        type: 'set-timestamp',
+        timestamp: filteredEntries[idx].trace.timestamp,
       });
-
-      if (filtered.length === 0) {
-        traceDispatch({ type: 'set-index', index: 0 });
-        traceDispatch({ type: 'set-scroll', offset: 0 });
-        return;
-      }
-
-      let idx = selectedIndex;
-      if (selectedTimestamp) {
-        idx = findClosestIndexByTimestamp(filtered, selectedTimestamp);
-      } else {
-        idx = filtered.length - 1;
-        traceDispatch({
-          type: 'set-timestamp',
-          timestamp: filtered[idx].trace.timestamp,
-        });
-      }
-      setListSelectedIndex(idx);
-      ensureVisible(idx);
-    };
-
-    buf.onUpdate(update);
-    buf.start().catch(() => {});
-    update();
-
-    return () => {
-      buf.close();
-    };
-  }, [project, appConfig, terminalWidth]);
+    }
+    setListSelectedIndex(idx);
+    ensureVisible(idx);
+  }, [filteredEntries, selectedTimestamp, selectedIndex, ensureVisible]);
 
   // Input handling
   useInput((input, key) => {
