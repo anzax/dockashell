@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
-import { useTraceSelection } from '../contexts/trace-context.js';
+import { useStore } from '@nanostores/react';
+import {
+  $traceSelection,
+  dispatch as traceDispatch,
+} from '../stores/trace-selection-store.js';
 import { useMouseInput } from '../hooks/use-mouse-input.js';
 import { AppContainer } from '../components/app-container.js';
 import { useStdoutDimensions } from '../hooks/use-stdout-dimensions.js';
@@ -11,10 +15,7 @@ import { isExitKey } from '../ui-utils/text-utils.js';
 
 export const TraceDetailsView = () => {
   // Get details state from store
-  const {
-    state: { detailsState },
-    dispatch,
-  } = useTraceSelection();
+  const { detailsState } = useStore($traceSelection);
 
   if (!detailsState) {
     return React.createElement(AppContainer, {
@@ -66,10 +67,10 @@ export const TraceDetailsView = () => {
   useInput((input, key) => {
     // Navigation between traces (simplified - no Alt required)
     if (key.leftArrow && hasPrev) {
-      dispatch({ type: 'navigate-details', index: currentIndex - 1 });
+      traceDispatch({ type: 'navigate-details', index: currentIndex - 1 });
       setScrollOffset(0); // Reset scroll when changing traces
     } else if (key.rightArrow && hasNext) {
-      dispatch({ type: 'navigate-details', index: currentIndex + 1 });
+      traceDispatch({ type: 'navigate-details', index: currentIndex + 1 });
       setScrollOffset(0); // Reset scroll when changing traces
     }
     // Scrolling
