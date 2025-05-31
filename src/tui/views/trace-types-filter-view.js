@@ -6,7 +6,6 @@ import { AppContainer } from '../components/app-container.js';
 import { useStore } from '@nanostores/react';
 import { DEFAULT_FILTERS } from '../ui-utils/entry-utils.js';
 import { $traceFilters, setTraceFilters } from '../stores/filter-store.js';
-import { Footer } from '../components/footer.js';
 import { dispatch as uiDispatch } from '../stores/ui-store.js';
 
 /**
@@ -60,7 +59,6 @@ export const TraceTypesFilterView = () => {
       { bold: true },
       'DockaShell TUI - Filter Trace Types'
     ),
-    footer: React.createElement(Footer),
     children: React.createElement(MultiSelect, {
       options: traceTypes,
       defaultValue: selectedValues,
