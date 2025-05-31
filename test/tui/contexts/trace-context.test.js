@@ -3,10 +3,11 @@ import assert from 'node:assert';
 import React from 'react';
 import { render } from 'ink-testing-library';
 import { Text } from 'ink';
+import { useTraceSelection } from '../../../src/tui/contexts/trace-context.js';
 import {
-  TraceProvider,
-  useTraceSelection,
-} from '../../../src/tui/contexts/trace-context.js';
+  dispatch,
+  resetTraceSelection,
+} from '../../../src/tui/stores/trace-selection-store.js';
 
 describe('TraceContext', () => {
   test('should provide default values', () => {
@@ -20,76 +21,41 @@ describe('TraceContext', () => {
       );
     }
 
-    const { lastFrame } = render(
-      React.createElement(
-        TraceProvider,
-        null,
-        React.createElement(TestComponent)
-      )
-    );
+    resetTraceSelection();
+    const { lastFrame } = render(React.createElement(TestComponent));
 
     assert.strictEqual(lastFrame(), '0,null,closed');
   });
 
-  test('should provide context methods', () => {
+  test('should expose state and dispatch', () => {
     function TestComponent() {
-      const context = useTraceSelection();
-      const methods = [
-        'selectedIndex',
-        'setSelectedIndex',
-        'scrollOffset',
-        'setScrollOffset',
-        'selectedTimestamp',
-        'setSelectedTimestamp',
-        'detailsState',
-        'openDetails',
-        'closeDetails',
-        'navigateDetails',
-        'restoreSelection',
-      ];
-      const hasAllMethods = methods.every(
-        (method) => typeof context[method] !== 'undefined'
-      );
-      return React.createElement(
-        Text,
-        null,
-        hasAllMethods ? 'all-methods-present' : 'missing-methods'
-      );
+      const ctx = useTraceSelection();
+      const hasProps = ctx && ctx.state && typeof ctx.dispatch === 'function';
+      return React.createElement(Text, null, hasProps ? 'ok' : 'fail');
     }
 
-    const { lastFrame } = render(
-      React.createElement(
-        TraceProvider,
-        null,
-        React.createElement(TestComponent)
-      )
-    );
+    const { lastFrame } = render(React.createElement(TestComponent));
 
-    assert.strictEqual(lastFrame(), 'all-methods-present');
+    assert.strictEqual(lastFrame(), 'ok');
   });
 
   test('should handle empty restore selection', () => {
     function TestComponent() {
-      const { restoreSelection, selectedIndex } = useTraceSelection();
+      const {
+        state: { selectedIndex },
+      } = useTraceSelection();
 
       React.useEffect(() => {
-        // Test restore with empty array - should not crash
-        restoreSelection([]);
-        restoreSelection(null);
-      }, [restoreSelection]);
+        dispatch({ type: 'restore-selection', traces: [] });
+        dispatch({ type: 'restore-selection', traces: null });
+      }, []);
 
       return React.createElement(Text, null, `index-${selectedIndex}`);
     }
 
-    const { lastFrame } = render(
-      React.createElement(
-        TraceProvider,
-        null,
-        React.createElement(TestComponent)
-      )
-    );
+    resetTraceSelection();
+    const { lastFrame } = render(React.createElement(TestComponent));
 
-    // Should not crash and maintain default index
     assert.strictEqual(lastFrame(), 'index-0');
   });
 });

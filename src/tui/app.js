@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TraceProvider, useTraceSelection } from './contexts/trace-context.js';
+import { useTraceSelection } from './contexts/trace-context.js';
 import { useTerminalMouseMode } from './hooks/use-terminal-mouse-mode.js';
 import { ProjectSelector } from './views/project-selector.js';
 import { LogViewer } from './views/log-viewer.js';
@@ -17,9 +17,11 @@ const MainApp = ({ projectArg }) => {
   // Enable mouse mode for the entire application
   useTerminalMouseMode();
 
-  // Get trace selection state from context
-  const { detailsState, openDetails, closeDetails, navigateDetails } =
-    useTraceSelection();
+  // Get trace selection state from store
+  const {
+    state: { detailsState },
+    dispatch,
+  } = useTraceSelection();
 
   const project = useStore($activeProject);
   useStore($appConfig); // ensure re-render on config change
@@ -48,8 +50,8 @@ const MainApp = ({ projectArg }) => {
     return React.createElement(TraceDetailsView, {
       traces: detailsState.traces,
       currentIndex: detailsState.currentIndex,
-      onClose: closeDetails,
-      onNavigate: navigateDetails,
+      onClose: () => dispatch({ type: 'close-details' }),
+      onNavigate: (idx) => dispatch({ type: 'navigate-details', index: idx }),
     });
   }
 
@@ -57,7 +59,7 @@ const MainApp = ({ projectArg }) => {
     onBack: () => setActiveProject(null),
     onExit: () => process.exit(0),
     onOpenDetails: ({ traces, currentIndex }) =>
-      openDetails(traces, currentIndex),
+      dispatch({ type: 'open-details', traces, index: currentIndex }),
     onOpenFilter: () => setFilterOpen(true),
   });
 };
@@ -66,9 +68,5 @@ const MainApp = ({ projectArg }) => {
  * Root App component that provides trace selection context
  */
 export const App = ({ projectArg }) => {
-  return React.createElement(
-    TraceProvider,
-    null,
-    React.createElement(MainApp, { projectArg })
-  );
+  return React.createElement(MainApp, { projectArg });
 };

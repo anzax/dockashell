@@ -9,8 +9,11 @@ import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
 import { isExitKey } from '../ui-utils/text-utils.js';
 
 export const TraceDetailsView = () => {
-  // Get details state from context
-  const { detailsState, closeDetails, navigateDetails } = useTraceSelection();
+  // Get details state from store
+  const {
+    state: { detailsState },
+    dispatch,
+  } = useTraceSelection();
 
   if (!detailsState) {
     return React.createElement(AppContainer, {
@@ -70,10 +73,10 @@ export const TraceDetailsView = () => {
   useInput((input, key) => {
     // Navigation between traces (simplified - no Alt required)
     if (key.leftArrow && hasPrev) {
-      navigateDetails(currentIndex - 1);
+      dispatch({ type: 'navigate-details', index: currentIndex - 1 });
       setScrollOffset(0); // Reset scroll when changing traces
     } else if (key.rightArrow && hasNext) {
-      navigateDetails(currentIndex + 1);
+      dispatch({ type: 'navigate-details', index: currentIndex + 1 });
       setScrollOffset(0); // Reset scroll when changing traces
     }
     // Scrolling
@@ -102,7 +105,7 @@ export const TraceDetailsView = () => {
     }
     // Close view
     else if (isExitKey(input, key)) {
-      closeDetails();
+      dispatch({ type: 'close-details' });
     }
   });
 

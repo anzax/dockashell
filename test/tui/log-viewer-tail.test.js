@@ -5,7 +5,7 @@ import { render } from 'ink-testing-library';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
-import { TraceProvider } from '../../src/tui/contexts/trace-context.js';
+import { resetTraceSelection } from '../../src/tui/stores/trace-selection-store.js';
 import { LogViewer } from '../../src/tui/views/log-viewer.js';
 import { setActiveProject } from '../../src/tui/stores/project-store.js';
 
@@ -45,18 +45,15 @@ describe('LogViewer default selection', () => {
 
   test('selects last trace on load', async () => {
     let idx = null;
+    resetTraceSelection();
     const { stdin, unmount } = render(
-      React.createElement(
-        TraceProvider,
-        null,
-        React.createElement(LogViewer, {
-          onBack: () => {},
-          onExit: () => {},
-          onOpenDetails: ({ currentIndex }) => {
-            idx = currentIndex;
-          },
-        })
-      )
+      React.createElement(LogViewer, {
+        onBack: () => {},
+        onExit: () => {},
+        onOpenDetails: ({ currentIndex }) => {
+          idx = currentIndex;
+        },
+      })
     );
     await new Promise((r) => setTimeout(r, 50));
     stdin.write('\r');
