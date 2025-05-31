@@ -5,7 +5,8 @@ import { useMouseInput } from '../hooks/use-mouse-input.js';
 import { AppContainer } from '../components/app-container.js';
 import { useStdoutDimensions } from '../hooks/use-stdout-dimensions.js';
 import { buildFullLines } from '../components/trace-item-preview.js';
-import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
+import { Footer } from '../components/footer.js';
+import { dispatch as uiDispatch } from '../stores/ui-store.js';
 import { isExitKey } from '../ui-utils/text-utils.js';
 
 export const TraceDetailsView = () => {
@@ -18,11 +19,7 @@ export const TraceDetailsView = () => {
   if (!detailsState) {
     return React.createElement(AppContainer, {
       header: React.createElement(Text, { bold: true }, 'Trace Details'),
-      footer: React.createElement(
-        Text,
-        { dimColor: true },
-        buildFooter(SHORTCUTS.EXIT)
-      ),
+      footer: React.createElement(Footer),
       children: React.createElement(
         Box,
         { flexGrow: 1, justifyContent: 'center', alignItems: 'center' },
@@ -40,11 +37,7 @@ export const TraceDetailsView = () => {
   if (!currentTrace) {
     return React.createElement(AppContainer, {
       header: React.createElement(Text, { bold: true }, 'Trace Details'),
-      footer: React.createElement(
-        Text,
-        { dimColor: true },
-        buildFooter(SHORTCUTS.EXIT)
-      ),
+      footer: React.createElement(Footer),
       children: React.createElement(
         Box,
         { flexGrow: 1, justifyContent: 'center', alignItems: 'center' },
@@ -105,7 +98,7 @@ export const TraceDetailsView = () => {
     }
     // Close view
     else if (isExitKey(input, key)) {
-      dispatch({ type: 'close-details' });
+      uiDispatch({ type: 'close-details' });
     }
   });
 
@@ -131,17 +124,7 @@ export const TraceDetailsView = () => {
       { bold: true, wrap: 'truncate-end' },
       `Trace Details${navigationIndicator}${scrollIndicator}`
     ),
-    footer: React.createElement(
-      Text,
-      { dimColor: true, wrap: 'truncate-end' },
-      buildFooter(
-        SHORTCUTS.LINE,
-        SHORTCUTS.PAGE,
-        SHORTCUTS.TOP_BOTTOM,
-        SHORTCUTS.PREV_NEXT,
-        SHORTCUTS.EXIT
-      )
-    ),
+    footer: React.createElement(Footer),
     children: React.createElement(
       Box,
       {

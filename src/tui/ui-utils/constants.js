@@ -29,7 +29,7 @@ export const SHORTCUTS = /** @type {const} */ ({
   FILTER: '[f] Filter',
   BACK_B: '[b] Back',
   PREV_NEXT: '[←/→] Prev/Next',
-  EXIT: '[Enter/Esc/q] Back',
+  EXIT: '[Enter/Esc/b] Back',
   QUIT: '[q] Quit',
 });
 

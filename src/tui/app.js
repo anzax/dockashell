@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useTraceSelection } from './contexts/trace-context.js';
+import React, { useEffect } from 'react';
 import { useTerminalMouseMode } from './hooks/use-terminal-mouse-mode.js';
+import { useGlobalKeys } from './hooks/use-global-keys.js';
 import { ProjectSelector } from './views/project-selector.js';
 import { LogViewer } from './views/log-viewer.js';
 import { TraceDetailsView } from './views/trace-details-view.js';
@@ -9,6 +9,7 @@ import { useStore } from '@nanostores/react';
 import { $activeProject, setActiveProject } from './stores/project-store.js';
 import { $appConfig } from './stores/config-store.js';
 import { $traceFilters } from './stores/filter-store.js';
+import { $uiState, dispatch as uiDispatch } from './stores/ui-store.js';
 
 /**
  * Main application component that uses trace context
@@ -16,17 +17,12 @@ import { $traceFilters } from './stores/filter-store.js';
 const MainApp = ({ projectArg }) => {
   // Enable mouse mode for the entire application
   useTerminalMouseMode();
-
-  // Get trace selection state from store
-  const {
-    state: { detailsState },
-    dispatch,
-  } = useTraceSelection();
+  useGlobalKeys();
 
   const project = useStore($activeProject);
   useStore($appConfig); // ensure re-render on config change
   useStore($traceFilters); // ensure re-render on filter change
-  const [filterOpen, setFilterOpen] = useState(false);
+  const { activeView } = useStore($uiState);
 
   useEffect(() => {
     if (projectArg) {
@@ -34,34 +30,27 @@ const MainApp = ({ projectArg }) => {
     }
   }, [projectArg]);
 
+  useEffect(() => {
+    if (project) {
+      uiDispatch({ type: 'set-view', view: 'log' });
+    } else {
+      uiDispatch({ type: 'set-view', view: 'selector' });
+    }
+  }, [project]);
+
   if (!project) {
-    return React.createElement(ProjectSelector, {
-      onExit: () => process.exit(0),
-    });
+    return React.createElement(ProjectSelector);
   }
 
-  if (filterOpen) {
-    return React.createElement(TraceTypesFilterView, {
-      onBack: () => setFilterOpen(false),
-    });
+  if (activeView === 'filter') {
+    return React.createElement(TraceTypesFilterView);
   }
 
-  if (detailsState) {
-    return React.createElement(TraceDetailsView, {
-      traces: detailsState.traces,
-      currentIndex: detailsState.currentIndex,
-      onClose: () => dispatch({ type: 'close-details' }),
-      onNavigate: (idx) => dispatch({ type: 'navigate-details', index: idx }),
-    });
+  if (activeView === 'details') {
+    return React.createElement(TraceDetailsView);
   }
 
-  return React.createElement(LogViewer, {
-    onBack: () => setActiveProject(null),
-    onExit: () => process.exit(0),
-    onOpenDetails: ({ traces, currentIndex }) =>
-      dispatch({ type: 'open-details', traces, index: currentIndex }),
-    onOpenFilter: () => setFilterOpen(true),
-  });
+  return React.createElement(LogViewer, null);
 };
 
 /**

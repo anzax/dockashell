@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import { useInput, Text } from 'ink';
+import { Text } from 'ink';
 import { MultiSelect } from '@inkjs/ui';
 import { useStdoutDimensions } from '../hooks/use-stdout-dimensions.js';
 import { AppContainer } from '../components/app-container.js';
 import { useStore } from '@nanostores/react';
 import { DEFAULT_FILTERS } from '../ui-utils/entry-utils.js';
 import { $traceFilters, setTraceFilters } from '../stores/filter-store.js';
-import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
-import { isBackKey } from '../ui-utils/text-utils.js';
+import { Footer } from '../components/footer.js';
+import { dispatch as uiDispatch } from '../stores/ui-store.js';
 
 /**
  * Full screen trace type filter view using ink-ui MultiSelect.
  */
-export const TraceTypesFilterView = ({ onBack }) => {
+export const TraceTypesFilterView = () => {
   const [, terminalHeight] = useStdoutDimensions();
 
   const traceTypes = [
@@ -51,14 +51,8 @@ export const TraceTypesFilterView = ({ onBack }) => {
   const handleSubmit = (finalValues) => {
     const newFilters = arrayToFilters(finalValues);
     setTraceFilters(newFilters);
-    onBack?.();
+    uiDispatch({ type: 'set-view', view: 'log' });
   };
-
-  useInput((input, key) => {
-    if (isBackKey(input, key)) {
-      onBack();
-    }
-  });
 
   return React.createElement(AppContainer, {
     header: React.createElement(
@@ -66,16 +60,7 @@ export const TraceTypesFilterView = ({ onBack }) => {
       { bold: true },
       'DockaShell TUI - Filter Trace Types'
     ),
-    footer: React.createElement(
-      Text,
-      { dimColor: true },
-      buildFooter(
-        SHORTCUTS.NAVIGATE,
-        SHORTCUTS.TOGGLE,
-        SHORTCUTS.APPLY,
-        SHORTCUTS.EXIT
-      )
-    ),
+    footer: React.createElement(Footer),
     children: React.createElement(MultiSelect, {
       options: traceTypes,
       defaultValue: selectedValues,

@@ -8,6 +8,7 @@ import os from 'os';
 import { resetTraceSelection } from '../../src/tui/stores/trace-selection-store.js';
 import { LogViewer } from '../../src/tui/views/log-viewer.js';
 import { setActiveProject } from '../../src/tui/stores/project-store.js';
+import { $uiState } from '../../src/tui/stores/ui-store.js';
 
 describe('LogViewer callback triggers', () => {
   let tmpHome;
@@ -38,32 +39,16 @@ describe('LogViewer callback triggers', () => {
     setActiveProject(null);
   });
 
-  test('opens filter and details views via callbacks', async () => {
-    let filterCalled = false;
-    let detailCalled = false;
-    let detailIndex = null;
+  test('updates activeView on key presses', async () => {
     resetTraceSelection();
-    const { stdin, unmount } = render(
-      React.createElement(LogViewer, {
-        onBack: () => {},
-        onExit: () => {},
-        onOpenFilter: () => {
-          filterCalled = true;
-        },
-        onOpenDetails: ({ currentIndex }) => {
-          detailCalled = true;
-          detailIndex = currentIndex;
-        },
-      })
-    );
+    const { stdin, unmount } = render(React.createElement(LogViewer));
     await new Promise((r) => setTimeout(r, 50));
     stdin.write('f');
     await new Promise((r) => setTimeout(r, 20));
-    assert.ok(filterCalled);
+    assert.strictEqual($uiState.get().activeView, 'filter');
     stdin.write('\r');
     await new Promise((r) => setTimeout(r, 20));
-    assert.ok(detailCalled);
-    assert.strictEqual(detailIndex, 0);
+    assert.strictEqual($uiState.get().activeView, 'details');
     unmount();
   });
 });
