@@ -9,7 +9,6 @@ import { useMouseInput } from '../hooks/use-mouse-input.js';
 import { AppContainer } from '../components/app-container.js';
 import { useStdoutDimensions } from '../hooks/use-stdout-dimensions.js';
 import { buildFullLines } from '../components/trace-item-preview.js';
-import { Footer } from '../components/footer.js';
 import { dispatch as uiDispatch } from '../stores/ui-store.js';
 import { isExitKey } from '../ui-utils/text-utils.js';
 
@@ -20,7 +19,6 @@ export const TraceDetailsView = () => {
   if (!detailsState) {
     return React.createElement(AppContainer, {
       header: React.createElement(Text, { bold: true }, 'Trace Details'),
-      footer: React.createElement(Footer),
       children: React.createElement(
         Box,
         { flexGrow: 1, justifyContent: 'center', alignItems: 'center' },
@@ -38,7 +36,6 @@ export const TraceDetailsView = () => {
   if (!currentTrace) {
     return React.createElement(AppContainer, {
       header: React.createElement(Text, { bold: true }, 'Trace Details'),
-      footer: React.createElement(Footer),
       children: React.createElement(
         Box,
         { flexGrow: 1, justifyContent: 'center', alignItems: 'center' },
@@ -125,7 +122,6 @@ export const TraceDetailsView = () => {
       { bold: true, wrap: 'truncate-end' },
       `Trace Details${navigationIndicator}${scrollIndicator}`
     ),
-    footer: React.createElement(Footer),
     children: React.createElement(
       Box,
       {

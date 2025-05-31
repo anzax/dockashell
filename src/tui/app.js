@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
+import { Box } from 'ink';
 import { useTerminalMouseMode } from './hooks/use-terminal-mouse-mode.js';
 import { useGlobalKeys } from './hooks/use-global-keys.js';
+import { useStdoutDimensions } from './hooks/use-stdout-dimensions.js';
 import { ProjectSelector } from './views/project-selector.js';
 import { LogViewer } from './views/log-viewer.js';
 import { TraceDetailsView } from './views/trace-details-view.js';
@@ -10,6 +12,7 @@ import { $activeProject, setActiveProject } from './stores/project-store.js';
 import { $appConfig } from './stores/config-store.js';
 import { $traceFilters } from './stores/filter-store.js';
 import { $uiState, dispatch as uiDispatch } from './stores/ui-store.js';
+import { Footer } from './components/footer.js';
 
 /**
  * Main application component that uses trace context
@@ -57,5 +60,11 @@ const MainApp = ({ projectArg }) => {
  * Root App component that provides trace selection context
  */
 export const App = ({ projectArg }) => {
-  return React.createElement(MainApp, { projectArg });
+  const [, height] = useStdoutDimensions();
+  return React.createElement(
+    Box,
+    { flexDirection: 'column', height, width: '100%' },
+    React.createElement(MainApp, { projectArg }),
+    React.createElement(Box, { flexShrink: 0 }, React.createElement(Footer))
+  );
 };
