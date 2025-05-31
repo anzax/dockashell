@@ -19,7 +19,6 @@ import { TraceItemPreview } from '../components/trace-item-preview.js';
 import { useStdoutDimensions } from '../hooks/use-stdout-dimensions.js';
 import { useVirtualList } from '../hooks/use-virtual-list.js';
 import { ScrollableList } from '../components/scrollable-list.js';
-import { Footer } from '../components/footer.js';
 import { dispatch as uiDispatch } from '../stores/ui-store.js';
 import { isEnterKey } from '../ui-utils/text-utils.js';
 
@@ -270,7 +269,6 @@ export const LogViewer = () => {
       { bold: true, wrap: 'truncate-end' },
       `DockaShell TUI - ${project}${scrollIndicator}`
     ),
-    footer: React.createElement(Footer),
     children: React.createElement(ScrollableList, {
       list,
       renderItem: (entry, index, selected) =>

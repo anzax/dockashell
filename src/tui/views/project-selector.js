@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Box, Text } from 'ink';
 import { Select } from '@inkjs/ui';
 import { AppContainer } from '../components/app-container.js';
-import { Footer } from '../components/footer.js';
 import { discoverProjects } from '../ui-utils/project-discovery.js';
 import { setActiveProject } from '../stores/project-store.js';
 import { dispatch as uiDispatch } from '../stores/ui-store.js';
@@ -36,7 +35,6 @@ export const ProjectSelector = () => {
         ? 'DockaShell TUI - Select Project'
         : 'DockaShell TUI - No Projects Found'
     ),
-    footer: React.createElement(Footer),
     children: React.createElement(
       Box,
       { flexDirection: 'column', flexGrow: 1, width: '100%' },

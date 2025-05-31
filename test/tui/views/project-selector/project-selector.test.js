@@ -48,8 +48,6 @@ describe('ProjectSelector ink-ui integration', () => {
     await new Promise((r) => setTimeout(r, 50));
     const frame = lastFrame();
     assert.ok(frame.includes('proj'));
-    assert.ok(frame.includes('[↑↓] Navigate'));
-    assert.ok(frame.includes('[Enter] Open'));
   });
 
   test('lists project with only archived sessions', async () => {
