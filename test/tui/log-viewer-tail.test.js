@@ -8,6 +8,8 @@ import os from 'os';
 import { resetTraceSelection } from '../../src/tui/stores/trace-selection-store.js';
 import { LogViewer } from '../../src/tui/views/log-viewer.js';
 import { setActiveProject } from '../../src/tui/stores/project-store.js';
+import { $traceSelection } from '../../src/tui/stores/trace-selection-store.js';
+import { $uiState } from '../../src/tui/stores/ui-store.js';
 
 describe('LogViewer default selection', () => {
   let tmpHome;
@@ -44,21 +46,13 @@ describe('LogViewer default selection', () => {
   });
 
   test('selects last trace on load', async () => {
-    let idx = null;
     resetTraceSelection();
-    const { stdin, unmount } = render(
-      React.createElement(LogViewer, {
-        onBack: () => {},
-        onExit: () => {},
-        onOpenDetails: ({ currentIndex }) => {
-          idx = currentIndex;
-        },
-      })
-    );
+    const { stdin, unmount } = render(React.createElement(LogViewer));
     await new Promise((r) => setTimeout(r, 50));
     stdin.write('\r');
     await new Promise((r) => setTimeout(r, 20));
-    assert.strictEqual(idx, 2);
+    assert.strictEqual($uiState.get().activeView, 'details');
+    assert.strictEqual($traceSelection.get().detailsState.currentIndex, 2);
     unmount();
   });
 });

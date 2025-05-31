@@ -16,13 +16,15 @@ import { TraceItemPreview } from '../components/trace-item-preview.js';
 import { useStdoutDimensions } from '../hooks/use-stdout-dimensions.js';
 import { useVirtualList } from '../hooks/use-virtual-list.js';
 import { ScrollableList } from '../components/scrollable-list.js';
-import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
+import { Footer } from '../components/footer.js';
+import { dispatch as uiDispatch } from '../stores/ui-store.js';
+import { dispatch as traceDispatch } from '../stores/trace-selection-store.js';
 import { isEnterKey } from '../ui-utils/text-utils.js';
 
 export const getEntryHeight = (entry, isSelected) =>
   TraceItemPreview.getHeight(entry.trace, isSelected);
 
-export const LogViewer = ({ onBack, onExit, onOpenDetails, onOpenFilter }) => {
+export const LogViewer = () => {
   // Get selection state from store
   const {
     state: { selectedIndex, scrollOffset, selectedTimestamp },
@@ -157,10 +159,12 @@ export const LogViewer = ({ onBack, onExit, onOpenDetails, onOpenFilter }) => {
         type: 'set-timestamp',
         timestamp: filteredEntries[listSelectedIndex]?.trace.timestamp,
       });
-      onOpenDetails?.({
+      traceDispatch({
+        type: 'open-details',
         traces: filteredEntries,
-        currentIndex: listSelectedIndex,
+        index: listSelectedIndex,
       });
+      uiDispatch({ type: 'set-view', view: 'details' });
     } else if (
       key.downArrow &&
       listSelectedIndex < filteredEntries.length - 1
@@ -211,13 +215,9 @@ export const LogViewer = ({ onBack, onExit, onOpenDetails, onOpenFilter }) => {
       });
       ensureVisible(idx);
     } else if (input === 'f') {
-      onOpenFilter?.();
+      uiDispatch({ type: 'set-view', view: 'filter' });
     } else if (input === 'r') {
       buffer?.refresh().catch(() => {});
-    } else if (input === 'b') {
-      onBack();
-    } else if (input === 'q') {
-      onExit();
     }
   });
 
@@ -275,20 +275,7 @@ export const LogViewer = ({ onBack, onExit, onOpenDetails, onOpenFilter }) => {
       { bold: true, wrap: 'truncate-end' },
       `DockaShell TUI - ${project}${scrollIndicator}`
     ),
-    footer: React.createElement(
-      Text,
-      { dimColor: true, wrap: 'truncate-end' },
-      buildFooter(
-        SHORTCUTS.NAVIGATE,
-        SHORTCUTS.DETAIL,
-        SHORTCUTS.PAGE,
-        SHORTCUTS.TOP_BOTTOM,
-        SHORTCUTS.FILTER,
-        SHORTCUTS.REFRESH,
-        SHORTCUTS.BACK_B,
-        SHORTCUTS.QUIT
-      )
-    ),
+    footer: React.createElement(Footer),
     children: React.createElement(ScrollableList, {
       list,
       renderItem: (entry, index, selected) =>
