@@ -2,18 +2,13 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert';
 import React from 'react';
 import { render } from 'ink-testing-library';
-import { TraceProvider } from '../../src/tui/contexts/trace-context.js';
+import { resetTraceSelection } from '../../src/tui/stores/trace-selection-store.js';
 import { TraceDetailsView } from '../../src/tui/views/trace-details-view.js';
 
 describe('TraceDetailsView', () => {
   test('renders without details state', async () => {
-    const { lastFrame } = render(
-      React.createElement(
-        TraceProvider,
-        null,
-        React.createElement(TraceDetailsView)
-      )
-    );
+    resetTraceSelection();
+    const { lastFrame } = render(React.createElement(TraceDetailsView));
 
     await new Promise((r) => setTimeout(r, 50));
 
