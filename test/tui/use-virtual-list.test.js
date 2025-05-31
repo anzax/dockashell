@@ -1,6 +1,6 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert';
-import React from 'react';
+import React, { useState } from 'react';
 import { render } from 'ink-testing-library';
 import { useVirtualList } from '../../src/tui/hooks/use-virtual-list.js';
 
@@ -10,10 +10,16 @@ describe('useVirtualList hook', () => {
     const items = Array.from({ length: 5 }, () => ({ height: 2 }));
     let list;
     const Test = () => {
+      const [index, setIndex] = useState(0);
+      const [offset, setOffset] = useState(0);
       list = useVirtualList({
         totalCount: items.length,
         getItem: (i) => items[i],
         getItemHeight: (it) => it.height,
+        selectedIndex: index,
+        scrollOffset: offset,
+        onSelectionChange: setIndex,
+        onScrollChange: setOffset,
       });
       return null;
     };
@@ -34,10 +40,16 @@ describe('useVirtualList hook', () => {
     const items = [];
     let list;
     const Test = () => {
+      const [index, setIndex] = useState(0);
+      const [offset, setOffset] = useState(0);
       list = useVirtualList({
         totalCount: items.length,
         getItem: (i) => items[i],
         getItemHeight: () => 1,
+        selectedIndex: index,
+        scrollOffset: offset,
+        onSelectionChange: setIndex,
+        onScrollChange: setOffset,
       });
       return null;
     };
@@ -53,10 +65,16 @@ describe('useVirtualList hook', () => {
     const items = Array.from({ length: 3 }, () => ({ height: 1 }));
     let list;
     const Test = () => {
+      const [index, setIndex] = useState(0);
+      const [offset, setOffset] = useState(0);
       list = useVirtualList({
         totalCount: items.length,
         getItem: (i) => items[i],
         getItemHeight: () => 1,
+        selectedIndex: index,
+        scrollOffset: offset,
+        onSelectionChange: setIndex,
+        onScrollChange: setOffset,
       });
       return null;
     };
@@ -73,12 +91,16 @@ describe('useVirtualList hook', () => {
     const items = Array.from({ length: 10 }, () => ({ height: 1 }));
     let list;
     const Test = () => {
+      const [index, setIndex] = useState(5);
+      const [offset, setOffset] = useState(3);
       list = useVirtualList({
         totalCount: items.length,
         getItem: (i) => items[i],
         getItemHeight: () => 1,
-        initialIndex: 5,
-        initialOffset: 3,
+        selectedIndex: index,
+        scrollOffset: offset,
+        onSelectionChange: setIndex,
+        onScrollChange: setOffset,
       });
       return null;
     };
