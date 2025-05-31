@@ -5,6 +5,7 @@ import { AppContainer } from '../components/app-container.js';
 import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
 import { isBackKey } from '../ui-utils/text-utils.js';
 import { discoverProjects } from '../ui-utils/project-discovery.js';
+import { setActiveProject } from '../stores/project-store.js';
 
 export const ProjectSelector = ({ onSelect, onExit }) => {
   const [projects, setProjects] = useState([]);
@@ -50,7 +51,13 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
       Box,
       { flexDirection: 'column', flexGrow: 1, width: '100%' },
       projects.length > 0
-        ? React.createElement(Select, { options, onChange: onSelect })
+        ? React.createElement(Select, {
+            options,
+            onChange: (value) => {
+              setActiveProject(value);
+              onSelect?.(value);
+            },
+          })
         : React.createElement(
             Box,
             { flexDirection: 'column' },
