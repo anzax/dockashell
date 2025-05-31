@@ -12,8 +12,8 @@ describe('input utils', () => {
     assert.ok(!isEnterKey({}));
   });
 
-  test('isBackKey detects escape and q', () => {
-    assert.ok(isBackKey('q', {}));
+  test('isBackKey detects escape and b', () => {
+    assert.ok(isBackKey('b', {}));
     assert.ok(isBackKey('', { escape: true }));
     assert.ok(!isBackKey('x', {}));
   });
@@ -21,7 +21,7 @@ describe('input utils', () => {
   test('isExitKey combines checks', () => {
     assert.ok(isExitKey('', { return: true }));
     assert.ok(isExitKey('', { escape: true }));
-    assert.ok(isExitKey('q', {}));
+    assert.ok(isExitKey('b', {}));
     assert.ok(!isExitKey('x', {}));
   });
 });

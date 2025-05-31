@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Text, useInput } from 'ink';
+import { Box, Text } from 'ink';
 import { Select } from '@inkjs/ui';
 import { AppContainer } from '../components/app-container.js';
-import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
-import { isBackKey } from '../ui-utils/text-utils.js';
+import { Footer } from '../components/footer.js';
 import { discoverProjects } from '../ui-utils/project-discovery.js';
 import { setActiveProject } from '../stores/project-store.js';
+import { dispatch as uiDispatch } from '../stores/ui-store.js';
 
-export const ProjectSelector = ({ onSelect, onExit }) => {
+export const ProjectSelector = () => {
   const [projects, setProjects] = useState([]);
-
-  useInput((input, key) => {
-    if (isBackKey(input, key)) {
-      onExit();
-    }
-  });
 
   useEffect(() => {
     discoverProjects()
@@ -42,11 +36,7 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
         ? 'DockaShell TUI - Select Project'
         : 'DockaShell TUI - No Projects Found'
     ),
-    footer: React.createElement(
-      Text,
-      { dimColor: true },
-      buildFooter(SHORTCUTS.NAVIGATE, SHORTCUTS.OPEN, SHORTCUTS.QUIT)
-    ),
+    footer: React.createElement(Footer),
     children: React.createElement(
       Box,
       { flexDirection: 'column', flexGrow: 1, width: '100%' },
@@ -55,7 +45,7 @@ export const ProjectSelector = ({ onSelect, onExit }) => {
             options,
             onChange: (value) => {
               setActiveProject(value);
-              onSelect?.(value);
+              uiDispatch({ type: 'set-view', view: 'log' });
             },
           })
         : React.createElement(

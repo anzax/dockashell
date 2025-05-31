@@ -84,6 +84,6 @@ export const sanitizeText = (text) => {
 
 export const isEnterKey = (key) => !!(key && key.return);
 export const isBackKey = (input, key) =>
-  !!((key && key.escape) || input === 'q');
+  !!((key && key.escape) || input === 'b');
 export const isExitKey = (input, key) =>
   isEnterKey(key) || isBackKey(input, key);
