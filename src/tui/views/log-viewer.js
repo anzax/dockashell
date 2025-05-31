@@ -1,7 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Text, useInput } from 'ink';
 import { useStore } from '@nanostores/react';
-import { useTraceSelection } from '../contexts/trace-context.js';
+import {
+  $traceSelection,
+  dispatch as traceDispatch,
+} from '../stores/trace-selection-store.js';
 import { $activeProject } from '../stores/project-store.js';
 import { $appConfig } from '../stores/config-store.js';
 import { $traceFilters } from '../stores/filter-store.js';
@@ -18,7 +21,6 @@ import { useVirtualList } from '../hooks/use-virtual-list.js';
 import { ScrollableList } from '../components/scrollable-list.js';
 import { Footer } from '../components/footer.js';
 import { dispatch as uiDispatch } from '../stores/ui-store.js';
-import { dispatch as traceDispatch } from '../stores/trace-selection-store.js';
 import { isEnterKey } from '../ui-utils/text-utils.js';
 
 export const getEntryHeight = (entry, isSelected) =>
@@ -26,10 +28,8 @@ export const getEntryHeight = (entry, isSelected) =>
 
 export const LogViewer = () => {
   // Get selection state from store
-  const {
-    state: { selectedIndex, scrollOffset, selectedTimestamp },
-    dispatch,
-  } = useTraceSelection();
+  const { selectedIndex, scrollOffset, selectedTimestamp } =
+    useStore($traceSelection);
 
   const project = useStore($activeProject);
   const appConfig = useStore($appConfig);
@@ -101,8 +101,8 @@ export const LogViewer = () => {
   // Update timestamp when selection changes
   // Restore selection when filters change
   useEffect(() => {
-    dispatch({ type: 'restore-selection', traces: filteredEntries });
-  }, [filteredEntries, dispatch]);
+    traceDispatch({ type: 'restore-selection', traces: filteredEntries });
+  }, [filteredEntries]);
 
   // Load entries using TraceBuffer and update when buffer changes
   useEffect(() => {
@@ -124,8 +124,8 @@ export const LogViewer = () => {
       });
 
       if (filtered.length === 0) {
-        dispatch({ type: 'set-index', index: 0 });
-        dispatch({ type: 'set-scroll', offset: 0 });
+        traceDispatch({ type: 'set-index', index: 0 });
+        traceDispatch({ type: 'set-scroll', offset: 0 });
         return;
       }
 
@@ -134,7 +134,7 @@ export const LogViewer = () => {
         idx = findClosestIndexByTimestamp(filtered, selectedTimestamp);
       } else {
         idx = filtered.length - 1;
-        dispatch({
+        traceDispatch({
           type: 'set-timestamp',
           timestamp: filtered[idx].trace.timestamp,
         });
@@ -155,7 +155,7 @@ export const LogViewer = () => {
   // Input handling
   useInput((input, key) => {
     if (isEnterKey(key)) {
-      dispatch({
+      traceDispatch({
         type: 'set-timestamp',
         timestamp: filteredEntries[listSelectedIndex]?.trace.timestamp,
       });
@@ -171,7 +171,7 @@ export const LogViewer = () => {
     ) {
       const idx = listSelectedIndex + 1;
       setListSelectedIndex(idx);
-      dispatch({
+      traceDispatch({
         type: 'set-timestamp',
         timestamp: filteredEntries[idx].trace.timestamp,
       });
@@ -179,7 +179,7 @@ export const LogViewer = () => {
     } else if (key.upArrow && listSelectedIndex > 0) {
       const idx = listSelectedIndex - 1;
       setListSelectedIndex(idx);
-      dispatch({
+      traceDispatch({
         type: 'set-timestamp',
         timestamp: filteredEntries[idx].trace.timestamp,
       });
@@ -190,7 +190,7 @@ export const LogViewer = () => {
         listSelectedIndex + pageSize()
       );
       setListSelectedIndex(idx);
-      dispatch({
+      traceDispatch({
         type: 'set-timestamp',
         timestamp: filteredEntries[idx].trace.timestamp,
       });
@@ -198,18 +198,18 @@ export const LogViewer = () => {
     } else if (key.pageUp) {
       const idx = Math.max(0, listSelectedIndex - pageSize());
       setListSelectedIndex(idx);
-      dispatch({
+      traceDispatch({
         type: 'set-timestamp',
         timestamp: filteredEntries[idx].trace.timestamp,
       });
       ensureVisible(idx);
     } else if (input === 'g') {
-      dispatch({ type: 'set-index', index: 0, traces: filteredEntries });
+      traceDispatch({ type: 'set-index', index: 0, traces: filteredEntries });
       ensureVisible(0);
     } else if (input === 'G') {
       const idx = filteredEntries.length - 1;
       setListSelectedIndex(idx);
-      dispatch({
+      traceDispatch({
         type: 'set-timestamp',
         timestamp: filteredEntries[idx].trace.timestamp,
       });
@@ -232,7 +232,7 @@ export const LogViewer = () => {
         const newIndex = listSelectedIndex + direction;
         if (newIndex >= 0 && newIndex < filteredEntries.length) {
           setListSelectedIndex(newIndex);
-          dispatch({
+          traceDispatch({
             type: 'set-timestamp',
             timestamp: filteredEntries[newIndex].trace.timestamp,
           });
@@ -245,7 +245,7 @@ export const LogViewer = () => {
       for (const { item, index } of list.visibleItems) {
         const h = getEntryHeight(item, index === listSelectedIndex);
         if (r < h) {
-          dispatch({ type: 'set-index', index, traces: filteredEntries });
+          traceDispatch({ type: 'set-index', index, traces: filteredEntries });
           ensureVisible(index);
           break;
         }
