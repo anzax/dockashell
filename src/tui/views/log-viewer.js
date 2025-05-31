@@ -221,27 +221,23 @@ export const LogViewer = () => {
     }
   });
 
-  // Mouse handling
+  // Mouse handling with slower scroll: triggers movement every 4 wheel events
+  const wheelCountRef = useRef(0);
   useMouseInput((evt) => {
-    if (evt.wheel === 'up') {
-      if (listSelectedIndex > 0) {
-        const idx = listSelectedIndex - 1;
-        setListSelectedIndex(idx);
-        dispatch({
-          type: 'set-timestamp',
-          timestamp: filteredEntries[idx].trace.timestamp,
-        });
-        ensureVisible(idx);
-      }
-    } else if (evt.wheel === 'down') {
-      if (listSelectedIndex < filteredEntries.length - 1) {
-        const idx = listSelectedIndex + 1;
-        setListSelectedIndex(idx);
-        dispatch({
-          type: 'set-timestamp',
-          timestamp: filteredEntries[idx].trace.timestamp,
-        });
-        ensureVisible(idx);
+    if (evt.wheel === 'up' || evt.wheel === 'down') {
+      wheelCountRef.current++;
+      if (wheelCountRef.current >= 4) {
+        wheelCountRef.current = 0;
+        const direction = evt.wheel === 'up' ? -1 : 1;
+        const newIndex = listSelectedIndex + direction;
+        if (newIndex >= 0 && newIndex < filteredEntries.length) {
+          setListSelectedIndex(newIndex);
+          dispatch({
+            type: 'set-timestamp',
+            timestamp: filteredEntries[newIndex].trace.timestamp,
+          });
+          ensureVisible(newIndex);
+        }
       }
     } else if (evt.button === 'left' && !evt.isRelease) {
       const startRow = 2; // header + marginTop
