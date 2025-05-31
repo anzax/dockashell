@@ -1,4 +1,4 @@
-import { atom, computed } from 'nanostores';
+import { atom, computed, map } from 'nanostores';
 import { TraceBuffer } from '../ui-utils/trace-buffer.js';
 import { detectTraceType } from '../ui-utils/entry-utils.js';
 import { $traceFilters } from './filter-store.js';
@@ -13,6 +13,23 @@ export const $filteredEntries = computed(
       const type = detectTraceType(entry.trace);
       return filters[type] !== false;
     })
+);
+
+export const $traceState = map({
+  selectedIndex: 0,
+  scrollOffset: 0,
+  selectedTimestamp: null,
+});
+
+export const $traceData = computed(
+  [$traceEntries, $filteredEntries, $traceState],
+  (entries, filtered, state) => ({
+    entries,
+    filteredEntries: filtered,
+    selectedIndex: state.selectedIndex,
+    scrollOffset: state.scrollOffset,
+    selectedTimestamp: state.selectedTimestamp,
+  })
 );
 
 let activeProject = null;
