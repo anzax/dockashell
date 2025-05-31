@@ -1,11 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Text, useInput } from 'ink';
+import { useStore } from '@nanostores/react';
 import { useTraceSelection } from '../contexts/trace-context.js';
+import { $activeProject } from '../stores/project-store.js';
+import { $appConfig } from '../stores/config-store.js';
+import { $traceFilters } from '../stores/filter-store.js';
 import { useMouseInput } from '../hooks/use-mouse-input.js';
 import { TraceBuffer } from '../ui-utils/trace-buffer.js';
 import {
   detectTraceType,
-  DEFAULT_FILTERS,
   findClosestIndexByTimestamp,
 } from '../ui-utils/entry-utils.js';
 import { AppContainer } from '../components/app-container.js';
@@ -19,15 +22,7 @@ import { isEnterKey } from '../ui-utils/text-utils.js';
 export const getEntryHeight = (entry, isSelected) =>
   TraceItemPreview.getHeight(entry.trace, isSelected);
 
-export const LogViewer = ({
-  project,
-  onBack,
-  onExit,
-  config,
-  onOpenDetails,
-  onOpenFilter,
-  filters = DEFAULT_FILTERS,
-}) => {
+export const LogViewer = ({ onBack, onExit, onOpenDetails, onOpenFilter }) => {
   // Get selection state from context
   const {
     selectedIndex,
@@ -38,6 +33,10 @@ export const LogViewer = ({
     setSelectedTimestamp,
     restoreSelection,
   } = useTraceSelection();
+
+  const project = useStore($activeProject);
+  const appConfig = useStore($appConfig);
+  const filters = useStore($traceFilters);
 
   const [terminalWidth] = useStdoutDimensions();
   const filtersRef = useRef(filters);
@@ -110,7 +109,10 @@ export const LogViewer = ({
 
   // Load entries using TraceBuffer and update when buffer changes
   useEffect(() => {
-    const buf = new TraceBuffer(project, config?.display?.max_entries || 100);
+    const buf = new TraceBuffer(
+      project,
+      appConfig.tui?.display?.max_entries || 100
+    );
     setBuffer(buf);
 
     const update = () => {
@@ -148,7 +150,7 @@ export const LogViewer = ({
     return () => {
       buf.close();
     };
-  }, [project, config, terminalWidth]);
+  }, [project, appConfig, terminalWidth]);
 
   // Input handling
   useInput((input, key) => {

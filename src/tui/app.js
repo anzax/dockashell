@@ -5,14 +5,10 @@ import { ProjectSelector } from './views/project-selector.js';
 import { LogViewer } from './views/log-viewer.js';
 import { TraceDetailsView } from './views/trace-details-view.js';
 import { TraceTypesFilterView } from './views/trace-types-filter-view.js';
-import { loadConfig } from '../utils/config.js';
-import { DEFAULT_FILTERS } from './ui-utils/entry-utils.js';
-
-const defaultTuiConfig = {
-  display: {
-    max_entries: 100,
-  },
-};
+import { useStore } from '@nanostores/react';
+import { $activeProject, setActiveProject } from './stores/project-store.js';
+import { $appConfig } from './stores/config-store.js';
+import { $traceFilters } from './stores/filter-store.js';
 
 /**
  * Main application component that uses trace context
@@ -25,34 +21,26 @@ const MainApp = ({ projectArg }) => {
   const { detailsState, openDetails, closeDetails, navigateDetails } =
     useTraceSelection();
 
-  const [project, setProject] = useState(projectArg || null);
-  const [config, setConfig] = useState({ tui: defaultTuiConfig });
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const project = useStore($activeProject);
+  useStore($appConfig); // ensure re-render on config change
+  useStore($traceFilters); // ensure re-render on filter change
   const [filterOpen, setFilterOpen] = useState(false);
 
   useEffect(() => {
-    loadConfig()
-      .then(setConfig)
-      .catch(() => {
-        // keep default config on error
-      });
-  }, []);
+    if (projectArg) {
+      setActiveProject(projectArg);
+    }
+  }, [projectArg]);
 
   if (!project) {
     return React.createElement(ProjectSelector, {
-      onSelect: setProject,
       onExit: () => process.exit(0),
     });
   }
 
   if (filterOpen) {
     return React.createElement(TraceTypesFilterView, {
-      currentFilters: filters,
       onBack: () => setFilterOpen(false),
-      onApply: (newFilters) => {
-        setFilters(newFilters);
-        setFilterOpen(false);
-      },
     });
   }
 
@@ -66,10 +54,7 @@ const MainApp = ({ projectArg }) => {
   }
 
   return React.createElement(LogViewer, {
-    project,
-    config: config.tui || defaultTuiConfig,
-    filters,
-    onBack: () => setProject(null),
+    onBack: () => setActiveProject(null),
     onExit: () => process.exit(0),
     onOpenDetails: ({ traces, currentIndex }) =>
       openDetails(traces, currentIndex),

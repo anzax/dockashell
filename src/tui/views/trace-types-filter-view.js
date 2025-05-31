@@ -3,14 +3,16 @@ import { useInput, Text } from 'ink';
 import { MultiSelect } from '@inkjs/ui';
 import { useStdoutDimensions } from '../hooks/use-stdout-dimensions.js';
 import { AppContainer } from '../components/app-container.js';
+import { useStore } from '@nanostores/react';
 import { DEFAULT_FILTERS } from '../ui-utils/entry-utils.js';
+import { $traceFilters, setTraceFilters } from '../stores/filter-store.js';
 import { SHORTCUTS, buildFooter } from '../ui-utils/constants.js';
 import { isBackKey } from '../ui-utils/text-utils.js';
 
 /**
  * Full screen trace type filter view using ink-ui MultiSelect.
  */
-export const TraceTypesFilterView = ({ onBack, onApply, currentFilters }) => {
+export const TraceTypesFilterView = ({ onBack }) => {
   const [, terminalHeight] = useStdoutDimensions();
 
   const traceTypes = [
@@ -41,13 +43,15 @@ export const TraceTypesFilterView = ({ onBack, onApply, currentFilters }) => {
     return newFilters;
   };
 
+  const storeFilters = useStore($traceFilters);
   const [selectedValues, setSelectedValues] = useState(
-    filtersToArray(currentFilters || DEFAULT_FILTERS)
+    filtersToArray(storeFilters || DEFAULT_FILTERS)
   );
 
   const handleSubmit = (finalValues) => {
     const newFilters = arrayToFilters(finalValues);
-    onApply(newFilters);
+    setTraceFilters(newFilters);
+    onBack?.();
   };
 
   useInput((input, key) => {
