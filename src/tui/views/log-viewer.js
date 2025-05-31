@@ -23,8 +23,7 @@ import { Footer } from '../components/footer.js';
 import { dispatch as uiDispatch } from '../stores/ui-store.js';
 import { isEnterKey } from '../ui-utils/text-utils.js';
 
-export const getEntryHeight = (entry, isSelected) =>
-  TraceItemPreview.getHeight(entry.trace, isSelected);
+export const getEntryHeight = (isSelected) => 3 + (isSelected ? 2 : 0);
 
 export const LogViewer = () => {
   // Get selection state from store
@@ -53,7 +52,7 @@ export const LogViewer = () => {
   const list = useVirtualList({
     totalCount: filteredEntries.length,
     getItem: (idx) => filteredEntries[idx],
-    getItemHeight: (item, selected) => getEntryHeight(item, selected),
+    getItemHeight: (_, selected) => getEntryHeight(selected),
     initialIndex: selectedIndex,
     initialOffset: scrollOffset,
   });
@@ -242,8 +241,8 @@ export const LogViewer = () => {
     } else if (evt.button === 'left' && !evt.isRelease) {
       const startRow = 2; // header + marginTop
       let r = evt.y - startRow;
-      for (const { item, index } of list.visibleItems) {
-        const h = getEntryHeight(item, index === listSelectedIndex);
+      for (const { index } of list.visibleItems) {
+        const h = getEntryHeight(index === listSelectedIndex);
         if (r < h) {
           traceDispatch({ type: 'set-index', index, traces: filteredEntries });
           ensureVisible(index);

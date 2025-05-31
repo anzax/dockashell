@@ -1,8 +1,7 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert';
 // Simplified height function used for visibility calculations in tests
-const getEntryHeight = (entry, selected) =>
-  (entry.height || 3) + (selected ? 2 : 0);
+const getEntryHeight = (selected) => 3 + (selected ? 2 : 0);
 
 const ensureVisible = (entries, terminalHeight, scrollOffset, index) => {
   if (entries.length === 0) return scrollOffset;
@@ -13,7 +12,7 @@ const ensureVisible = (entries, terminalHeight, scrollOffset, index) => {
     const availableHeight = terminalHeight - 3;
     let height = 0;
     for (let i = index; i >= offset; i--) {
-      height += getEntryHeight(entries[i], i === index);
+      height += getEntryHeight(i === index);
       if (height > availableHeight) {
         offset = i + 1;
         break;
@@ -36,10 +35,9 @@ const calculateVisible = (
   let end = scrollOffset;
   while (
     end < entries.length &&
-    height + getEntryHeight(entries[end], end === selectedIndex) <=
-      availableHeight
+    height + getEntryHeight(end === selectedIndex) <= availableHeight
   ) {
-    height += getEntryHeight(entries[end], end === selectedIndex);
+    height += getEntryHeight(end === selectedIndex);
     end++;
   }
   return { start: scrollOffset, end, height };
@@ -51,10 +49,9 @@ const initialOffset = (entries, terminalHeight, selectedIndex) => {
   const availableHeight = terminalHeight - 3;
   while (
     offset >= 0 &&
-    height + getEntryHeight(entries[offset], offset === selectedIndex) <=
-      availableHeight
+    height + getEntryHeight(offset === selectedIndex) <= availableHeight
   ) {
-    height += getEntryHeight(entries[offset], offset === selectedIndex);
+    height += getEntryHeight(offset === selectedIndex);
     offset--;
   }
   offset = Math.max(0, Math.min(entries.length - 1, offset + 1));
@@ -63,13 +60,13 @@ const initialOffset = (entries, terminalHeight, selectedIndex) => {
 
 describe('LogViewer visibility logic', () => {
   test('scroll offset clamps when entry exceeds viewport', () => {
-    const entries = [{ height: 20 }];
-    const off = initialOffset(entries, 10, 0);
+    const entries = [{}];
+    const off = initialOffset(entries, 7, 0);
     assert.strictEqual(off, 0);
   });
 
   test('visible entries remain complete while navigating', () => {
-    const entries = [{ height: 3 }, { height: 5 }, { height: 3 }];
+    const entries = [{}, {}, {}];
     const termHeight = 10;
     let selected = 2;
     let offset = initialOffset(entries, termHeight, selected);

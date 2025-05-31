@@ -82,8 +82,3 @@ export const TraceItemPreview = ({
     renderLine(contentLine)
   );
 };
-
-TraceItemPreview.getHeight = (entry, selected = false) => {
-  // Always 2 lines (header + content) + marginBottom + selection border
-  return 2 + 1 + (selected ? 2 : 0);
-};
