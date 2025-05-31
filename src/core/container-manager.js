@@ -178,6 +178,13 @@ class ContainerManager {
     const timeoutMs = options.timeout || 30000;
     const startTime = Date.now();
 
+    let output = '';
+    let error = '';
+    const MAX_OUTPUT = 128 * 1024; // 128 KiB
+    let outputTruncated = false;
+    let errorTruncated = false;
+    let timedOut = false;
+
     try {
       const container = this.docker.getContainer(containerName);
 
@@ -200,17 +207,9 @@ class ContainerManager {
       // Start exec and capture output
       const stream = await exec.start({ Detach: false, Tty: false });
 
-      let output = '';
-      let error = '';
-      const MAX_OUTPUT = 128 * 1024; // 128 KiB
-      let outputTruncated = false;
-      let errorTruncated = false;
-
       const stdoutStream = new PassThrough();
       const stderrStream = new PassThrough();
       container.modem.demuxStream(stream, stdoutStream, stderrStream);
-
-      let timedOut = false;
 
       const result = await Promise.race([
         new Promise((resolve, reject) => {
@@ -296,29 +295,32 @@ class ContainerManager {
         timedOut: result.timedOut || false,
         duration: `${duration}s`,
       };
-    } catch (error) {
+    } catch (err) {
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
-      if (error.message === 'Command timed out') {
+      if (err.message === 'Command timed out') {
+        if (outputTruncated) output += '[truncated]';
+        if (errorTruncated) error += '[truncated]';
+
         await this.logger.logCommand(projectName, command, {
           type: 'exec',
           exitCode: -1,
           duration: `${duration}s`,
           timedOut: true,
-          output: '',
+          output: output.trim(),
         });
 
         return {
           success: false,
           exitCode: -1,
-          stdout: '',
-          stderr: 'Command timed out',
+          stdout: output.trim(),
+          stderr: error.trim() || 'Command timed out',
           timedOut: true,
           duration: `${duration}s`,
         };
       }
 
-      throw error;
+      throw err;
     }
   }
 
