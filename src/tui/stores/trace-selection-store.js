@@ -1,9 +1,7 @@
 import { map } from 'nanostores';
+import { $filteredEntries, $traceState } from './trace-buffer-store.js';
 
 export const $traceSelection = map({
-  selectedIndex: 0,
-  scrollOffset: 0,
-  selectedTimestamp: null,
   detailsState: null,
 });
 
@@ -12,9 +10,9 @@ export function dispatch(action) {
   switch (action.type) {
     case 'set-index': {
       const { index, traces } = action;
-      $traceSelection.setKey('selectedIndex', index);
+      $traceState.setKey('selectedIndex', index);
       if (traces && traces[index]) {
-        $traceSelection.setKey(
+        $traceState.setKey(
           'selectedTimestamp',
           traces[index].trace?.timestamp || null
         );
@@ -22,21 +20,22 @@ export function dispatch(action) {
       break;
     }
     case 'set-scroll':
-      $traceSelection.setKey('scrollOffset', action.offset);
+      $traceState.setKey('scrollOffset', action.offset);
       break;
     case 'set-timestamp':
-      $traceSelection.setKey('selectedTimestamp', action.timestamp);
+      $traceState.setKey('selectedTimestamp', action.timestamp);
       break;
     case 'open-details': {
-      const { traces, index } = action;
-      $traceSelection.setKey('detailsState', { traces, currentIndex: index });
+      const { index } = action;
+      const traces = $filteredEntries.get();
+      $traceSelection.setKey('detailsState', { currentIndex: index });
       if (traces[index]) {
-        $traceSelection.setKey(
+        $traceState.setKey(
           'selectedTimestamp',
           traces[index].trace?.timestamp || null
         );
       }
-      $traceSelection.setKey('selectedIndex', index);
+      $traceState.setKey('selectedIndex', index);
       break;
     }
     case 'close-details':
@@ -46,18 +45,18 @@ export function dispatch(action) {
       const prev = state.detailsState;
       if (!prev) break;
       const { index } = action;
-      const newTrace = prev.traces[index];
-      if (newTrace) {
-        $traceSelection.setKey(
+      const traces = $filteredEntries.get();
+      if (traces[index]) {
+        $traceState.setKey(
           'selectedTimestamp',
-          newTrace.trace?.timestamp || null
+          traces[index].trace?.timestamp || null
         );
       }
       $traceSelection.setKey('detailsState', {
         ...prev,
         currentIndex: index,
       });
-      $traceSelection.setKey('selectedIndex', index);
+      $traceState.setKey('selectedIndex', index);
       break;
     }
     case 'restore-selection': {
@@ -66,7 +65,7 @@ export function dispatch(action) {
         dispatch({ type: 'set-index', index: 0 });
         break;
       }
-      const { selectedIndex, selectedTimestamp } = state;
+      const { selectedIndex, selectedTimestamp } = $traceState.get();
       if (selectedTimestamp) {
         const matchingIndex = traces.findIndex(
           (e) => e.trace?.timestamp === selectedTimestamp
@@ -90,10 +89,12 @@ export function dispatch(action) {
 }
 
 export function resetTraceSelection() {
-  $traceSelection.set({
+  $traceState.set({
     selectedIndex: 0,
     scrollOffset: 0,
     selectedTimestamp: null,
+  });
+  $traceSelection.set({
     detailsState: null,
   });
 }

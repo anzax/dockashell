@@ -1,10 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Text, useInput } from 'ink';
 import { useStore } from '@nanostores/react';
-import {
-  $traceSelection,
-  dispatch as traceDispatch,
-} from '../stores/trace-selection-store.js';
+import { dispatch as traceDispatch } from '../stores/trace-selection-store.js';
+import { $traceState } from '../stores/trace-buffer-store.js';
 import { $activeProject } from '../stores/project-store.js';
 import { $traceFilters } from '../stores/filter-store.js';
 import {
@@ -26,7 +24,7 @@ export const getEntryHeight = (isSelected) => 3 + (isSelected ? 2 : 0);
 export const LogViewer = () => {
   // Get selection state from store
   const { selectedIndex, scrollOffset, selectedTimestamp } =
-    useStore($traceSelection);
+    useStore($traceState);
 
   const project = useStore($activeProject);
   const filters = useStore($traceFilters);
@@ -39,8 +37,11 @@ export const LogViewer = () => {
     totalCount: filteredEntries.length,
     getItem: (idx) => filteredEntries[idx],
     getItemHeight: (_, selected) => getEntryHeight(selected),
-    initialIndex: selectedIndex,
-    initialOffset: scrollOffset,
+    selectedIndex,
+    scrollOffset,
+    onSelectionChange: (idx) =>
+      traceDispatch({ type: 'set-index', index: idx, traces: filteredEntries }),
+    onScrollChange: (off) => traceDispatch({ type: 'set-scroll', offset: off }),
   });
 
   const {
@@ -50,38 +51,7 @@ export const LogViewer = () => {
     pageSize,
     visibleStart,
     visibleEnd,
-    scrollOffset: listScrollOffset,
-    setScrollOffset: setListScrollOffset,
   } = list;
-
-  // Sync context changes to virtual list (during restoration)
-  useEffect(() => {
-    if (selectedIndex !== listSelectedIndex) {
-      setListSelectedIndex(selectedIndex);
-      ensureVisible(selectedIndex);
-    }
-    if (scrollOffset !== listScrollOffset) {
-      setListScrollOffset(scrollOffset);
-    }
-  }, [
-    selectedIndex,
-    listSelectedIndex,
-    setListSelectedIndex,
-    ensureVisible,
-    scrollOffset,
-    listScrollOffset,
-    setListScrollOffset,
-  ]);
-  useEffect(() => {
-    if (selectedTimestamp) {
-      const idx = findClosestIndexByTimestamp(
-        filteredEntries,
-        selectedTimestamp
-      );
-      setListSelectedIndex(idx);
-      ensureVisible(idx);
-    }
-  }, [selectedTimestamp, filteredEntries, ensureVisible]);
 
   // Update timestamp when selection changes
   // Restore selection when filters change
@@ -107,7 +77,7 @@ export const LogViewer = () => {
         timestamp: filteredEntries[idx].trace.timestamp,
       });
     }
-    setListSelectedIndex(idx);
+    traceDispatch({ type: 'set-index', index: idx, traces: filteredEntries });
     ensureVisible(idx);
   }, [filteredEntries, selectedTimestamp, selectedIndex, ensureVisible]);
 
@@ -120,7 +90,6 @@ export const LogViewer = () => {
       });
       traceDispatch({
         type: 'open-details',
-        traces: filteredEntries,
         index: listSelectedIndex,
       });
       uiDispatch({ type: 'set-view', view: 'details' });

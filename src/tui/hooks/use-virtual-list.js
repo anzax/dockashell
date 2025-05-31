@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { useCallback, useMemo, useRef, useEffect } from 'react';
 import { useStdoutDimensions } from './use-stdout-dimensions.js';
 
 /**
@@ -16,12 +16,12 @@ export const useVirtualList = ({
   totalCount,
   getItem,
   getItemHeight,
-  initialIndex = 0,
-  initialOffset = 0,
+  selectedIndex,
+  scrollOffset,
+  onSelectionChange,
+  onScrollChange,
 }) => {
   const [, terminalHeight] = useStdoutDimensions();
-  const [selectedIndex, setSelectedIndex] = useState(initialIndex);
-  const [scrollOffset, setScrollOffset] = useState(initialOffset);
   const cacheRef = useRef(new Map());
 
   useEffect(() => {
@@ -59,9 +59,16 @@ export const useVirtualList = ({
         }
       }
       offset = Math.min(Math.max(offset, 0), Math.max(0, totalCount - 1));
-      setScrollOffset(offset);
+      if (offset !== scrollOffset) onScrollChange?.(offset);
     },
-    [scrollOffset, terminalHeight, totalCount, getCachedItem, getItemHeight]
+    [
+      scrollOffset,
+      terminalHeight,
+      totalCount,
+      getCachedItem,
+      getItemHeight,
+      onScrollChange,
+    ]
   );
 
   const calculateVisibleRange = useCallback(() => {
@@ -107,9 +114,9 @@ export const useVirtualList = ({
     visibleStart,
     visibleEnd,
     selectedIndex,
-    setSelectedIndex,
+    setSelectedIndex: onSelectionChange,
     scrollOffset,
-    setScrollOffset,
+    setScrollOffset: onScrollChange,
     ensureVisible,
     pageSize,
   };
