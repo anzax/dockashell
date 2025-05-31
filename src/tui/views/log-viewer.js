@@ -23,15 +23,10 @@ export const getEntryHeight = (entry, isSelected) =>
   TraceItemPreview.getHeight(entry.trace, isSelected);
 
 export const LogViewer = ({ onBack, onExit, onOpenDetails, onOpenFilter }) => {
-  // Get selection state from context
+  // Get selection state from store
   const {
-    selectedIndex,
-    setSelectedIndex,
-    scrollOffset,
-    setScrollOffset,
-    selectedTimestamp,
-    setSelectedTimestamp,
-    restoreSelection,
+    state: { selectedIndex, scrollOffset, selectedTimestamp },
+    dispatch,
   } = useTraceSelection();
 
   const project = useStore($activeProject);
@@ -99,13 +94,13 @@ export const LogViewer = ({ onBack, onExit, onOpenDetails, onOpenFilter }) => {
       setListSelectedIndex(idx);
       ensureVisible(idx);
     }
-  }, [selectedTimestamp, filteredEntries, setSelectedIndex, ensureVisible]);
+  }, [selectedTimestamp, filteredEntries, ensureVisible]);
 
   // Update timestamp when selection changes
   // Restore selection when filters change
   useEffect(() => {
-    restoreSelection(filteredEntries);
-  }, [filteredEntries, restoreSelection]);
+    dispatch({ type: 'restore-selection', traces: filteredEntries });
+  }, [filteredEntries, dispatch]);
 
   // Load entries using TraceBuffer and update when buffer changes
   useEffect(() => {
@@ -127,8 +122,8 @@ export const LogViewer = ({ onBack, onExit, onOpenDetails, onOpenFilter }) => {
       });
 
       if (filtered.length === 0) {
-        setSelectedIndex(0);
-        setScrollOffset(0);
+        dispatch({ type: 'set-index', index: 0 });
+        dispatch({ type: 'set-scroll', offset: 0 });
         return;
       }
 
@@ -137,7 +132,10 @@ export const LogViewer = ({ onBack, onExit, onOpenDetails, onOpenFilter }) => {
         idx = findClosestIndexByTimestamp(filtered, selectedTimestamp);
       } else {
         idx = filtered.length - 1;
-        setSelectedTimestamp?.(filtered[idx].trace.timestamp);
+        dispatch({
+          type: 'set-timestamp',
+          timestamp: filtered[idx].trace.timestamp,
+        });
       }
       setListSelectedIndex(idx);
       ensureVisible(idx);
@@ -155,9 +153,10 @@ export const LogViewer = ({ onBack, onExit, onOpenDetails, onOpenFilter }) => {
   // Input handling
   useInput((input, key) => {
     if (isEnterKey(key)) {
-      setSelectedTimestamp?.(
-        filteredEntries[listSelectedIndex]?.trace.timestamp
-      );
+      dispatch({
+        type: 'set-timestamp',
+        timestamp: filteredEntries[listSelectedIndex]?.trace.timestamp,
+      });
       onOpenDetails?.({
         traces: filteredEntries,
         currentIndex: listSelectedIndex,
@@ -168,12 +167,18 @@ export const LogViewer = ({ onBack, onExit, onOpenDetails, onOpenFilter }) => {
     ) {
       const idx = listSelectedIndex + 1;
       setListSelectedIndex(idx);
-      setSelectedTimestamp?.(filteredEntries[idx].trace.timestamp);
+      dispatch({
+        type: 'set-timestamp',
+        timestamp: filteredEntries[idx].trace.timestamp,
+      });
       ensureVisible(idx);
     } else if (key.upArrow && listSelectedIndex > 0) {
       const idx = listSelectedIndex - 1;
       setListSelectedIndex(idx);
-      setSelectedTimestamp?.(filteredEntries[idx].trace.timestamp);
+      dispatch({
+        type: 'set-timestamp',
+        timestamp: filteredEntries[idx].trace.timestamp,
+      });
       ensureVisible(idx);
     } else if (key.pageDown) {
       const idx = Math.min(
@@ -181,21 +186,29 @@ export const LogViewer = ({ onBack, onExit, onOpenDetails, onOpenFilter }) => {
         listSelectedIndex + pageSize()
       );
       setListSelectedIndex(idx);
-      setSelectedTimestamp?.(filteredEntries[idx].trace.timestamp);
+      dispatch({
+        type: 'set-timestamp',
+        timestamp: filteredEntries[idx].trace.timestamp,
+      });
       ensureVisible(idx);
     } else if (key.pageUp) {
       const idx = Math.max(0, listSelectedIndex - pageSize());
       setListSelectedIndex(idx);
-      setSelectedTimestamp?.(filteredEntries[idx].trace.timestamp);
+      dispatch({
+        type: 'set-timestamp',
+        timestamp: filteredEntries[idx].trace.timestamp,
+      });
       ensureVisible(idx);
     } else if (input === 'g') {
-      setSelectedIndex(0);
-      setSelectedTimestamp?.(filteredEntries[0]?.trace.timestamp);
+      dispatch({ type: 'set-index', index: 0, traces: filteredEntries });
       ensureVisible(0);
     } else if (input === 'G') {
       const idx = filteredEntries.length - 1;
       setListSelectedIndex(idx);
-      setSelectedTimestamp?.(filteredEntries[idx].trace.timestamp);
+      dispatch({
+        type: 'set-timestamp',
+        timestamp: filteredEntries[idx].trace.timestamp,
+      });
       ensureVisible(idx);
     } else if (input === 'f') {
       onOpenFilter?.();
@@ -214,14 +227,20 @@ export const LogViewer = ({ onBack, onExit, onOpenDetails, onOpenFilter }) => {
       if (listSelectedIndex > 0) {
         const idx = listSelectedIndex - 1;
         setListSelectedIndex(idx);
-        setSelectedTimestamp?.(filteredEntries[idx].trace.timestamp);
+        dispatch({
+          type: 'set-timestamp',
+          timestamp: filteredEntries[idx].trace.timestamp,
+        });
         ensureVisible(idx);
       }
     } else if (evt.wheel === 'down') {
       if (listSelectedIndex < filteredEntries.length - 1) {
         const idx = listSelectedIndex + 1;
         setListSelectedIndex(idx);
-        setSelectedTimestamp?.(filteredEntries[idx].trace.timestamp);
+        dispatch({
+          type: 'set-timestamp',
+          timestamp: filteredEntries[idx].trace.timestamp,
+        });
         ensureVisible(idx);
       }
     } else if (evt.button === 'left' && !evt.isRelease) {
@@ -230,8 +249,7 @@ export const LogViewer = ({ onBack, onExit, onOpenDetails, onOpenFilter }) => {
       for (const { item, index } of list.visibleItems) {
         const h = getEntryHeight(item, index === listSelectedIndex);
         if (r < h) {
-          setSelectedIndex(index);
-          setSelectedTimestamp?.(filteredEntries[index].trace.timestamp);
+          dispatch({ type: 'set-index', index, traces: filteredEntries });
           ensureVisible(index);
           break;
         }
