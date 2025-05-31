@@ -5,6 +5,7 @@ import {
   $traceSelection,
   dispatch as traceDispatch,
 } from '../stores/trace-selection-store.js';
+import { $filteredEntries } from '../stores/trace-buffer-store.js';
 import { useMouseInput } from '../hooks/use-mouse-input.js';
 import { AppContainer } from '../components/app-container.js';
 import { useStdoutDimensions } from '../hooks/use-stdout-dimensions.js';
@@ -15,6 +16,7 @@ import { isExitKey } from '../ui-utils/text-utils.js';
 export const TraceDetailsView = () => {
   // Get details state from store
   const { detailsState } = useStore($traceSelection);
+  const traces = useStore($filteredEntries);
 
   if (!detailsState) {
     return React.createElement(AppContainer, {
@@ -27,7 +29,7 @@ export const TraceDetailsView = () => {
     });
   }
 
-  const { traces, currentIndex } = detailsState;
+  const { currentIndex } = detailsState;
 
   const [scrollOffset, setScrollOffset] = useState(0);
   const [terminalWidth, height] = useStdoutDimensions();
