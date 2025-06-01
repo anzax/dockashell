@@ -82,7 +82,7 @@ class Logger {
         command: (command || '').substring(0, 50),
       });
       const recorder = await this.getTraceRecorder(projectName);
-      await recorder.execution('run_command', { command }, logResult);
+      await recorder.execution('bash', { command }, logResult);
     } catch (error) {
       console.error('Failed to log command:', error.message);
       // Don't throw - logging failures shouldn't break the main operation

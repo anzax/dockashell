@@ -91,7 +91,7 @@ The `apply_patch` tool enables flexible, incremental file updates using the Open
 - ✅ Modifying functions, classes, or configuration sections
 - ✅ Creating new files or deleting existing ones
 - ✅ Moving files with content changes
-- ❌ Large file restructuring (use `run_command` with text editors instead)
+- ❌ Large file restructuring (use `bash` with text editors instead)
 
 ### Error Recovery
 

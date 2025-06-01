@@ -7,19 +7,28 @@ import {
 
 describe('trace-utils', () => {
   test('parseTraceLine handles known tools', () => {
-    const cmdLine = JSON.stringify({
+    const bashLine = JSON.stringify({
       timestamp: '2025-01-01T00:00:00Z',
-      tool: 'run_command',
+      tool: 'bash',
       command: 'echo hi',
       result: { exitCode: 0 },
     });
-    const cmd = parseTraceLine(cmdLine);
-    assert.deepStrictEqual(cmd, {
+    const bash = parseTraceLine(bashLine);
+    assert.deepStrictEqual(bash, {
       timestamp: '2025-01-01T00:00:00Z',
       kind: 'command',
       command: 'echo hi',
       result: { exitCode: 0 },
     });
+
+    const legacyLine = JSON.stringify({
+      timestamp: '2025-01-01T00:00:00Z',
+      tool: 'run_command',
+      command: 'echo hi',
+      result: { exitCode: 0 },
+    });
+    const legacy = parseTraceLine(legacyLine);
+    assert.deepStrictEqual(legacy, bash);
 
     const patchLine = JSON.stringify({
       timestamp: '2025-01-01T00:00:01Z',

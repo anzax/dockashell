@@ -15,12 +15,12 @@ describe('execution-tools', () => {
   test('registers tools', () => {
     const server = createServer();
     registerExecutionTools(server, {}, {}, {});
-    assert.ok(server.tools.run_command);
+    assert.ok(server.tools.bash);
     assert.ok(server.tools.apply_patch);
     assert.ok(server.tools.write_file);
   });
 
-  test('run_command success', async () => {
+  test('bash success', async () => {
     const server = createServer();
     const pm = { loadProject: async () => ({}) };
     const cm = {
@@ -34,7 +34,7 @@ describe('execution-tools', () => {
     };
     const sm = { validateCommand: () => {}, getMaxExecutionTime: () => 1 };
     registerExecutionTools(server, pm, cm, sm);
-    const result = await server.tools.run_command.handler({
+    const result = await server.tools.bash.handler({
       project_name: 'proj',
       command: 'ls',
     });
@@ -42,7 +42,7 @@ describe('execution-tools', () => {
     assert.ok(result.content[0].text.includes('**Exit Code:** 0'));
   });
 
-  test('run_command failure response', async () => {
+  test('bash failure response', async () => {
     const server = createServer();
     const pm = { loadProject: async () => ({}) };
     const cm = {
@@ -50,18 +50,18 @@ describe('execution-tools', () => {
     };
     const sm = { validateCommand: () => {}, getMaxExecutionTime: () => 1 };
     registerExecutionTools(server, pm, cm, sm);
-    const res = await server.tools.run_command.handler({
+    const res = await server.tools.bash.handler({
       project_name: 'p',
       command: 'ls',
     });
     assert.strictEqual(res.isError, true);
   });
 
-  test('run_command invalid command throws', async () => {
+  test('bash invalid command throws', async () => {
     const server = createServer();
     registerExecutionTools(server, {}, {}, {});
     await assert.rejects(
-      server.tools.run_command.handler({ project_name: 'p', command: '' }),
+      server.tools.bash.handler({ project_name: 'p', command: '' }),
       /Command must be a non-empty string/
     );
   });

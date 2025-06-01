@@ -104,25 +104,25 @@ list_projects();
 start_project({ project_name: 'web-app' });
 
 // 3. Initialize a new Node.js project
-run_command({
+bash({
   project_name: 'web-app',
   command: 'npm init -y',
 });
 
 // 4. Install dependencies
-run_command({
+bash({
   project_name: 'web-app',
   command: 'npm install express',
 });
 
 // 5. Create a simple server
-run_command({
+bash({
   project_name: 'web-app',
   command: 'echo \'const express = require("express"); const app = express(); app.get("/", (req, res) => res.send("Hello World!")); app.listen(3000);\' > app.js',
 });
 
 // 6. Start the server
-run_command({
+bash({
   project_name: 'web-app',
   command: 'node app.js',
 });
@@ -176,7 +176,7 @@ Lists all configured projects with their status.
 
 **Arguments:** `{"project_name": "string"}` Starts a Docker container for the specified project.
 
-### `run_command`
+### `bash`
 
 **Arguments:** `{"project_name": "string", "command": "string"}` Executes a shell command in the project container.
 
@@ -254,7 +254,7 @@ Agent traces are stored in `~/.dockashell/projects/{project-name}/traces/current
 ```
 {"id":"tr_abc123","tool":"start_project","trace_type":"execution","project_name":"web-app","result":{"success":true}}
 {"id":"tr_def456","tool":"write_trace","trace_type":"observation","type":"agent","text":"Planning React app"}
-{"id":"tr_ghi789","tool":"run_command","trace_type":"execution","command":"npm start","result":{"exitCode":0,"duration":"0.1s"}}
+{"id":"tr_ghi789","tool":"bash","trace_type":"execution","command":"npm start","result":{"exitCode":0,"duration":"0.1s"}}
 ```
 
 Use `write_trace` to store notes and `read_traces` to query previous entries.

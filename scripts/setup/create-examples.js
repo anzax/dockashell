@@ -182,13 +182,13 @@ async function createExampleProjects() {
   console.log('   Tool: list_projects');
   console.log('   Tool: start_project, Args: {"project_name": "web-app"}');
   console.log(
-    '   Tool: run_command, Args: {"project_name": "web-app", "command": "node --version"}'
+    '   Tool: bash, Args: {"project_name": "web-app", "command": "node --version"}'
   );
   console.log(
-    '   Tool: run_command, Args: {"project_name": "web-app", "command": "python3 --version"}'
+    '   Tool: bash, Args: {"project_name": "web-app", "command": "python3 --version"}'
   );
   console.log(
-    '   Tool: run_command, Args: {"project_name": "web-app", "command": "which rg"}'
+    '   Tool: bash, Args: {"project_name": "web-app", "command": "which rg"}'
   );
 }
 
