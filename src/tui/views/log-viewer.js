@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { Text, useInput } from 'ink';
 import { useStore } from '@nanostores/react';
 import { dispatch as traceDispatch } from '../stores/trace-selection-store.js';
@@ -6,7 +6,6 @@ import { $traceData } from '../stores/trace-buffer-store.js';
 import { $activeProject } from '../stores/project-store.js';
 import { $traceFilters } from '../stores/filter-store.js';
 import { $traceBuffer } from '../stores/trace-buffer-store.js';
-import { useMouseInput } from '../hooks/use-mouse-input.js';
 import { findClosestIndexByTimestamp } from '../ui-utils/entry-utils.js';
 import { AppContainer } from '../components/app-container.js';
 import { TraceItemPreview } from '../components/trace-item-preview.js';
@@ -137,43 +136,6 @@ export const LogViewer = () => {
       uiDispatch({ type: 'set-view', view: 'filter' });
     } else if (input === 'r') {
       buffer?.refresh().catch(() => {});
-    }
-  });
-
-  // Mouse handling with slower scroll: triggers movement every 4 wheel events
-  const wheelCountRef = useRef(0);
-  useMouseInput((evt) => {
-    if (evt.wheel === 'up' || evt.wheel === 'down') {
-      wheelCountRef.current++;
-      if (wheelCountRef.current >= 4) {
-        wheelCountRef.current = 0;
-        const direction = evt.wheel === 'up' ? -1 : 1;
-        const newIndex = listSelectedIndex + direction;
-        if (newIndex >= 0 && newIndex < filteredEntries.length) {
-          traceDispatch({
-            type: 'set-index',
-            index: newIndex,
-            traces: filteredEntries,
-          });
-          traceDispatch({
-            type: 'set-timestamp',
-            timestamp: filteredEntries[newIndex].trace.timestamp,
-          });
-          ensureVisible(newIndex);
-        }
-      }
-    } else if (evt.button === 'left' && !evt.isRelease) {
-      const startRow = 2; // header + marginTop
-      let r = evt.y - startRow;
-      for (const { index } of list.visibleItems) {
-        const h = getEntryHeight(index === listSelectedIndex);
-        if (r < h) {
-          traceDispatch({ type: 'set-index', index, traces: filteredEntries });
-          ensureVisible(index);
-          break;
-        }
-        r -= h;
-      }
     }
   });
 
