@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { Box } from 'ink';
-import { useTerminalMouseMode } from './hooks/use-terminal-mouse-mode.js';
 import { useGlobalKeys } from './hooks/use-global-keys.js';
 import { useStdoutDimensions } from './hooks/use-stdout-dimensions.js';
 import { ProjectSelector } from './views/project-selector.js';
@@ -18,8 +17,6 @@ import { Footer } from './components/footer.js';
  * Main application component that uses trace context
  */
 const MainApp = ({ projectArg }) => {
-  // Enable mouse mode for the entire application
-  useTerminalMouseMode();
   useGlobalKeys();
 
   const project = useStore($activeProject);

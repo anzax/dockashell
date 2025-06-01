@@ -6,7 +6,6 @@ import {
   dispatch as traceDispatch,
 } from '../stores/trace-selection-store.js';
 import { $traceData } from '../stores/trace-buffer-store.js';
-import { useMouseInput } from '../hooks/use-mouse-input.js';
 import { AppContainer } from '../components/app-container.js';
 import { useStdoutDimensions } from '../hooks/use-stdout-dimensions.js';
 import { buildFullLines } from '../components/trace-item-preview.js';
@@ -99,14 +98,6 @@ export const TraceDetailsView = () => {
     // Close view
     else if (isExitKey(input, key)) {
       uiDispatch({ type: 'close-details' });
-    }
-  });
-
-  useMouseInput((evt) => {
-    if (evt.wheel === 'up') {
-      setScrollOffset((prev) => Math.max(0, prev - 1));
-    } else if (evt.wheel === 'down') {
-      setScrollOffset((prev) => Math.min(maxScrollOffset, prev + 1));
     }
   });
 
