@@ -115,24 +115,21 @@ async function testMCPTools() {
 
   // Test 4: Run command with invalid parameters
   try {
-    console.log('4. Testing run_command with empty command...');
-    const response = await runMCPCommand('run_command', {
+    console.log('4. Testing bash with empty command...');
+    const response = await runMCPCommand('bash', {
       project_name: 'test-project',
       command: '',
     });
     if (response.error || response.result?.isError) {
       console.log(
-        '✅ run_command properly rejected empty command:',
+        '✅ bash properly rejected empty command:',
         response.result?.content?.[0]?.text || response.error?.message
       );
     } else {
       console.log('❌ Should have failed with empty command');
     }
   } catch (error) {
-    console.log(
-      '✅ run_command properly rejected empty command:',
-      error.message
-    );
+    console.log('✅ bash properly rejected empty command:', error.message);
   }
 
   // Test 5: apply_patch with nonexistent project

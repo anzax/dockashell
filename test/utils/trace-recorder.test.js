@@ -32,11 +32,7 @@ describe('TraceRecorder', () => {
   });
 
   test('writes trace entries and moves on close', async () => {
-    await recorder.execution(
-      'run_command',
-      { command: 'echo hi' },
-      { exit: 0 }
-    );
+    await recorder.execution('bash', { command: 'echo hi' }, { exit: 0 });
     const fileExists = await fs.pathExists(recorder.currentFile);
     assert.ok(fileExists);
     await recorder.close();
