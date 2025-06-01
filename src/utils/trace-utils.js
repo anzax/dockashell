@@ -1,7 +1,7 @@
 export function parseTraceLine(line) {
   try {
     const trace = JSON.parse(line);
-    if (trace.tool === 'run_command') {
+    if (trace.tool === 'bash' || trace.tool === 'run_command') {
       return {
         timestamp: trace.timestamp,
         kind: 'command',

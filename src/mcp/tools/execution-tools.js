@@ -9,7 +9,7 @@ export function registerExecutionTools(
 ) {
   // Run command
   server.tool(
-    'run_command',
+    'bash',
     {
       project_name: z.string().describe('Name of the project'),
       command: z.string().describe('Shell command to execute'),
