@@ -19,17 +19,6 @@ dockashell logs web-app
 dockashell recreate web-app
 ```
 
-### Data Science Project
-
-```bash
-# Create project with default Python/Jupyter setup
-dockashell create data-analysis
-dockashell start data-analysis
-
-# View real-time traces
-dockashell logs
-```
-
 ### Multi-Project Management
 
 ```bash
@@ -78,7 +67,7 @@ dockashell logs             # Interactive trace viewer
 dockashell logs <project>   # View specific project
 ```
 
-### AI Integration
+### MCP server
 
 ```bash
 dockashell serve            # Start MCP server

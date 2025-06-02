@@ -9,7 +9,7 @@ USAGE:
 
 COMMANDS:
   status [--json]           Show Docker status, images, and all projects
-  build [--force]           Build default development image  
+  build [--force]           Build default development image
   start <project>           Start project container
   stop <project>            Stop project container
   create <project>          Create new project configuration
@@ -27,13 +27,13 @@ EXAMPLES:
   dockashell recreate web-app         # Apply config changes
 
 Run 'dockashell help <command>' for detailed information.
-For more: https://github.com/your-org/dockashell
+For more: https://github.com/anzax/dockashell
 `;
 
 const DETAILED_HELP = {
   status: `
 COMMAND: status
-Show comprehensive system status including Docker daemon, 
+Show comprehensive system status including Docker daemon,
 default image, and all projects with container states.
 
 USAGE:
@@ -43,7 +43,7 @@ OPTIONS:
   --json                   Output machine-readable JSON
 
 OUTPUT INCLUDES:
-  • Docker daemon status and version  
+  • Docker daemon status and version
   • Default image availability and build date
   • All projects with container states (running/stopped/missing)
   • Port usage and basic resource summary
@@ -54,7 +54,7 @@ EXAMPLES:
 `,
 
   build: `
-COMMAND: build  
+COMMAND: build
 Build the default DockaShell development image with Python 3.12,
 Node.js 20 LTS, and essential development tools.
 
@@ -66,7 +66,7 @@ OPTIONS:
 
 BUILD DETAILS:
   • Image: dockashell/default-dev:latest
-  • Base: Microsoft Python 3.12 devcontainer  
+  • Base: Microsoft Python 3.12 devcontainer
   • Build time: 2-5 minutes on first run
   • Includes: Python, Node.js, npm, yarn, ripgrep, jq
 
@@ -79,7 +79,7 @@ EXAMPLES:
 COMMAND: start
 Start a project container. Creates container from config if needed.
 
-USAGE:  
+USAGE:
   dockashell start <project>
 
 REQUIREMENTS:
@@ -114,7 +114,7 @@ EXAMPLES:
 `,
 
   create: `
-COMMAND: create  
+COMMAND: create
 Create a new project with default configuration.
 
 USAGE:
@@ -123,7 +123,7 @@ USAGE:
 BEHAVIOR:
   • Creates ~/.dockashell/projects/<project>/ directory
   • Generates default config.json with common settings
-  • Sets up workspace mount to ~/projects/<project>
+  • Sets up workspace mount to ~/dockashell-projects/<project>
   • Configures common development ports (3000, 8000, etc.)
 
 PROJECT NAMING:
@@ -132,7 +132,7 @@ PROJECT NAMING:
 
 EXAMPLES:
   dockashell create my-web-app        # Create web project
-  dockashell create data-science      # Create data project  
+  dockashell create data-science      # Create data project
 `,
 
   recreate: `
@@ -147,7 +147,7 @@ USE CASES:
   • Updated default image and want to use new version
   • Container corrupted or needs fresh start
 
-BEHAVIOR:  
+BEHAVIOR:
   • Stops running container
   • Removes container (preserves project files)
   • Creates new container with current config
@@ -173,7 +173,7 @@ FEATURES:
 
 KEYBOARD SHORTCUTS:
   • ↑↓ Navigate traces
-  • Enter: View trace details  
+  • Enter: View trace details
   • f: Filter by type
   • /: Search
   • q: Quit
@@ -199,7 +199,7 @@ INTEGRATION:
   {
     "mcpServers": {
       "dockashell": {
-        "command": "dockashell", 
+        "command": "dockashell",
         "args": ["serve"]
       }
     }

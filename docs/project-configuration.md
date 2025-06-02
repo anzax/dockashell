@@ -22,7 +22,7 @@ DockaShell stores each project's config in `~/.dockashell/projects/{name}/config
   "description": "Node.js web application with hot reload",
   "mounts": [
     {
-      "host": "~/projects/web-app",
+      "host": "~/dockashell-projects/web-app",
       "container": "/workspace",
       "readonly": false
     }
@@ -48,7 +48,7 @@ DockaShell stores each project's config in `~/.dockashell/projects/{name}/config
   "image": "node:16-bullseye",
   "mounts": [
     {
-      "host": "~/projects/legacy-app",
+      "host": "~/dockashell-projects/legacy-app",
       "container": "/workspace",
       "readonly": false
     }
