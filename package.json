@@ -17,8 +17,8 @@
     "format": "prettier --write .",
     "format:md": "prettier --write '**/*.md'",
     "format:check": "prettier --check .",
-    "build-image": "node scripts/image/build-default-image.js",
-    "rebuild-image": "node scripts/image/build-default-image.js --rebuild"
+    "build-image": "node src/cli/cli.js build",
+    "rebuild-image": "node src/cli/cli.js build --force"
   },
   "dependencies": {
     "@inkjs/ui": "^2.0.0",
