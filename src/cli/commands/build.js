@@ -1,5 +1,6 @@
 import { ImageBuilder } from '../utils/image-builder.js';
 import { success, error as errorColor } from '../utils/output.js';
+import { checkDockerDaemon } from '../utils/docker-utils.js';
 
 export function registerBuild(program) {
   program
@@ -8,6 +9,12 @@ export function registerBuild(program) {
     .option('-f, --force', 'Force rebuild (ignore existing image)')
     .option('-q, --quiet', 'Minimal output during build')
     .action(async (options) => {
+      const docker = await checkDockerDaemon();
+      if (!docker.running) {
+        console.error(errorColor('Docker daemon not running'));
+        process.exit(1);
+      }
+
       const builder = new ImageBuilder();
       try {
         if (options.force) {
@@ -23,6 +30,7 @@ export function registerBuild(program) {
         else console.log(errorColor('Image build failed'));
       } catch (err) {
         console.error(errorColor(`Error: ${err.message}`));
+        process.exit(1);
       }
     });
 }
