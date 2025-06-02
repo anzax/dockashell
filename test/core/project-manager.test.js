@@ -96,12 +96,12 @@ describe('ProjectManager', () => {
 
     await assert.rejects(
       async () => await projectManager.loadProject('../../malicious'),
-      /can only contain letters/
+      /lowercase letters/
     );
 
     await assert.rejects(
       async () => await projectManager.loadProject('project with spaces'),
-      /can only contain letters/
+      /lowercase letters/
     );
   });
 
