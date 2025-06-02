@@ -46,24 +46,6 @@ This implementation adds a comprehensive default Docker image approach to DockaS
 npm run build-image        # Build default image
 npm run rebuild-image      # Force rebuild existing image
 npm run setup-examples     # Create example projects
-npm run setup-config       # Initialize ~/.dockashell
-```
-
-Running `npm run setup-config` now creates a global `config.json` with TUI display settings and the `logging.traces.session_timeout` property:
-
-```json
-{
-  "tui": {
-    "display": {
-      "max_entries": 100
-    }
-  },
-  "logging": {
-    "traces": {
-      "session_timeout": "4h"
-    }
-  }
-}
 ```
 
 ## 🔄 Project Configuration Changes

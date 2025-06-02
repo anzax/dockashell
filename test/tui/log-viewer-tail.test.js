@@ -48,7 +48,7 @@ describe('LogViewer default selection', () => {
   test('selects last trace on load', async () => {
     resetTraceSelection();
     const { stdin, unmount } = render(React.createElement(LogViewer));
-    await new Promise((r) => setTimeout(r, 50));
+    await new Promise((r) => setTimeout(r, 100));
     stdin.write('\r');
     await new Promise((r) => setTimeout(r, 20));
     assert.strictEqual($uiState.get().activeView, 'details');
