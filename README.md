@@ -35,15 +35,28 @@ DockaShell is an experimental project under active development. It is not yet st
 ### 1. Installation
 
 ```bash
+npm install -g dockashell
+# OR for development:
 git clone <repository>
 cd dockashell
 npm install
+npm link  # Makes dockashell command available
 ```
 
-### 2. Build the Default Docker Image
+### 2. Initial Setup
 
 ```bash
+# Check system status
+dockashell status
+
+# Build default development image
 dockashell build
+
+# Create your first project
+dockashell create my-project
+
+# Start working
+dockashell start my-project
 ```
 
 ## 🐳 Default Development Image
@@ -86,43 +99,9 @@ dockashell build
 dockashell build --force
 ```
 
-## 📝 Example Workflow
+## 📝 CLI Usage
 
-Here's how an AI agent would typically use DockaShell:
-
-```javascript
-// 1. List available projects
-list_projects();
-
-// 2. Start a web development project
-start_project({ project_name: 'web-app' });
-
-// 3. Initialize a new Node.js project
-bash({
-  project_name: 'web-app',
-  command: 'npm init -y',
-});
-
-// 4. Install dependencies
-bash({
-  project_name: 'web-app',
-  command: 'npm install express',
-});
-
-// 5. Create a simple server
-bash({
-  project_name: 'web-app',
-  command: 'echo \'const express = require("express"); const app = express(); app.get("/", (req, res) => res.send("Hello World!")); app.listen(3000);\' > app.js',
-});
-
-// 6. Start the server
-bash({
-  project_name: 'web-app',
-  command: 'node app.js',
-});
-
-// Server is now running at http://localhost:3000
-```
+See [docs/cli-usage.md](docs/cli-usage.md) for workflow examples and full command reference.
 
 ## ⚙️ Configuration
 
@@ -265,7 +244,15 @@ Trace sessions rotate automatically when there are more than four hours between 
 }
 ```
 
-## 🔌 MCP Client Integration
+## 🔌 Installation & Integration
+
+### CLI Installation
+
+```bash
+npm install -g dockashell
+```
+
+### AI Client Integration
 
 Add to your MCP client configuration:
 
@@ -273,23 +260,21 @@ Add to your MCP client configuration:
 {
   "mcpServers": {
     "dockashell": {
-      "command": "node",
-      "args": ["path/to/dockashell/src/mcp/mcp-server.js"]
+      "command": "dockashell",
+      "args": ["serve"]
     }
   }
 }
 ```
 
-Or if installed globally:
+### Development Setup
 
-```json
-{
-  "mcpServers": {
-    "dockashell": {
-      "command": "dockashell"
-    }
-  }
-}
+```bash
+git clone <repository>
+cd dockashell
+npm install
+npm link              # Make CLI available globally
+dockashell build      # Build default image
 ```
 
 ## 📋 Requirements
