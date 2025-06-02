@@ -35,7 +35,7 @@ DockaShell is an experimental project under active development. It is not yet st
 ### 1. Installation
 
 ```bash
-npm install -g dockashell
+npm install -g dockashell # not yet published, coming soon
 # OR for development:
 git clone <repository>
 cd dockashell
@@ -59,6 +59,45 @@ dockashell create my-project
 dockashell start my-project
 ```
 
+### 📋 Requirements
+
+- **Node.js 18+**
+- **Docker** installed and running
+- **Home directory write access** for configuration storage
+
+### MCP Configuration
+
+Add to your MCP client configuration:
+
+```json
+{
+  "mcpServers": {
+    "dockashell": {
+      "command": "dockashell",
+      "args": ["serve"]
+    }
+  }
+}
+```
+
+---
+
+## 🖥️ Terminal User Interface (TUI)
+
+DockaShell includes a Terminal User Interface for viewing agent activity and project traces. The TUI provides immediate visibility into what agents are working on without interrupting their progress.
+
+```bash
+dockashell logs
+```
+
+### Features
+
+- **Project Discovery**: Automatically finds all DockaShell projects
+- **Trace Viewing**: Navigate through agent logs with keyboard
+- **Entry Types**: Displays user inputs, agent reasoning, and command results
+
+---
+
 ## 🐳 Default Development Image
 
 DockaShell includes a comprehensive default development image (`dockashell/default-dev:latest`) with:
@@ -67,7 +106,6 @@ DockaShell includes a comprehensive default development image (`dockashell/defau
 - **Node.js 20 LTS** - Active LTS support
 - **Essential CLI Tools**: ripgrep, jq, git-lfs, build-essential, curl
 - **Package Managers**: npm, yarn, pnpm (via corepack), pip
-- **apply_patch JavaScript tool** for file editing
 - **Non-root user** (vscode, UID 1000) with workspace access
 
 ### Benefits of the Default Image
@@ -76,18 +114,6 @@ DockaShell includes a comprehensive default development image (`dockashell/defau
 - **Simplicity**: Project configs focus on project-specific needs (ports, mounts, env vars)
 - **Performance**: Base image is cached and reused across all projects
 - **Zero Configuration**: Python, Node.js, and essential tools pre-installed
-
-### Using Custom Images
-
-You can override the default image for specific project requirements:
-
-```json
-{
-  "name": "legacy-project",
-  "image": "node:16-bullseye",
-  "description": "Legacy project requiring Node.js 16"
-}
-```
 
 ### Building the Default Image
 
@@ -103,39 +129,9 @@ dockashell build --force
 
 See [docs/cli-usage.md](docs/cli-usage.md) for workflow examples and full command reference.
 
-## ⚙️ Configuration
+## ⚙️ Project Configuration
 
-Projects are configured in `~/.dockashell/projects/{project-name}/config.json`:
-
-```json
-{
-  "name": "my-project",
-  "description": "Project description",
-  "mounts": [
-    {
-      "host": "~/projects/my-project",
-      "container": "/workspace",
-      "readonly": false
-    }
-  ],
-  "ports": [
-    {
-      "host": 3000,
-      "container": 3000
-    }
-  ],
-  "environment": {
-    "NODE_ENV": "development"
-  },
-  "working_dir": "/workspace",
-  "shell": "/bin/bash",
-  "security": {
-    "max_execution_time": 300
-  }
-}
-```
-
-Note: The `image` field is optional - if omitted, projects will use the default `dockashell/default-dev:latest` image.
+See [docs/project-configuration.md](docs/project-configuration.md) for configuration details and full schema reference.
 
 ## 🔧 MCP Tools
 
@@ -243,83 +239,6 @@ Trace sessions rotate automatically when there are more than four hours between 
   }
 }
 ```
-
-## 🔌 Installation & Integration
-
-### CLI Installation
-
-```bash
-npm install -g dockashell
-```
-
-### AI Client Integration
-
-Add to your MCP client configuration:
-
-```json
-{
-  "mcpServers": {
-    "dockashell": {
-      "command": "dockashell",
-      "args": ["serve"]
-    }
-  }
-}
-```
-
-### Development Setup
-
-```bash
-git clone <repository>
-cd dockashell
-npm install
-npm link              # Make CLI available globally
-dockashell build      # Build default image
-```
-
-## 📋 Requirements
-
-- **Node.js 18+**
-- **Docker** installed and running
-- **Home directory write access** for configuration storage
-
----
-
-## 🖥️ Terminal User Interface (TUI)
-
-DockaShell includes a Terminal User Interface for viewing agent activity and project traces. The TUI provides immediate visibility into what agents are working on without interrupting their progress.
-
-### Usage
-
-**Interactive project selector:**
-
-```bash
-dockashell-tui
-```
-
-### Features
-
-- **Project Discovery**: Automatically finds all DockaShell projects
-- **Activity Sorting**: Projects sorted by most recent activity
-- **Trace Viewing**: Navigate through agent logs with keyboard
-- **Entry Types**: Displays user inputs, agent reasoning, and command results
-- **Configurable**: Customizable display settings via `~/.dockashell/config.json`
-
-### TUI Configuration
-
-TUI settings in `~/.dockashell/config.json`:
-
-```json
-{
-  "tui": {
-    "display": {
-      "max_entries": 100
-    }
-  }
-}
-```
-
----
 
 ## 📄 License
 

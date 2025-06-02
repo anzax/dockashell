@@ -13,7 +13,11 @@ export const DEFAULT_GLOBAL_CONFIG = {
 
 export const DEFAULT_PROJECT_CONFIG = {
   mounts: [
-    { host: '~/projects/{name}', container: '/workspace', readonly: false },
+    {
+      host: '~/dockashell-projects/{name}',
+      container: '/workspace',
+      readonly: false,
+    },
   ],
   ports: [],
   environment: {},
