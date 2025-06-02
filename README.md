@@ -46,12 +46,6 @@ npm install
 npm run build-image
 ```
 
-### 3. Create Example Projects
-
-```bash
-npm run setup-examples
-```
-
 ## 🐳 Default Development Image
 
 DockaShell includes a comprehensive default development image (`dockashell/default-dev:latest`) with:
