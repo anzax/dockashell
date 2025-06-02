@@ -4,12 +4,19 @@ import ProjectManager from '../../core/project-manager.js';
 import ContainerManager from '../../core/container-manager.js';
 import { success, error as errorColor, warn } from '../utils/output.js';
 import { createDefaultConfig } from '../utils/project-utils.js';
+import { checkDockerDaemon } from '../utils/docker-utils.js';
 
 export function registerProjectCommands(program) {
   program
     .command('start <project>')
     .description('Start project container')
     .action(async (project) => {
+      const docker = await checkDockerDaemon();
+      if (!docker.running) {
+        console.error(errorColor('Docker daemon not running'));
+        process.exit(1);
+      }
+
       const pm = new ProjectManager();
       await pm.initialize();
       const cm = new ContainerManager(pm);
@@ -19,6 +26,7 @@ export function registerProjectCommands(program) {
         console.log(success(`Started: ${result.containerId}`));
       } catch (err) {
         console.error(errorColor(`Error: ${err.message}`));
+        process.exit(1);
       }
     });
 
@@ -26,6 +34,12 @@ export function registerProjectCommands(program) {
     .command('stop <project>')
     .description('Stop project container')
     .action(async (project) => {
+      const docker = await checkDockerDaemon();
+      if (!docker.running) {
+        console.error(errorColor('Docker daemon not running'));
+        process.exit(1);
+      }
+
       const pm = new ProjectManager();
       await pm.initialize();
       const cm = new ContainerManager(pm);
@@ -35,6 +49,7 @@ export function registerProjectCommands(program) {
         console.log(success('Stopped'));
       } catch (err) {
         console.error(errorColor(`Error: ${err.message}`));
+        process.exit(1);
       }
     });
 
@@ -59,6 +74,7 @@ export function registerProjectCommands(program) {
         console.log(success(`Created project at ${projectDir}`));
       } catch (err) {
         console.error(errorColor(`Error: ${err.message}`));
+        process.exit(1);
       }
     });
 
@@ -66,6 +82,12 @@ export function registerProjectCommands(program) {
     .command('recreate <project>')
     .description('Recreate project container')
     .action(async (project) => {
+      const docker = await checkDockerDaemon();
+      if (!docker.running) {
+        console.error(errorColor('Docker daemon not running'));
+        process.exit(1);
+      }
+
       const pm = new ProjectManager();
       await pm.initialize();
       const cm = new ContainerManager(pm);
@@ -82,6 +104,7 @@ export function registerProjectCommands(program) {
         console.log(success('Recreated container'));
       } catch (err) {
         console.error(errorColor(`Error: ${err.message}`));
+        process.exit(1);
       }
     });
 }

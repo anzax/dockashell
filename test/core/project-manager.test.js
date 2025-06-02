@@ -141,4 +141,18 @@ describe('ProjectManager', () => {
     assert.strictEqual(projects.length, 1);
     assert.strictEqual(projects[0].name, 'valid-project');
   });
+
+  test('should reject configs with invalid schema', async () => {
+    const badDir = path.join(testConfigDir, 'projects', 'bad');
+    await fs.ensureDir(badDir);
+    await fs.writeJson(path.join(badDir, 'config.json'), {
+      name: 'bad',
+      ports: 'not-an-array',
+    });
+
+    await assert.rejects(
+      async () => projectManager.loadProject('bad'),
+      /Invalid project configuration/
+    );
+  });
 });

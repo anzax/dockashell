@@ -1,4 +1,5 @@
 import DockashellServer from '../../mcp/mcp-server.js';
+import { error as errorColor } from '../utils/output.js';
 
 export function registerServe(program) {
   program
@@ -7,7 +8,12 @@ export function registerServe(program) {
     .option('--http', 'Start HTTP server (coming soon)')
     .option('-v, --verbose', 'Enable debug logging')
     .action(async () => {
-      const server = new DockashellServer();
-      await server.run();
+      try {
+        const server = new DockashellServer();
+        await server.run();
+      } catch (err) {
+        console.error(errorColor(`Error: ${err.message}`));
+        process.exit(1);
+      }
     });
 }
