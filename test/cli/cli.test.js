@@ -31,7 +31,7 @@ test('shows version', async () => {
 
 test('shows help', async () => {
   const result = await run(['help']);
-  assert.ok(result.stdout.includes('Usage'));
+  assert.ok(result.stdout.includes('DockaShell v0.1.0'));
 });
 
 test('auto-creates config structure on first use', async () => {
