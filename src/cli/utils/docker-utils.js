@@ -3,6 +3,9 @@ import Docker from 'dockerode';
 const docker = new Docker();
 
 export async function checkDockerDaemon() {
+  if (process.env.DS_TEST_DOCKER) {
+    return { running: true, version: 'test' };
+  }
   try {
     const info = await docker.info();
     return { running: true, version: info.ServerVersion };
