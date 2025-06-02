@@ -5,8 +5,7 @@
   "type": "module",
   "main": "src/mcp/mcp-server.js",
   "bin": {
-    "dockashell": "./src/mcp/mcp-server.js",
-    "dockashell-tui": "./src/tui/tui-launcher.js"
+    "dockashell": "./src/cli/cli.js"
   },
   "scripts": {
     "start": "node src/mcp/mcp-server.js",
