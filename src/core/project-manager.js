@@ -192,13 +192,22 @@ class ProjectManager {
     if (name.length === 0) {
       throw new Error('Project name cannot be empty');
     }
-    if (!/^[a-zA-Z0-9_-]+$/.test(name)) {
+    if (!/^[a-z0-9][a-z0-9_-]*$/.test(name)) {
       throw new Error(
-        'Project name can only contain letters, numbers, hyphens, and underscores'
+        'Project name must start with letter/number and contain only lowercase letters, numbers, hyphens, and underscores'
       );
     }
     if (name.length > 64) {
       throw new Error('Project name must be 64 characters or less');
+    }
+
+    const reserved = ['docker', 'system', 'default', 'localhost'];
+    if (reserved.includes(name)) {
+      throw new Error(`'${name}' is a reserved name`);
+    }
+
+    if (name.startsWith('-') || name.endsWith('-')) {
+      throw new Error('Project name cannot start or end with hyphen');
     }
   }
 }
