@@ -6,6 +6,12 @@ import { registerProjectCommands } from './commands/project.js';
 import { registerLogs } from './commands/logs.js';
 import { registerServe } from './commands/serve.js';
 import { registerHelp } from './commands/help.js';
+import { error as errorColor } from './utils/output.js';
+
+process.on('uncaughtException', (err) => {
+  console.error(errorColor(`Fatal error: ${err.message}`));
+  process.exit(1);
+});
 
 const program = new Command();
 

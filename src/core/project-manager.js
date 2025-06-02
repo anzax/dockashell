@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
 import { DEFAULT_GLOBAL_CONFIG } from '../utils/default-config.js';
+import { projectConfigSchema } from '../utils/config-schema.js';
 
 class ProjectManager {
   constructor() {
@@ -80,36 +81,24 @@ class ProjectManager {
     }
 
     try {
-      const config = await fs.readJSON(configPath);
-
-      // Validate config structure
-      if (!config || typeof config !== 'object') {
-        throw new Error(
-          'Invalid configuration file: must be a valid JSON object'
-        );
+      const raw = await fs.readJSON(configPath);
+      let config;
+      try {
+        config = projectConfigSchema.parse(raw);
+      } catch {
+        throw new Error('Invalid project configuration');
       }
-
-      // Validate required fields
       if (!config.name) {
         config.name = projectName;
       }
 
-      // Validate image field
-      if (config.image && typeof config.image !== 'string') {
-        throw new Error('Invalid configuration: image must be a string');
-      }
-
-      // Apply defaults
       const projectConfig = {
         name: projectName,
         description: config.description || '',
         image: config.image || this.getDefaultImage(),
         mounts: Array.isArray(config.mounts) ? config.mounts : [],
         ports: Array.isArray(config.ports) ? config.ports : [],
-        environment:
-          config.environment && typeof config.environment === 'object'
-            ? config.environment
-            : {},
+        environment: config.environment || {},
         working_dir: config.working_dir || '/workspace',
         shell: config.shell || '/bin/bash',
         security: {
