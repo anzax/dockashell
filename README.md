@@ -43,7 +43,7 @@ npm install
 ### 2. Build the Default Docker Image
 
 ```bash
-npm run build-image
+dockashell build
 ```
 
 ## 🐳 Default Development Image
@@ -80,10 +80,10 @@ You can override the default image for specific project requirements:
 
 ```bash
 # Build the default image
-npm run build-image
+dockashell build
 
 # Force rebuild
-npm run rebuild-image
+dockashell build --force
 ```
 
 ## 📝 Example Workflow
