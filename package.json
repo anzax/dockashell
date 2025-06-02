@@ -1,13 +1,14 @@
 {
   "name": "dockashell",
   "version": "0.1.0",
-  "description": "AI agent secure Docker environments for project work",
+  "description": "MCP server that gives every AI Agent its own isolated Docker container",
   "type": "module",
   "main": "src/mcp/mcp-server.js",
   "bin": {
     "dockashell": "./src/cli/cli.js"
   },
   "scripts": {
+    "dev:tui": "node src/tui/tui-launcher.js",
     "start": "node src/mcp/mcp-server.js",
     "test": "node --test test/**/*.test.js",
     "test:integration": "node test/integration/test-*.js",
@@ -17,8 +18,7 @@
     "format:md": "prettier --write '**/*.md'",
     "format:check": "prettier --check .",
     "build-image": "node scripts/image/build-default-image.js",
-    "rebuild-image": "node scripts/image/build-default-image.js --rebuild",
-    "dev": "node src/tui/tui-launcher.js"
+    "rebuild-image": "node scripts/image/build-default-image.js --rebuild"
   },
   "dependencies": {
     "@inkjs/ui": "^2.0.0",

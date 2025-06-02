@@ -1,6 +1,6 @@
 # DockaShell v0.1
 
-> **DockaShell** is an open-source MCP server that gives every project its own isolated Docker container — complete with file access, shell execution, and full action traceability.
+> **DockaShell** is an open-source MCP server that gives every AI Agent its own isolated Docker container — complete with file access, shell execution, and full action traceability.
 
 - **MCP tools for file access & shell execution:** Use any compatible client — _Claude Desktop_, _Zed_, _Cursor IDE_, _VS Code_, and more — to interact with your dedicated project container.
 - **Dedicated, persistent containers per project:** Each project runs in its own container, giving AI agents and assistants full control _inside_, with zero risk to your host.
