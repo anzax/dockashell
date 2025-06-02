@@ -1,4 +1,4 @@
-import { ImageBuilder } from '../../../scripts/image/build-default-image.js';
+import { ImageBuilder } from '../utils/image-builder.js';
 import { success, error as errorColor } from '../utils/output.js';
 
 export function registerBuild(program) {

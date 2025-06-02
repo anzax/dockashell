@@ -28,8 +28,6 @@ yarn.lock
 # Examples directory (might contain intentionally unformatted code)
 examples/
 
-# Docker image templates (might have special formatting)
-scripts/image/templates/
 
 # Preserve formatting for specific docs if needed
 # docs/legacy/

@@ -13,7 +13,6 @@ export default [
       'logs/',
       '*.min.js',
       'examples/',
-      'scripts/image/templates/',
     ],
   },
 
