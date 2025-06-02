@@ -5,6 +5,7 @@ import ContainerManager from '../../core/container-manager.js';
 import { success, error as errorColor, warn } from '../utils/output.js';
 import { createDefaultConfig } from '../utils/project-utils.js';
 import { checkDockerDaemon } from '../utils/docker-utils.js';
+import { confirm } from '../utils/prompts.js';
 
 export function registerProjectCommands(program) {
   program
@@ -13,7 +14,11 @@ export function registerProjectCommands(program) {
     .action(async (project) => {
       const docker = await checkDockerDaemon();
       if (!docker.running) {
-        console.error(errorColor('Docker daemon not running'));
+        console.error(
+          errorColor(
+            "Docker daemon not running. Please start Docker Desktop or run 'sudo systemctl start docker'"
+          )
+        );
         process.exit(1);
       }
 
@@ -25,7 +30,14 @@ export function registerProjectCommands(program) {
         const result = await cm.startContainer(project);
         console.log(success(`Started: ${result.containerId}`));
       } catch (err) {
-        console.error(errorColor(`Error: ${err.message}`));
+        if (err.message && err.message.includes('port already in use')) {
+          console.error(errorColor(`Error: ${err.message}`));
+          console.error(
+            warn("Hint: Check what's running on that port with: lsof -i :PORT")
+          );
+        } else {
+          console.error(errorColor(`Error: ${err.message}`));
+        }
         process.exit(1);
       }
     });
@@ -36,7 +48,11 @@ export function registerProjectCommands(program) {
     .action(async (project) => {
       const docker = await checkDockerDaemon();
       if (!docker.running) {
-        console.error(errorColor('Docker daemon not running'));
+        console.error(
+          errorColor(
+            "Docker daemon not running. Please start Docker Desktop or run 'sudo systemctl start docker'"
+          )
+        );
         process.exit(1);
       }
 
@@ -48,7 +64,14 @@ export function registerProjectCommands(program) {
         await cm.stopContainer(project);
         console.log(success('Stopped'));
       } catch (err) {
-        console.error(errorColor(`Error: ${err.message}`));
+        if (err.message && err.message.includes('port already in use')) {
+          console.error(errorColor(`Error: ${err.message}`));
+          console.error(
+            warn("Hint: Check what's running on that port with: lsof -i :PORT")
+          );
+        } else {
+          console.error(errorColor(`Error: ${err.message}`));
+        }
         process.exit(1);
       }
     });
@@ -73,7 +96,14 @@ export function registerProjectCommands(program) {
         });
         console.log(success(`Created project at ${projectDir}`));
       } catch (err) {
-        console.error(errorColor(`Error: ${err.message}`));
+        if (err.message && err.message.includes('port already in use')) {
+          console.error(errorColor(`Error: ${err.message}`));
+          console.error(
+            warn("Hint: Check what's running on that port with: lsof -i :PORT")
+          );
+        } else {
+          console.error(errorColor(`Error: ${err.message}`));
+        }
         process.exit(1);
       }
     });
@@ -84,7 +114,11 @@ export function registerProjectCommands(program) {
     .action(async (project) => {
       const docker = await checkDockerDaemon();
       if (!docker.running) {
-        console.error(errorColor('Docker daemon not running'));
+        console.error(
+          errorColor(
+            "Docker daemon not running. Please start Docker Desktop or run 'sudo systemctl start docker'"
+          )
+        );
         process.exit(1);
       }
 
@@ -93,6 +127,13 @@ export function registerProjectCommands(program) {
       const cm = new ContainerManager(pm);
       try {
         pm.validateProjectName(project);
+        const confirmed = await confirm(
+          `This will destroy the current container for '${project}' and recreate it.`
+        );
+        if (!confirmed) {
+          console.log('Operation cancelled');
+          return;
+        }
         await cm.stopContainer(project);
         try {
           const container = cm.docker.getContainer(`dockashell-${project}`);
@@ -103,7 +144,14 @@ export function registerProjectCommands(program) {
         await cm.startContainer(project);
         console.log(success('Recreated container'));
       } catch (err) {
-        console.error(errorColor(`Error: ${err.message}`));
+        if (err.message && err.message.includes('port already in use')) {
+          console.error(errorColor(`Error: ${err.message}`));
+          console.error(
+            warn("Hint: Check what's running on that port with: lsof -i :PORT")
+          );
+        } else {
+          console.error(errorColor(`Error: ${err.message}`));
+        }
         process.exit(1);
       }
     });
