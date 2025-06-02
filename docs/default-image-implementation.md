@@ -14,7 +14,6 @@ This implementation adds a comprehensive default Docker image approach to DockaS
 ### Modified Files
 
 - `src/project-manager.js` - Updated to use default image (`dockashell/default-dev:latest`)
-- `scripts/setup/create-examples.js` - Simplified example projects using default image
 - `package.json` - Added new npm scripts
 - `README.md` - Updated documentation with default image information
 
@@ -45,7 +44,6 @@ This implementation adds a comprehensive default Docker image approach to DockaS
 ```bash
 npm run build-image        # Build default image
 npm run rebuild-image      # Force rebuild existing image
-npm run setup-examples     # Create example projects
 ```
 
 ## 🔄 Project Configuration Changes
@@ -97,7 +95,6 @@ git clone <repository>
 cd dockashell
 npm install
 npm run build-image
-npm run setup-examples
 ```
 
 ### Development Workflow
@@ -106,9 +103,6 @@ npm run setup-examples
 # Build or rebuild the default image
 npm run build-image
 npm run rebuild-image
-
-# Create example projects
-npm run setup-examples
 
 # Start the MCP server
 npm start
