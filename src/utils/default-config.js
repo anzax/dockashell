@@ -1,4 +1,4 @@
-export const defaultConfig = {
+export const DEFAULT_GLOBAL_CONFIG = {
   tui: {
     display: {
       max_entries: 100,
@@ -7,7 +7,17 @@ export const defaultConfig = {
   logging: {
     traces: {
       session_timeout: '4h',
-      max_output_length: 128 * 1024,
     },
   },
+};
+
+export const DEFAULT_PROJECT_CONFIG = {
+  mounts: [
+    { host: '~/projects/{name}', container: '/workspace', readonly: false },
+  ],
+  ports: [],
+  environment: {},
+  working_dir: '/workspace',
+  shell: '/bin/bash',
+  security: { max_execution_time: 300 },
 };

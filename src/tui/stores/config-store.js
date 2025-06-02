@@ -1,8 +1,8 @@
 import { atom } from 'nanostores';
-import { defaultConfig } from '../../utils/default-config.js';
+import { DEFAULT_GLOBAL_CONFIG } from '../../utils/default-config.js';
 import { loadConfig } from '../../utils/config.js';
 
-export const $appConfig = atom({ ...defaultConfig });
+export const $appConfig = atom({ ...DEFAULT_GLOBAL_CONFIG });
 
 loadConfig()
   .then((cfg) => $appConfig.set(cfg))

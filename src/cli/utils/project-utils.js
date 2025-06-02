@@ -2,6 +2,7 @@ import path from 'path';
 import os from 'os';
 import fs from 'fs-extra';
 import { getContainerState } from './docker-utils.js';
+import { DEFAULT_PROJECT_CONFIG } from '../../utils/default-config.js';
 
 export async function getProjectsStatus(projectManager) {
   const projects = await projectManager.listProjects();
@@ -20,19 +21,12 @@ export async function getProjectsStatus(projectManager) {
 export async function createDefaultConfig(projectName) {
   const dir = path.join(os.homedir(), 'projects', projectName);
   const config = {
+    ...DEFAULT_PROJECT_CONFIG,
     name: projectName,
-    mounts: [
-      {
-        host: `~/projects/${projectName}`,
-        container: '/workspace',
-        readonly: false,
-      },
-    ],
-    ports: [],
-    environment: {},
-    working_dir: '/workspace',
-    shell: '/bin/bash',
-    security: { max_execution_time: 300 },
+    mounts: DEFAULT_PROJECT_CONFIG.mounts.map((m) => ({
+      ...m,
+      host: m.host.replace('{name}', projectName),
+    })),
   };
   await fs.ensureDir(dir);
   return config;
