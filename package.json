@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "MCP server that gives every AI Agent its own isolated Docker container",
   "type": "module",
-  "main": "src/mcp/mcp-server.js",
   "bin": {
     "dockashell": "./src/cli/cli.js"
   },
@@ -18,7 +17,12 @@
     "format:md": "prettier --write '**/*.md'",
     "format:check": "prettier --check .",
     "build-image": "node src/cli/cli.js build",
-    "rebuild-image": "node src/cli/cli.js build --force"
+    "rebuild-image": "node src/cli/cli.js build --force",
+    "release:beta": "release-it --preRelease=beta",
+    "release:patch": "npm run release:beta",
+    "release:minor": "release-it minor --npm.tag=latest",
+    "release:major": "release-it major --npm.tag=latest",
+    "release:stable": "release-it --npm.tag=latest"
   },
   "dependencies": {
     "@inkjs/ui": "^2.0.0",
@@ -35,7 +39,7 @@
     "zod": "^3.23.8"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "keywords": [
     "mcp",
@@ -44,8 +48,25 @@
     "agent",
     "container"
   ],
-  "author": "DockaShell",
+  "author": "https://github.com/anzax",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anzax/dockashell.git"
+  },
+  "homepage": "https://github.com/anzax/dockashell#readme",
+  "bugs": {
+    "url": "https://github.com/anzax/dockashell/issues"
+  },
+  "files": [
+    "src/",
+    "docker/",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@eslint/js": "^9.27.0",
     "eslint": "^9.27.0",
@@ -53,6 +74,7 @@
     "eslint-plugin-prettier": "^5.4.0",
     "globals": "^16.2.0",
     "ink-testing-library": "^4.0.0",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "release-it": "^19.0.3"
   }
 }

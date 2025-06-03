@@ -35,7 +35,8 @@ DockaShell is an experimental project under active development. It is not yet st
 ### 1. Installation
 
 ```bash
-npm install -g dockashell # not yet published, coming soon
+npm install -g dockashell@beta
+
 # OR for development:
 git clone <repository>
 cd dockashell
@@ -61,7 +62,7 @@ dockashell start my-project
 
 ### 📋 Requirements
 
-- **Node.js 18+**
+- **Node.js 20+**
 - **Docker** installed and running
 - **Home directory write access** for configuration storage
 
