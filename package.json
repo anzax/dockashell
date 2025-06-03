@@ -9,6 +9,7 @@
   "scripts": {
     "dev:tui": "node src/tui/tui-launcher.js",
     "start": "node src/mcp/mcp-server.js",
+    "start:remote": "node src/cli/cli.js remote",
     "test": "node --test test/**/*.test.js",
     "test:integration": "node test/integration/test-*.js",
     "lint": "eslint .",
@@ -28,14 +29,18 @@
     "@inkjs/ui": "^2.0.0",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "@nanostores/react": "^1.0.0",
+    "bcryptjs": "^3.0.2",
     "chokidar": "^4.0.3",
     "commander": "^14.0.0",
+    "cors": "^2.8.5",
     "dockerode": "^4.0.0",
+    "express": "^4.19.2",
     "fs-extra": "^11.0.0",
     "ink": "^5.2.1",
     "lodash.throttle": "^4.1.1",
     "nanostores": "^1.0.1",
     "picocolors": "^1.1.1",
+    "uuid": "^10.0.0",
     "zod": "^3.23.8"
   },
   "engines": {
