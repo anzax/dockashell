@@ -1,0 +1,19 @@
+{
+  "git": {
+    "requireBranch": "main",
+    "commitMessage": "release: v${version}",
+    "tagName": "v${version}"
+  },
+  "github": {
+    "release": true,
+    "releaseName": "v${version}"
+  },
+  "npm": {
+    "publish": true,
+    "publishPath": ".",
+    "tag": "beta"
+  },
+  "hooks": {
+    "before:init": ["npm run test", "npm run lint"]
+  }
+}

@@ -1,0 +1,31 @@
+# Development files
+test/
+.github/
+.vscode/
+.idea/
+
+# Config files
+.eslintrc*
+.prettierrc*
+.release-it.json
+.auto-changelog
+
+# Build artifacts
+*.tgz
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Docker
+Dockerfile.dev
+docker-compose*
+
+# Git
+.git/
+.gitignore
