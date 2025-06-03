@@ -1,12 +1,27 @@
 export const DEFAULT_GLOBAL_CONFIG = {
   tui: {
     display: {
-      max_entries: 100,
+      max_entries: 300,
     },
   },
   logging: {
     traces: {
       session_timeout: '4h',
+    },
+  },
+  remote_mcp: {
+    enabled: false,
+    port: 3333,
+    auth: {
+      username: 'admin',
+      password: 'changeme123', // Will be bcrypt hashed
+    },
+    cors: {
+      origin: '*',
+      credentials: true,
+    },
+    session: {
+      timeout: '24h',
     },
   },
 };

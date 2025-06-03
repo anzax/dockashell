@@ -5,6 +5,7 @@ import { registerBuild } from './commands/build.js';
 import { registerProjectCommands } from './commands/project.js';
 import { registerLogs } from './commands/logs.js';
 import { registerServe } from './commands/serve.js';
+import { registerRemoteServe } from './commands/remote.js';
 import { registerHelp } from './commands/help.js';
 import { error as errorColor } from './utils/output.js';
 
@@ -25,6 +26,7 @@ registerBuild(program);
 registerProjectCommands(program);
 registerLogs(program);
 registerServe(program);
+registerRemoteServe(program);
 registerHelp(program);
 
 program.parse(process.argv);

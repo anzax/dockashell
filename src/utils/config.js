@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
+import bcrypt from 'bcryptjs';
 import { DEFAULT_GLOBAL_CONFIG } from './default-config.js';
 
 export async function loadConfig() {
@@ -23,8 +24,24 @@ export async function loadConfig() {
       cfg.logging.traces.session_timeout =
         DEFAULT_GLOBAL_CONFIG.logging.traces.session_timeout;
     }
+    if (!cfg.remote_mcp)
+      cfg.remote_mcp = { ...DEFAULT_GLOBAL_CONFIG.remote_mcp };
+    if (!cfg.remote_mcp.auth)
+      cfg.remote_mcp.auth = { ...DEFAULT_GLOBAL_CONFIG.remote_mcp.auth };
+    if (!cfg.remote_mcp.cors)
+      cfg.remote_mcp.cors = { ...DEFAULT_GLOBAL_CONFIG.remote_mcp.cors };
+    if (!cfg.remote_mcp.session)
+      cfg.remote_mcp.session = { ...DEFAULT_GLOBAL_CONFIG.remote_mcp.session };
     return cfg;
   } catch {
     return { ...DEFAULT_GLOBAL_CONFIG };
   }
+}
+
+export async function hashPassword(password) {
+  return await bcrypt.hash(password, 10);
+}
+
+export async function verifyPassword(password, hash) {
+  return await bcrypt.compare(password, hash);
 }
