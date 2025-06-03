@@ -1,6 +1,6 @@
 {
   "name": "dockashell",
-  "version": "0.1.0",
+  "version": "0.1.1-beta.0",
   "description": "MCP server that gives every AI Agent its own isolated Docker container",
   "type": "module",
   "bin": {
