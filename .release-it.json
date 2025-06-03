@@ -1,8 +1,9 @@
 {
   "git": {
-    "requireBranch": "main",
+    "requireBranch": false,
     "commitMessage": "release: v${version}",
-    "tagName": "v${version}"
+    "tagName": "v${version}",
+    "push": false
   },
   "github": {
     "release": true,
