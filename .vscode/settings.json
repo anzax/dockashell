@@ -1,6 +1,5 @@
 {
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
     "source.organizeImports": "explicit"
@@ -9,7 +8,6 @@
   "files.associations": {
     "*.js": "javascript"
   },
-  "editor.rulers": [80],
   "editor.tabSize": 2,
   "editor.insertSpaces": true
 }
