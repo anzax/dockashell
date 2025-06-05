@@ -5,8 +5,18 @@ import { registerExecutionTools } from '../../src/mcp/tools/execution-tools.js';
 function createServer() {
   return {
     tools: {},
-    tool(name, _schema, handler) {
-      this.tools[name] = { handler };
+    tool(name, description, schema, handler) {
+      // Handle both 3-param (old) and 4-param (new) formats
+      if (typeof description === 'function') {
+        // 3-param format: tool(name, schema, handler)
+        this.tools[name] = { handler: description };
+      } else if (typeof schema === 'function') {
+        // 4-param format: tool(name, description, schema, handler)
+        this.tools[name] = { handler: schema };
+      } else {
+        // 4-param format: tool(name, description, schema, handler)
+        this.tools[name] = { handler };
+      }
     },
   };
 }

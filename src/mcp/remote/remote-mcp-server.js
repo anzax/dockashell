@@ -1,16 +1,16 @@
-import express from 'express';
-import cors from 'cors';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { SimpleAuth } from './auth/simple-auth.js';
-import { TransportManager } from './transport/transport-manager.js';
-import { registerProjectTools } from '../tools/project-tools.js';
-import { registerExecutionTools } from '../tools/execution-tools.js';
-import { registerLogTools } from '../tools/log-tools.js';
-import ProjectManager from '../../core/project-manager.js';
+import cors from 'cors';
+import express from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import ContainerManager from '../../core/container-manager.js';
+import ProjectManager from '../../core/project-manager.js';
 import SecurityManager from '../../core/security.js';
 import Logger from '../../utils/logger.js';
-import { v4 as uuidv4 } from 'uuid';
+import { registerExecutionTools } from '../tools/execution-tools.js';
+import { registerLogTools } from '../tools/log-tools.js';
+import { registerProjectTools } from '../tools/project-tools.js';
+import { SimpleAuth } from './auth/simple-auth.js';
+import { TransportManager } from './transport/transport-manager.js';
 
 /**
  * Remote MCP Server with simple single-user authentication
@@ -80,7 +80,7 @@ export class RemoteMCPServer {
     if (process.env.NODE_ENV !== 'production') {
       this.app.use((req, _res, next) => {
         if (req.method === 'OPTIONS') {
-          console.log('🔍 CORS Preflight Request:', {
+          console.log('CORS Preflight Request:', {
             origin: req.headers.origin,
             method: req.headers['access-control-request-method'],
             headers: req.headers['access-control-request-headers'],
@@ -167,7 +167,7 @@ export class RemoteMCPServer {
           </style>
         </head>
         <body>
-          <h2>🐳 DockaShell Authentication</h2>
+          <h2>DockaShell Authentication</h2>
           <form onsubmit="handleLogin(event)">
             <div class="form-group">
               <input type="text" id="username" placeholder="Username" required>
@@ -472,13 +472,11 @@ export class RemoteMCPServer {
 
     const server = this.app.listen(this.config.port, () => {
       console.log(
-        `🐳 DockaShell Remote MCP Server started on port ${this.config.port}`
+        `DockaShell Remote MCP Server started on port ${this.config.port}`
       );
+      console.log(`Health check: http://localhost:${this.config.port}/health`);
       console.log(
-        `📊 Health check: http://localhost:${this.config.port}/health`
-      );
-      console.log(
-        `🔐 OAuth discovery: http://localhost:${this.config.port}/.well-known/oauth-authorization-server`
+        `OAuth discovery: http://localhost:${this.config.port}/.well-known/oauth-authorization-server`
       );
     });
 

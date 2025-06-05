@@ -5,6 +5,7 @@ export function registerLogTools(server, logger) {
   // Write trace note
   server.tool(
     'write_trace',
+    'Records trace entries for auditing agent actions and preserving session context',
     {
       project_name: z.string().describe('Project name'),
       type: z.enum(['user', 'summary', 'agent']).describe('Note type'),
@@ -23,6 +24,7 @@ export function registerLogTools(server, logger) {
   // Read traces
   server.tool(
     'read_traces',
+    'Retrieves and filters trace history for a project, showing command executions, file operations, and notes with timestamps',
     {
       project_name: z.string().describe('Project name'),
       type: z

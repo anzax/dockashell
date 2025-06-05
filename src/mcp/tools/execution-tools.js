@@ -10,6 +10,7 @@ export function registerExecutionTools(
   // Run command
   server.tool(
     'bash',
+    'Executes shell commands in a project container. Avoid interactive commands (vim, nano, less, top) as they require TTY. Use non-interactive alternatives instead.',
     {
       project_name: z.string().describe('Name of the project'),
       command: z.string().describe('Shell command to execute'),
@@ -55,6 +56,7 @@ export function registerExecutionTools(
   // Apply patch
   server.tool(
     'apply_patch',
+    'Applies code patches using OpenAI format. Patch must start with "*** Begin Patch\\n" and end with "\\n*** End Patch". Use "*** Add File: path", "*** Update File: path", or "*** Delete File: path" followed by diff content with +/- lines.',
     {
       project_name: z.string().describe('Name of the project'),
       patch: z
@@ -90,6 +92,7 @@ export function registerExecutionTools(
   // Write file
   server.tool(
     'write_file',
+    'Creates or overwrites files in a project container with the specified content',
     {
       project_name: z.string().describe('Name of the project'),
       path: z.string().describe('File path inside container'),
