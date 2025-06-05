@@ -1,4 +1,4 @@
-# DockaShell v0.1
+# DockaShell
 
 > **DockaShell** is an open-source MCP server that gives every AI Agent its own isolated Docker container — complete with file access, shell execution, and full action traceability.
 
@@ -130,9 +130,9 @@ dockashell build --force
 
 See [docs/cli-usage.md](docs/cli-usage.md) for workflow examples and full command reference.
 
-## ⚙️ Project Configuration
+## ⚙️ Configuration
 
-See [docs/project-configuration.md](docs/project-configuration.md) for configuration details and full schema reference.
+See [docs/dockashell-configuration.md](docs/dockashell-configuration.md) for global and project configuration details.
 
 ## 🔧 MCP Tools
 
@@ -229,17 +229,7 @@ Agent traces are stored in `~/.dockashell/projects/{project-name}/traces/current
 
 Use `write_trace` to store notes and `read_traces` to query previous entries.
 
-Trace sessions rotate automatically when there are more than four hours between entries. If DockaShell restarts within this window, the same `current.jsonl` file continues to be used so history remains visible in the TUI. The timeout can be changed in `~/.dockashell/config.json` using `logging.traces.session_timeout` (e.g. `"2h"`). The default configuration sets this to `"4h"`:
-
-```json
-{
-  "logging": {
-    "traces": {
-      "session_timeout": "4h"
-    }
-  }
-}
-```
+Trace sessions rotate automatically when there are more than four hours between entries. If DockaShell restarts within this window, the same `current.jsonl` file continues to be used so history remains visible in the TUI. See [docs/dockashell-configuration.md](docs/dockashell-configuration.md) for trace session configuration options.
 
 ## 📄 License
 
