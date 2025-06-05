@@ -6,13 +6,36 @@ This document covers both global and project-specific configuration for DockaShe
 
 DockaShell stores global settings in `~/.dockashell/config.json`. This file controls system-wide behavior and default settings.
 
-### Global Configuration Example
+### Complete Global Configuration Example
 
 ```json
 {
+  "projects": {
+    "directory": "~/dockashell-projects"
+  },
+  "tui": {
+    "display": {
+      "max_entries": 300
+    }
+  },
   "logging": {
     "traces": {
       "session_timeout": "4h"
+    }
+  },
+  "remote_mcp": {
+    "enabled": false,
+    "port": 3333,
+    "auth": {
+      "username": "admin",
+      "password": "changeme123"
+    },
+    "cors": {
+      "origin": "*",
+      "credentials": true
+    },
+    "session": {
+      "timeout": "24h"
     }
   }
 }
@@ -20,7 +43,36 @@ DockaShell stores global settings in `~/.dockashell/config.json`. This file cont
 
 ### Global Configuration Fields
 
-- `logging.traces.session_timeout` – Time between trace entries before starting a new session (e.g., `"2h"`, `"4h"`)
+#### Projects Configuration
+
+- `projects.directory` – Default directory where project files are stored (default: `"~/dockashell-projects"`)
+
+#### TUI Configuration
+
+- `tui.display.max_entries` – Maximum number of trace entries to display in the TUI log viewer (default: `300`)
+
+#### Logging Configuration
+
+- `logging.traces.session_timeout` – Time between trace entries before starting a new session (default: `"4h"`, formats: `"2h"`, `"30m"`)
+
+#### Remote MCP Server Configuration
+
+- `remote_mcp.enabled` – Enable remote MCP server for multi-user access (default: `false`)
+- `remote_mcp.port` – Port for remote MCP server (default: `3333`)
+
+##### Authentication Settings
+
+- `remote_mcp.auth.username` – Username for authentication (default: `"admin"`)
+- `remote_mcp.auth.password` – Password for authentication (default: `"changeme123"` - should be changed)
+
+##### CORS Settings
+
+- `remote_mcp.cors.origin` – Allowed origins for CORS requests (default: `"*"`)
+- `remote_mcp.cors.credentials` – Allow credentials in CORS requests (default: `true`)
+
+##### Session Settings
+
+- `remote_mcp.session.timeout` – Session timeout for authenticated users (default: `"24h"`)
 
 ## Project Configuration
 
