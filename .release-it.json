@@ -3,11 +3,13 @@
     "requireBranch": false,
     "commitMessage": "release: v${version}",
     "tagName": "v${version}",
-    "push": false
+    "push": false,
+    "requireCleanWorkingDir": true
   },
   "github": {
     "release": true,
-    "releaseName": "v${version}"
+    "releaseName": "v${version}",
+    "draft": true
   },
   "npm": {
     "publish": true,
@@ -15,6 +17,11 @@
     "tag": "latest"
   },
   "hooks": {
-    "before:init": ["npm run format", "npm run test", "npm run lint"]
+    "before:init": [
+      "./scripts/ensure-release-ready.sh",
+      "npm run format",
+      "npm run test",
+      "npm run lint"
+    ]
   }
 }

@@ -22,7 +22,8 @@
     "rebuild-image": "node src/cli/cli.js build --force",
     "release:patch": "release-it patch",
     "release:minor": "release-it minor",
-    "release:major": "release-it major"
+    "release:major": "release-it major",
+    "release:from-main": "./scripts/release-from-main.sh"
   },
   "dependencies": {
     "@inkjs/ui": "^2.0.0",
