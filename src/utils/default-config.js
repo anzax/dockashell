@@ -1,4 +1,7 @@
 export const DEFAULT_GLOBAL_CONFIG = {
+  projects: {
+    directory: '~/dockashell-projects',
+  },
   tui: {
     display: {
       max_entries: 300,
@@ -29,7 +32,7 @@ export const DEFAULT_GLOBAL_CONFIG = {
 export const DEFAULT_PROJECT_CONFIG = {
   mounts: [
     {
-      host: '~/dockashell-projects/{name}',
+      host: '{projects_dir}/{name}',
       container: '/workspace',
       readonly: false,
     },

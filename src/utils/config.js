@@ -14,6 +14,9 @@ export async function loadConfig() {
   }
   try {
     const cfg = await fs.readJSON(configPath);
+    if (!cfg.projects) cfg.projects = { ...DEFAULT_GLOBAL_CONFIG.projects };
+    if (!cfg.projects.directory)
+      cfg.projects.directory = DEFAULT_GLOBAL_CONFIG.projects.directory;
     if (!cfg.tui) cfg.tui = { ...DEFAULT_GLOBAL_CONFIG.tui };
     if (!cfg.tui.display)
       cfg.tui.display = { ...DEFAULT_GLOBAL_CONFIG.tui.display };
