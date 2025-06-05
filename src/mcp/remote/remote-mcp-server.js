@@ -1,7 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SimpleAuth } from './auth/simple-auth.js';
 import { TransportManager } from './transport/transport-manager.js';
@@ -13,9 +11,6 @@ import ContainerManager from '../../core/container-manager.js';
 import SecurityManager from '../../core/security.js';
 import Logger from '../../utils/logger.js';
 import { v4 as uuidv4 } from 'uuid';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 /**
  * Remote MCP Server with simple single-user authentication
@@ -83,7 +78,7 @@ export class RemoteMCPServer {
 
     // Debug CORS issues in development
     if (process.env.NODE_ENV !== 'production') {
-      this.app.use((req, res, next) => {
+      this.app.use((req, _res, next) => {
         if (req.method === 'OPTIONS') {
           console.log('🔍 CORS Preflight Request:', {
             origin: req.headers.origin,
@@ -94,9 +89,6 @@ export class RemoteMCPServer {
         next();
       });
     }
-
-    // Static files for auth UI
-    this.app.use('/static', express.static(path.join(__dirname, 'static')));
   }
 
   setupMCPTools() {
@@ -141,31 +133,12 @@ export class RemoteMCPServer {
     this.app.post('/messages', this.handleSSEMessage.bind(this));
 
     // Health check
-    this.app.get('/health', (req, res) => {
+    this.app.get('/health', (_req, res) => {
       res.json({
         status: 'ok',
         version: '0.1.0',
         transport_stats: this.transportManager.getStats(),
       });
-    });
-
-    // CORS test endpoint
-    this.app.get('/cors-test', (req, res) => {
-      res.json({
-        message: 'CORS is working!',
-        origin: req.headers.origin,
-        userAgent: req.headers['user-agent'],
-        mcpHeaders: {
-          protocolVersion: req.headers['mcp-protocol-version'],
-          clientInfo: req.headers['mcp-client-info'],
-          sessionId: req.headers['mcp-session-id'],
-        },
-      });
-    });
-
-    // CORS test page
-    this.app.get('/test', (req, res) => {
-      res.sendFile(path.join(__dirname, 'static', 'cors-test.html'));
     });
   }
 
