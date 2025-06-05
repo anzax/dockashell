@@ -3,31 +3,42 @@ import { validateProjectName, textResponse } from './helpers.js';
 
 export function registerProjectTools(server, projectManager, containerManager) {
   // List projects
-  server.tool('list_projects', {}, async () => {
-    try {
-      const projects = await projectManager.listProjects();
-      let response = '# Configured Projects\n\n';
-      if (projects.length === 0) {
-        response +=
-          'No projects configured. Create project configs in `~/.dockashell/projects/`\n';
-      } else {
-        projects.forEach((project) => {
-          response += `**${project.name}**\n`;
-          response += `- Description: ${project.description || 'None'}\n`;
-          response += `- Image: ${project.image}\n`;
-          response += `- Status: ${project.status}\n\n`;
-        });
+  server.tool(
+    'list_projects',
+    {
+      description:
+        'Lists all configured DockaShell projects with their status and configuration details',
+    },
+    async () => {
+      try {
+        const projects = await projectManager.listProjects();
+        let response = '# Configured Projects\n\n';
+        if (projects.length === 0) {
+          response +=
+            'No projects configured. Create project configs in `~/.dockashell/projects/`\n';
+        } else {
+          projects.forEach((project) => {
+            response += `**${project.name}**\n`;
+            response += `- Description: ${project.description || 'None'}\n`;
+            response += `- Image: ${project.image}\n`;
+            response += `- Status: ${project.status}\n\n`;
+          });
+        }
+        return textResponse(response);
+      } catch (error) {
+        throw new Error(`Failed to list projects: ${error.message}`);
       }
-      return textResponse(response);
-    } catch (error) {
-      throw new Error(`Failed to list projects: ${error.message}`);
     }
-  });
+  );
 
   // Start project
   server.tool(
     'start_project',
-    { project_name: z.string().describe('Name of the project to start') },
+    {
+      description:
+        'Starts a Docker container for the specified project with configured mounts and port forwarding',
+      project_name: z.string().describe('Name of the project to start'),
+    },
     async ({ project_name }) => {
       validateProjectName(project_name);
       try {
@@ -66,7 +77,11 @@ export function registerProjectTools(server, projectManager, containerManager) {
   // Stop project
   server.tool(
     'stop_project',
-    { project_name: z.string().describe('Name of the project to stop') },
+    {
+      description:
+        'Stops the running Docker container for the specified project',
+      project_name: z.string().describe('Name of the project to stop'),
+    },
     async ({ project_name }) => {
       validateProjectName(project_name);
       try {
@@ -86,7 +101,11 @@ export function registerProjectTools(server, projectManager, containerManager) {
   // Project status
   server.tool(
     'project_status',
-    { project_name: z.string().describe('Name of the project to check') },
+    {
+      description:
+        'Shows current status, configuration, and runtime details of a project container',
+      project_name: z.string().describe('Name of the project to check'),
+    },
     async ({ project_name }) => {
       try {
         validateProjectName(project_name);
