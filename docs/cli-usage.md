@@ -16,7 +16,7 @@ dockashell logs web-app
 
 # Make config changes, then apply
 # (edit ~/.dockashell/projects/web-app/config.json)
-dockashell recreate web-app
+dockashell rebuild web-app
 ```
 
 ### Multi-Project Management
@@ -57,7 +57,7 @@ dockashell build --force    # Force rebuild
 dockashell create <name>    # Create new project
 dockashell start <name>     # Start project container
 dockashell stop <name>      # Stop project container
-dockashell recreate <name>  # Apply config changes
+dockashell rebuild <name>   # Apply config changes
 ```
 
 ### Monitoring & Debugging

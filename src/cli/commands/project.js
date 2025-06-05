@@ -126,8 +126,10 @@ export function registerProjectCommands(program) {
     });
 
   program
-    .command('recreate <project>')
-    .description('Recreate project container')
+    .command('rebuild <project>')
+    .description(
+      'Rebuild project container to apply config changes (volume mappings, ports, etc.)'
+    )
     .action(async (project) => {
       const docker = await checkDockerDaemon();
       if (!docker.running) {
@@ -155,7 +157,7 @@ export function registerProjectCommands(program) {
           process.exit(1);
         }
         const confirmed = await confirm(
-          `This will destroy the current container for '${project}' and recreate it.`
+          `This will destroy the current container for '${project}' and rebuild it with current config.`
         );
         if (!confirmed) {
           console.log('Operation cancelled');
@@ -169,7 +171,7 @@ export function registerProjectCommands(program) {
           /* ignore */
         }
         await cm.startContainer(project);
-        console.log(success('Recreated container'));
+        console.log(success('Rebuilt container'));
       } catch (err) {
         if (err.message && err.message.includes('port already in use')) {
           console.error(errorColor(`Error: ${err.message}`));
