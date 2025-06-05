@@ -6,8 +6,6 @@ export function registerLogTools(server, logger) {
   server.tool(
     'write_trace',
     {
-      description:
-        'Records trace entries for auditing agent actions and preserving session context',
       project_name: z.string().describe('Project name'),
       type: z.enum(['user', 'summary', 'agent']).describe('Note type'),
       text: z.string().describe('Text to record'),
@@ -19,6 +17,10 @@ export function registerLogTools(server, logger) {
       } catch (error) {
         throw new Error(`Failed to write trace: ${error.message}`);
       }
+    },
+    {
+      description:
+        'Records trace entries for auditing agent actions and preserving session context',
     }
   );
 
@@ -26,8 +28,6 @@ export function registerLogTools(server, logger) {
   server.tool(
     'read_traces',
     {
-      description:
-        'Retrieves and filters trace history for a project, showing command executions, file operations, and notes with timestamps',
       project_name: z.string().describe('Project name'),
       type: z
         .string()
@@ -174,6 +174,10 @@ export function registerLogTools(server, logger) {
       } catch (error) {
         throw new Error(`Failed to read traces: ${error.message}`);
       }
+    },
+    {
+      description:
+        'Retrieves and filters trace history for a project, showing command executions, file operations, and notes with timestamps',
     }
   );
 }

@@ -5,10 +5,7 @@ export function registerProjectTools(server, projectManager, containerManager) {
   // List projects
   server.tool(
     'list_projects',
-    {
-      description:
-        'Lists all configured DockaShell projects with their status and configuration details',
-    },
+    {},
     async () => {
       try {
         const projects = await projectManager.listProjects();
@@ -28,6 +25,10 @@ export function registerProjectTools(server, projectManager, containerManager) {
       } catch (error) {
         throw new Error(`Failed to list projects: ${error.message}`);
       }
+    },
+    {
+      description:
+        'Lists all configured DockaShell projects with their status and configuration details',
     }
   );
 
@@ -35,8 +36,6 @@ export function registerProjectTools(server, projectManager, containerManager) {
   server.tool(
     'start_project',
     {
-      description:
-        'Starts a Docker container for the specified project with configured mounts and port forwarding',
       project_name: z.string().describe('Name of the project to start'),
     },
     async ({ project_name }) => {
@@ -71,6 +70,10 @@ export function registerProjectTools(server, projectManager, containerManager) {
       } catch (error) {
         return { ...textResponse(`Error: ${error.message}`), isError: true };
       }
+    },
+    {
+      description:
+        'Starts a Docker container for the specified project with configured mounts and port forwarding',
     }
   );
 
@@ -78,8 +81,6 @@ export function registerProjectTools(server, projectManager, containerManager) {
   server.tool(
     'stop_project',
     {
-      description:
-        'Stops the running Docker container for the specified project',
       project_name: z.string().describe('Name of the project to stop'),
     },
     async ({ project_name }) => {
@@ -95,6 +96,10 @@ export function registerProjectTools(server, projectManager, containerManager) {
       } catch (error) {
         return { ...textResponse(`Error: ${error.message}`), isError: true };
       }
+    },
+    {
+      description:
+        'Stops the running Docker container for the specified project',
     }
   );
 
@@ -102,8 +107,6 @@ export function registerProjectTools(server, projectManager, containerManager) {
   server.tool(
     'project_status',
     {
-      description:
-        'Shows current status, configuration, and runtime details of a project container',
       project_name: z.string().describe('Name of the project to check'),
     },
     async ({ project_name }) => {
@@ -137,6 +140,10 @@ export function registerProjectTools(server, projectManager, containerManager) {
           `Failed to get status for project '${project_name}': ${error.message}`
         );
       }
+    },
+    {
+      description:
+        'Shows current status, configuration, and runtime details of a project container',
     }
   );
 }

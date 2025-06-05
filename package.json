@@ -10,6 +10,7 @@
     "dev:tui": "node src/tui/tui-launcher.js",
     "start": "node src/mcp/mcp-server.js",
     "start:remote": "node src/cli/cli.js remote",
+    "debug": "npx @modelcontextprotocol/inspector node src/mcp/mcp-server.js",
     "test": "node --test test/**/*.test.js",
     "test:integration": "node test/integration/test-*.js",
     "lint": "eslint .",
