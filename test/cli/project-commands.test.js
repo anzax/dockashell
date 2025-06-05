@@ -34,8 +34,8 @@ test('create command rejects reserved names', async () => {
   assert.ok(result.stderr.includes('reserved name'));
 });
 
-test('recreate command requires confirmation', async () => {
-  const result = await run(['recreate', 'proj'], { DS_AUTO_CONFIRM: '1' });
+test('rebuild command requires confirmation', async () => {
+  const result = await run(['rebuild', 'proj'], { DS_AUTO_CONFIRM: '1' });
   assert.strictEqual(result.code, 0);
   assert.ok(result.stdout.includes('Operation cancelled'));
 });

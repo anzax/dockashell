@@ -13,7 +13,7 @@ COMMANDS:
   start <project>           Start project container
   stop <project>            Stop project container
   create <project>          Create new project configuration
-  recreate <project>        Rebuild container (apply config changes)
+  rebuild <project>         Rebuild container (apply config changes)
   logs [project]            Launch interactive trace viewer
   serve [--http]            Start MCP server for AI integration
   help [command]            Show detailed help for command
@@ -24,7 +24,7 @@ EXAMPLES:
   dockashell create web-app           # Create new project
   dockashell start web-app            # Start working on project
   dockashell logs                     # Monitor all activity
-  dockashell recreate web-app         # Apply config changes
+  dockashell rebuild web-app          # Apply config changes
 
 Run 'dockashell help <command>' for detailed information.
 For more: https://github.com/anzax/dockashell
@@ -135,12 +135,12 @@ EXAMPLES:
   dockashell create data-science      # Create data project
 `,
 
-  recreate: `
-COMMAND: recreate
+  rebuild: `
+COMMAND: rebuild
 Stop, remove, and restart project container to apply configuration changes.
 
 USAGE:
-  dockashell recreate <project>
+  dockashell rebuild <project>
 
 USE CASES:
   • Applied changes to config.json (ports, mounts, environment)
@@ -154,7 +154,7 @@ BEHAVIOR:
   • Starts new container
 
 EXAMPLES:
-  dockashell recreate web-app         # Apply config changes
+  dockashell rebuild web-app          # Apply config changes
 `,
 
   logs: `
@@ -222,7 +222,7 @@ export function registerHelp(program) {
       } else if (cmd) {
         console.log(`Unknown command: ${cmd}\n`);
         console.log(
-          'Available commands: status, build, start, stop, create, recreate, logs, serve'
+          'Available commands: status, build, start, stop, create, rebuild, logs, serve'
         );
       } else {
         console.log(MAIN_HELP);
