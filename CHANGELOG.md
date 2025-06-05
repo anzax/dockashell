@@ -8,12 +8,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
-- Initial MCP server implementation
-- Docker container management
-- Project isolation and persistence
-- CLI tool for container management
-- TUI interface for development
-
 ### Changed
 
 ### Deprecated
@@ -23,3 +17,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixed
 
 ### Security
+
+## [0.2.0] - 2025-06-05
+
+### Added
+
+- MCP server implementation with tools to enable safe agentic coding in isolated Docker containers
+- CLI for project and Docker container management
+- Project isolation and persistence
+- TUI interface for observability

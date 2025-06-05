@@ -35,7 +35,7 @@ DockaShell is an experimental project under active development. It is not yet st
 ### 1. Installation
 
 ```bash
-npm install -g dockashell@beta
+npm install -g dockashell
 
 # OR for development:
 git clone <repository>

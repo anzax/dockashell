@@ -1,6 +1,6 @@
 {
   "name": "dockashell",
-  "version": "0.1.1-beta.0",
+  "version": "0.2.0",
   "description": "MCP server that gives every AI Agent its own isolated Docker container",
   "type": "module",
   "bin": {
@@ -19,11 +19,9 @@
     "format:check": "prettier --check .",
     "build-image": "node src/cli/cli.js build",
     "rebuild-image": "node src/cli/cli.js build --force",
-    "release:beta": "release-it --preRelease=beta",
-    "release:patch": "npm run release:beta",
-    "release:minor": "release-it minor --npm.tag=latest",
-    "release:major": "release-it major --npm.tag=latest",
-    "release:stable": "release-it --npm.tag=latest"
+    "release:patch": "release-it patch",
+    "release:minor": "release-it minor",
+    "release:major": "release-it major"
   },
   "dependencies": {
     "@inkjs/ui": "^2.0.0",

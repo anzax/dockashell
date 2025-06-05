@@ -12,9 +12,9 @@
   "npm": {
     "publish": true,
     "publishPath": ".",
-    "tag": "beta"
+    "tag": "latest"
   },
   "hooks": {
-    "before:init": ["npm run test", "npm run lint"]
+    "before:init": ["npm run format", "npm run test", "npm run lint"]
   }
 }
