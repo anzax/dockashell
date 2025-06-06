@@ -1,6 +1,7 @@
 import { RemoteMCPServer } from '../../mcp/remote/remote-mcp-server.js';
 import { loadConfig, hashPassword } from '../../utils/config.js';
 import { success, info, error as errorColor } from '../utils/output.js';
+import { secureInput, textInput } from '../utils/prompts.js';
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
@@ -48,24 +49,13 @@ export function registerRemoteServe(program) {
 }
 
 async function setupAuthentication() {
-  const readline = await import('readline');
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  const question = (prompt) =>
-    new Promise((resolve) => {
-      rl.question(prompt, resolve);
-    });
-
   try {
     console.log(info('🔐 Setting up DockaShell Remote MCP Authentication'));
     console.log('');
 
-    const username = await question('Username: ');
-    const password = await question('Password: ');
-    const confirmPassword = await question('Confirm Password: ');
+    const username = await textInput('Username:');
+    const password = await secureInput('Password:');
+    const confirmPassword = await secureInput('Confirm Password:');
 
     if (password !== confirmPassword) {
       console.log(errorColor('❌ Passwords do not match'));
@@ -106,7 +96,5 @@ async function setupAuthentication() {
   } catch (err) {
     console.error(errorColor(`Setup failed: ${err.message}`));
     process.exit(1);
-  } finally {
-    rl.close();
   }
 }
