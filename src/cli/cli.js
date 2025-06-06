@@ -8,6 +8,7 @@ import { registerServe } from './commands/serve.js';
 import { registerRemoteServe } from './commands/remote.js';
 import { registerHelp } from './commands/help.js';
 import { error as errorColor } from './utils/output.js';
+import { getVersion } from '../utils/version.js';
 
 process.on('uncaughtException', (err) => {
   console.error(errorColor(`Fatal error: ${err.message}`));
@@ -18,7 +19,7 @@ const program = new Command();
 
 program
   .name('dockashell')
-  .version('0.1.0')
+  .version(getVersion())
   .description('AI agent secure Docker environments');
 
 registerStatus(program);

@@ -1,7 +1,8 @@
 // Enhanced help content for DockaShell CLI
+import { getVersion } from '../../utils/version.js';
 
 const MAIN_HELP = `
-DockaShell v0.1.0
+DockaShell v${getVersion()}
 AI agent secure Docker environments for project work
 
 USAGE:
