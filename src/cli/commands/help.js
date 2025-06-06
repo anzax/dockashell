@@ -16,7 +16,8 @@ COMMANDS:
   create <project>          Create new project configuration
   rebuild <project>         Rebuild container (apply config changes)
   logs [project]            Launch interactive trace viewer
-  serve [--http]            Start MCP server for AI integration
+  serve                     Start MCP server for AI integration
+  remote [--setup-auth]     Start remote MCP server with authentication
   help [command]            Show detailed help for command
 
 EXAMPLES:
@@ -189,11 +190,10 @@ COMMAND: serve
 Start MCP (Model Context Protocol) server for AI agent integration.
 
 USAGE:
-  dockashell serve [--http]
+  dockashell serve
 
-TRANSPORT OPTIONS:
-  Default: stdio (for direct AI client integration)
-  --http: HTTP server (coming soon)
+TRANSPORT:
+  • stdio (standard input/output for direct AI client integration)
 
 INTEGRATION:
   Add to AI client config:
@@ -209,6 +209,36 @@ INTEGRATION:
 EXAMPLES:
   dockashell serve                    # Start stdio server
 `,
+
+  remote: `
+COMMAND: remote
+Start remote MCP server with HTTP transport and authentication.
+
+USAGE:
+  dockashell remote [options]
+
+OPTIONS:
+  -p, --port <port>        Port to run server on (default: 3333)
+  --setup-auth             Setup initial authentication credentials
+
+FEATURES:
+  • HTTP transport for web-based AI clients
+  • Username/password authentication
+  • Secure password hashing
+  • Cross-origin resource sharing (CORS) support
+
+SETUP:
+  1. Configure authentication:
+     dockashell remote --setup-auth
+  
+  2. Start remote server:
+     dockashell remote
+
+EXAMPLES:
+  dockashell remote --setup-auth      # Setup authentication
+  dockashell remote                   # Start on default port 3333
+  dockashell remote -p 8080           # Start on custom port
+`,
 };
 
 export function registerHelp(program) {
@@ -223,7 +253,7 @@ export function registerHelp(program) {
       } else if (cmd) {
         console.log(`Unknown command: ${cmd}\n`);
         console.log(
-          'Available commands: status, build, start, stop, create, rebuild, logs, serve'
+          'Available commands: status, build, start, stop, create, rebuild, logs, serve, remote'
         );
       } else {
         console.log(MAIN_HELP);
