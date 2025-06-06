@@ -24,18 +24,3 @@ git pull origin main
 
 # Now run the release readiness check with any arguments passed
 ./scripts/ensure-release-ready.sh "$@"
-
-# If we reach here, a release branch was created successfully
-echo ""
-echo -e "${GREEN}🏃 Running release process...${NC}"
-npm run release:minor
-
-echo ""
-echo -e "${GREEN}✅ Release completed!${NC}"
-echo ""
-echo -e "${YELLOW}📋 Next steps:${NC}"
-echo "   1. Push: git push -u origin \$(git branch --show-current)"
-echo "   2. Create PR: \$(git branch --show-current) → main"
-echo "   3. Merge PR and publish GitHub release"
-echo ""
-echo -e "${YELLOW}📖 Full documentation: docs/development/release-workflow.md${NC}"

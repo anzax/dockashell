@@ -9,7 +9,8 @@
   "github": {
     "release": true,
     "releaseName": "v${version}",
-    "draft": true
+    "draft": true,
+    "releaseNotes": false
   },
   "npm": {
     "publish": true,
