@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'path';
 import os from 'os';
 import fs from 'fs-extra';
+import { getVersion } from '../../src/utils/version.js';
 
 const cliPath = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -26,12 +27,12 @@ function run(args, env = {}) {
 
 test('shows version', async () => {
   const result = await run(['--version']);
-  assert.strictEqual(result.stdout.trim(), '0.1.0');
+  assert.strictEqual(result.stdout.trim(), getVersion());
 });
 
 test('shows help', async () => {
   const result = await run(['help']);
-  assert.ok(result.stdout.includes('DockaShell v0.1.0'));
+  assert.ok(result.stdout.includes(`DockaShell v${getVersion()}`));
 });
 
 test('auto-creates config structure on first use', async () => {
