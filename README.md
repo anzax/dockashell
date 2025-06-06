@@ -136,71 +136,14 @@ See [docs/dockashell-configuration.md](docs/dockashell-configuration.md) for glo
 
 ## 🔧 MCP Tools
 
-DockaShell exposes several MCP tools:
+DockaShell provides a comprehensive set of MCP tools for AI agents:
 
-### `list_projects`
+- **Project Management** - Start, stop, and monitor project containers
+- **Shell Execution** - Run shell commands with full isolation and audit trails
+- **File Operations** - Create files and apply patches with context-based matching
+- **Trace & Logging** - Document agent reasoning and query traces history
 
-Lists all configured projects with their status.
-
-### `start_project`
-
-**Arguments:** `{"project_name": "string"}` Starts a Docker container for the specified project.
-
-### `bash`
-
-**Arguments:** `{"project_name": "string", "command": "string"}` Executes a shell command in the project container.
-
-### `apply_patch`
-
-**Arguments:** `{"project_name": "string", "patch": "string"}` Applies patches using the [OpenAI format](https://cookbook.openai.com/examples/gpt4-1_prompting_guide#appendix-generating-and-applying-file-diffs) inside the project container with context-based matching. More reliable than line-number based diffs for iterative edits.
-
-### `write_file`
-
-**Arguments:** `{"project_name": "string", "path": "string", "content": "string", "overwrite?": "boolean"}` Creates or overwrites a file inside the container. Intermediate directories are created automatically. Set `overwrite` to `true` to replace existing files (defaults to `false`).
-
-### `project_status`
-
-**Arguments:** `{"project_name": "string"}` Returns detailed status information about the project container.
-
-### `stop_project`
-
-**Arguments:** `{"project_name": "string"}` Stops the project container.
-
-### `write_trace`
-
-**Arguments:** `{"project_name": "string", "type": "user|summary|agent", "text": "string"}` Writes an arbitrary note to the project trace log.
-
-### `read_traces`
-
-**Arguments:** `{"project_name": "string", "type?": "string", "search?": "string", "skip?": "number", "limit?": "number", "fields?": "string[]", "output_max_len?": "number"}` Returns formatted trace entries with optional filtering and field selection.
-
-**Field Options:**
-
-- `timestamp`, `type`, `content` - Always included for context
-- `exit_code`, `duration` - Command execution metadata (commands only)
-- `output` - Command output preview. The preview is truncated to 1000 characters by default (override with `output_max_len`).
-
-**Type Filtering:**
-
-- `"command"` - Shell command executions only
-- `"note"` - All note types (user, agent, summary)
-- `"user"`, `"agent"`, `"summary"` - Specific note types
-
-**Usage Examples:**
-
-```javascript
-// Recent activity overview
-read_traces('project', { limit: 10 });
-
-// Debug failed commands with output
-read_traces('project', {
-  type: 'command',
-  fields: ['timestamp', 'type', 'content', 'exit_code', 'output'],
-});
-
-// Search across traces
-read_traces('project', { search: 'error' });
-```
+See [docs/mcp-tools.md](docs/mcp-tools.md) for the complete tools reference with examples and best practices.
 
 ## 🛡️ Security Model
 
