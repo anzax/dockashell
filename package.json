@@ -27,6 +27,9 @@
   },
   "dependencies": {
     "@inkjs/ui": "^2.0.0",
+    "@inquirer/confirm": "^5.1.12",
+    "@inquirer/input": "^4.1.12",
+    "@inquirer/password": "^4.0.15",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "@nanostores/react": "^1.0.0",
     "bcryptjs": "^3.0.2",
