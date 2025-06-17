@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/anzax-dockashell-badge.png)](https://mseep.ai/app/anzax-dockashell)
+
 # DockaShell
 
 DockaShell is an MCP (Model Context Protocol) server that gives AI agents isolated Docker containers to work in. Each agent gets its own persistent environment with shell access, file operations, and full audit trails.
